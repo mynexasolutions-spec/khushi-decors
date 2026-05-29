@@ -1,0 +1,87 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ attribute.name }} Values – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+  <div style="display:flex; align-items:center; gap:0.5rem; color:var(--admin-text-muted); font-size:0.875rem; margin-bottom:1rem;">
+    <a href="{{ url_for('admin_attributes') }}" style="color:var(--admin-primary);">Attributes</a>
+    <span>/</span>
+    <span>{{ attribute.name }}</span>
+  </div>
+  <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main);">Manage Values: {{ attribute.name }}</h1>
+  <p style="color:var(--admin-text-muted); font-size:0.875rem;">Add, rename, or remove possible values for this attribute.</p>
+</div>
+
+<div class="admin-grid-order" style="display:grid; grid-template-columns: 1fr 1.5fr; gap:2rem; align-items:start;">
+  
+  <!-- Add Value Form -->
+  <div class="admin-card">
+    <h3 style="font-size:1rem; font-weight:700; margin-bottom:1.5rem;">Add New Value</h3>
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div style="margin-bottom:1.25rem;">
+        <label class="admin-label">Value Content *</label>
+        <input type="text" name="value" required placeholder="e.g. -0.50 or Red" class="admin-input" />
+      </div>
+      <div style="margin-bottom:1.5rem;">
+        <label class="admin-label">Image/Icon (Optional)</label>
+        <input type="file" name="image_file" class="admin-input" accept="image/*" style="padding:0.4rem; background:white;" />
+      </div>
+      <button type="submit" class="admin-btn btn-primary" style="width:100%; justify-content:center; font-weight:700;">Add Value</button>
+    </form>
+  </div>
+
+  <!-- Values List -->
+  <div class="admin-card" style="padding:0; overflow:hidden;">
+    <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--admin-border); display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:1rem; font-weight:700;">Existing Values</h3>
+        {% if values %}
+        <button type="submit" form="bulkUpdateValuesForm" class="admin-btn btn-primary" style="padding:0.5rem 1rem; font-size:0.875rem;">Save All Changes</button>
+        {% endif %}
+    </div>
+
+    <div style="overflow-x:auto;">
+      <form id="bulkUpdateValuesForm" method="post" action="{{ url_for('admin_attribute_values_bulk_update', attr_id=attribute.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <table class="admin-table" style="width:100%;">
+          <thead>
+            <tr>
+              <th style="padding-left:1.5rem;">Value</th>
+              <th style="text-align:right; padding-right:1.5rem;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in values %}
+            <tr>
+              <td style="padding-left:1.5rem;">
+                <input type="text" name="value_{{ v.id }}" value="{{ v.value }}" class="admin-input" style="height:36px; padding:0.4rem; font-size:0.875rem; font-weight:600;" />
+              </td>
+              <td style="text-align:right; padding-right:1.5rem; display:flex; justify-content:flex-end; gap:0.5rem; align-items:center; height:100%; min-height:60px;">
+                <a href="{{ url_for('admin_attribute_value_edit', val_id=v.id) }}" class="admin-btn" style="padding:0.375rem 0.75rem; font-size:0.8125rem; color:#4f46e5; background:rgba(79,70,229,0.05); border:none; text-decoration:none;">Edit</a>
+                <button type="button" onclick="if(confirm('Remove this value?')) { document.getElementById('delete_form_{{ v.id }}').submit(); }" class="admin-btn" style="padding:0.375rem 0.75rem; font-size:0.8125rem; color:#ef4444; background:rgba(239,68,68,0.05); border:none;">Remove</button>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="2" style="text-align:center; padding:3rem; color:var(--admin-text-muted);">No values added yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </form>
+    </div>
+
+    {% for v in values %}
+    <form id="delete_form_{{ v.id }}" action="{{ url_for('admin_attribute_value_delete', val_id=v.id) }}" method="post" style="display:none;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="hidden" name="attribute_id" value="{{ attribute.id }}" />
+    </form>
+    {% endfor %}
+  </div>
+
+</div>
+
+<style>
+  @media (max-width: 900px) {
+    .admin-grid-order { grid-template-columns: 1fr !important; }
+  }
+</style>
+{% endblock %}

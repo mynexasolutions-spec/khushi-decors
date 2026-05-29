@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}My Account | Khushi Decors{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/account.css">
+{% endblock %}
+
+{% block content %}
+<div class="account-dashboard-wrapper">
+  <!-- Content loaded dynamically from localStorage by static/js/account.js -->
+  <p style="text-align:center; padding: 4rem 1rem; color:#8a857a; font-size:1.1rem;">Loading your account profile...</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/account.js"></script>
+{% endblock %}

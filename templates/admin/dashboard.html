@@ -1,0 +1,174 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard – StoreAdmin{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+{% set placeholder_url = url_for('static', filename='images/placeholder.png') %}
+<div style="margin-bottom:2rem;">
+  <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin-bottom:0.5rem;">Dashboard Overview</h1>
+  <p style="color:var(--admin-text-muted); font-size:0.875rem;">A quick look at your store's performance metrics.</p>
+</div>
+
+<!-- Main Dashboard Grid -->
+<div class="admin-grid-dash" style="margin-bottom:2.5rem; align-items:stretch;">
+  
+  <!-- Revenue Chart -->
+  <div class="admin-card" style="margin-bottom:0;">
+    <h3 style="font-size:1rem; font-weight:700; margin-bottom:1.5rem;">Revenue (Last 7 Days)</h3>
+    <div style="position: relative; width: 100%; height: 320px;">
+      <canvas id="revenueChart" data-labels='{{ chart_data["labels"] | tojson | safe }}' data-values='{{ chart_data["values"] | tojson | safe }}'></canvas>
+    </div>
+  </div>
+
+  <!-- Stats Grid (Relocated) -->
+  <div class="admin-grid-stats">
+    
+    <div class="admin-stat-card" style="margin:0; flex-direction:column; align-items:flex-start; justify-content:center; gap:0.75rem; padding:1.5rem; height: 100%;">
+      <div class="stat-icon-wrap" style="background:#e0e7ff; color:#4338ca; margin:0;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div class="stat-info" style="margin:0;">
+        <span class="label" style="font-size:0.8125rem;">Total Revenue</span>
+        <span class="value" style="font-size:1.5rem;">₹{{ "%.0f"|format(stats.total_revenue) }}</span>
+      </div>
+    </div>
+
+    <div class="admin-stat-card" style="margin:0; flex-direction:column; align-items:flex-start; justify-content:center; gap:0.75rem; padding:1.5rem; height: 100%;">
+      <div class="stat-icon-wrap" style="background:#dcfce7; color:#15803d; margin:0;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+      </div>
+      <div class="stat-info" style="margin:0;">
+        <span class="label" style="font-size:0.8125rem;">Total Orders</span>
+        <span class="value" style="font-size:1.5rem;">{{ stats.total_orders }}</span>
+      </div>
+    </div>
+
+    <div class="admin-stat-card" style="margin:0; flex-direction:column; align-items:flex-start; justify-content:center; gap:0.75rem; padding:1.5rem; height: 100%;">
+      <div class="stat-icon-wrap" style="background:#fef3c7; color:#b45309; margin:0;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 15.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      </div>
+      <div class="stat-info" style="margin:0;">
+        <span class="label" style="font-size:0.8125rem;">Customers</span>
+        <span class="value" style="font-size:1.5rem;">{{ stats.total_customers }}</span>
+      </div>
+    </div>
+
+    <div class="admin-stat-card" style="margin:0; flex-direction:column; align-items:flex-start; justify-content:center; gap:0.75rem; padding:1.5rem; height: 100%;">
+      <div class="stat-icon-wrap" style="background:#fee2e2; color:#b91c1c; margin:0;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </div>
+      <div class="stat-info" style="margin:0;">
+        <span class="label" style="font-size:0.8125rem;">Low Stock</span>
+        <span class="value" style="font-size:1.5rem;">{{ stats.low_stock }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="admin-grid-dash-bottom">
+  
+  <!-- Recent Orders -->
+  <div class="admin-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <h3 style="font-size:1rem; font-weight:700;">Recent Orders</h3>
+      <a href="{{ url_for('admin_orders') }}" class="text-indigo" style="font-size:0.8125rem; font-weight:600;">View All</a>
+    </div>
+    <div class="admin-table-container">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Order Number</th>
+            <th>Customer</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in recent_orders %}
+          <tr>
+            <td style="font-weight:600;"><a href="{{ url_for('admin_order_detail', order_id=o.id) }}">#{{ o.id[:8] }}</a></td>
+            <td>
+              <div style="font-weight:500;">{{ o.customer_name or 'Guest' }}</div>
+              <div style="font-size:0.75rem; color:var(--admin-text-muted);">{{ o.customer_email }}</div>
+            </td>
+            <td>₹{{ "%.0f"|format(o.total_amount) }}</td>
+            <td><span class="badge badge-{{ o.status }}">{{ o.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Products -->
+  <div class="admin-card" style="align-self: flex-start;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <h3 style="font-size:1rem; font-weight:700;">Recent Products</h3>
+      <a href="{{ url_for('admin_products') }}" class="text-indigo" style="font-size:0.8125rem; font-weight:600;">View All</a>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+      {% for p in recent_products %}
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <div style="width:40px; height:40px; border-radius:8px; overflow:hidden; border:1px solid var(--admin-border); flex-shrink:0; background:white;">
+          <img src="{{ resolve_image(p.image_url) }}" alt="{{ p.name }}" style="width:100%; height:100%; object-fit:contain; padding:2px;" onerror="this.src='{{ placeholder_url }}'" />
+        </div>
+        <div style="min-width:0;">
+          <div style="font-size:0.875rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ p.name }}</div>
+          <div style="font-size:0.75rem; color:var(--admin-text-muted);">{{ p.sku }} • <span class="text-indigo">₹{{ "%.0f"|format(p.sale_price or p.price) }}</span></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const chartEl = document.getElementById('revenueChart');
+  const labels = JSON.parse(chartEl.getAttribute('data-labels') || '[]');
+  const values = JSON.parse(chartEl.getAttribute('data-values') || '[]');
+
+  const ctx = chartEl.getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: values,
+        borderColor: '#c5a880',
+        backgroundColor: 'rgba(197, 168, 128, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#c5a880',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { font: { family: 'Inter' } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: 'Inter' } }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

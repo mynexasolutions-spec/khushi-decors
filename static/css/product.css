@@ -1,0 +1,276 @@
+/* Product Detail Page & Gallery Styles */
+.product-detail-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.product-detail-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3.5rem;
+  align-items: flex-start;
+  margin-top: 2rem;
+}
+
+/* Left side gallery styling */
+.product-gallery-container {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.product-gallery-thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.gallery-thumb-item {
+  width: 78px;
+  height: 78px;
+  border-radius: 14px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+  transition: var(--transition);
+}
+
+.gallery-thumb-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+}
+
+.gallery-thumb-item.active {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(193,122,90,0.22);
+}
+
+.product-gallery-main {
+  flex: 1;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  height: 480px;
+  background: var(--pure-white);
+  border: 1px solid #f0ede8;
+}
+
+.product-gallery-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.25s ease;
+}
+
+/* Right side content info */
+.product-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.product-info-cat {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.product-info-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--dark-charcoal);
+  line-height: 1.2;
+}
+
+.product-info-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  margin-top: -0.25rem;
+}
+
+.product-info-rating .stars {
+  color: #FFB020;
+}
+
+.product-info-rating .reviews-count {
+  color: #7E7970;
+  font-size: 0.85rem;
+}
+
+.product-info-price {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary);
+  border-bottom: 1px solid #f0ede8;
+  padding-bottom: 1.2rem;
+  margin-top: 0.25rem;
+}
+
+.product-info-desc {
+  color: #5C5850;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.product-info-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+  border-bottom: 1px solid #f0ede8;
+  padding-bottom: 1.8rem;
+}
+
+.qty-control-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.qty-control-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--dark-charcoal);
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--soft-gray);
+  border-radius: 40px;
+  width: fit-content;
+  padding: 0.2rem;
+}
+
+.quantity-selector button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.quantity-selector span {
+  padding: 0 5px;
+  font-weight: 600;
+}
+
+.product-detail-badges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.detail-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: #5C5850;
+  font-weight: 600;
+}
+
+.detail-badge-item i {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+/* Related Products Section styling */
+.related-products-section {
+  margin-top: 5rem;
+  border-top: 1px solid #f0ede8;
+  padding-top: 4rem;
+}
+
+.related-products-title {
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.related-products-subtitle {
+  text-align: center;
+  color: #7E7970;
+  font-size: 1.05rem;
+  margin-bottom: 3rem;
+}
+
+/* Related Products Grid */
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 992px) {
+  .related-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .product-gallery-container {
+    flex-direction: column-reverse;
+  }
+  
+  .product-gallery-thumbs {
+    flex-direction: row;
+    justify-content: center;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  
+  .gallery-thumb-item {
+    width: 68px;
+    height: 68px;
+  }
+  
+  .product-gallery-main {
+    height: 380px;
+  }
+  
+  .product-info-title {
+    font-size: 2rem;
+  }
+  
+  .related-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+    padding: 0.5rem 0 !important;
+  }
+  
+  .related-products-section {
+    margin-top: 3.5rem;
+    padding-top: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-gallery-main {
+    height: 290px;
+  }
+  
+  .product-detail-badges {
+    grid-template-columns: 1fr;
+  }
+}

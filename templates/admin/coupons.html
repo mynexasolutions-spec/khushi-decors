@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+{% block title %}Coupons – StoreAdmin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+  <div>
+    <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin-bottom:0.25rem;">Coupons</h1>
+    <p style="color:var(--admin-text-muted); font-size:0.875rem;">Manage discount codes and promotional offers.</p>
+  </div>
+  <a href="{{ url_for('admin_coupon_new') }}" class="admin-btn btn-primary">+ Create New Coupon</a>
+</div>
+
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Type</th>
+        <th>Value</th>
+        <th>Usage</th>
+        <th>Expiry</th>
+        <th>Status</th>
+        <th style="text-align:right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in coupons %}
+      <tr>
+        <td>
+            <div style="font-weight:700; font-family:monospace; background:rgba(99,102,241,0.05); color:var(--admin-primary); padding:0.25rem 0.5rem; border-radius:4px; display:inline-block; border:1px dashed var(--admin-primary);">
+                {{ c.code }}
+            </div>
+        </td>
+        <td>
+            <span style="text-transform:capitalize;">{{ c.type }}</span>
+        </td>
+        <td style="font-weight:600;">
+            {% if c.type == 'percentage' %}
+                {{ c.value|int }}%
+            {% else %}
+                ₹{{ "%.2f"|format(c.value) }}
+            {% endif %}
+        </td>
+        <td style="font-size:0.875rem;">
+            {{ c.used_count or 0 }} / {{ c.usage_limit or '∞' }}
+        </td>
+        <td style="font-size:0.875rem; color:var(--admin-text-muted);">
+            {{ c.expires_at.strftime('%d-%m-%Y') if c.expires_at else 'No expiry' }}
+        </td>
+        <td>
+            <span class="badge {% if c.is_active %}badge-delivered{% else %}badge-cancelled{% endif %}">
+                {{ 'Active' if c.is_active else 'Inactive' }}
+            </span>
+        </td>
+        <td style="text-align:right;">
+          <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+            <form action="{{ url_for('admin_coupon_delete', coupon_id=c.id) }}" method="post" onsubmit="return confirm('Delete this coupon permanently?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="admin-btn" style="padding:0.375rem 0.75rem; font-size:0.8125rem; color:#ef4444; background:rgba(239,68,68,0.05); border:none;">Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="text-align:center; padding:3rem; color:var(--admin-text-muted);">No coupons created yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

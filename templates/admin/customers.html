@@ -1,0 +1,41 @@
+{% extends "admin/base.html" %}
+{% block title %}Customers – StoreAdmin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+  <div>
+    <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin-bottom:0.25rem;">Customers</h1>
+    <p style="color:var(--admin-text-muted); font-size:0.875rem;">Manage your store's customer accounts.</p>
+  </div>
+</div>
+
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Email</th>
+        <th>Joined At</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in customers %}
+      <tr>
+        <td>
+          <div style="font-weight:600;">{{ c.first_name }} {{ c.last_name }}</div>
+          <div style="font-size:0.75rem; color:var(--admin-text-muted);">ID: {{ c.id[:8] }}</div>
+        </td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.created_at.strftime('%Y-%m-%d') if c.created_at else 'N/A' }}</td>
+        <td><span class="badge badge-delivered">Active</span></td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4" style="text-align:center; padding:3rem; color:var(--admin-text-muted);">No customers found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

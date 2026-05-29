@@ -1,0 +1,566 @@
+/* 
+   REFINED ADMIN CSS 
+   Styled to match the professional Next.js Admin Dashboard
+*/
+
+:root {
+  --admin-primary: #c5a880; /* Khushi Decors Luxury Gold/Bronze */
+  --admin-primary-hover: #b3946a;
+  --admin-bg-body: #faf8f5; /* Elegant warm off-white body background */
+  --admin-bg-surface: #ffffff;
+  --admin-sidebar-bg: #1e1915; /* Premium dark warm brown sidebar */
+  --admin-sidebar-text: #a8a29e;
+  --admin-sidebar-active: #ffffff;
+  --admin-border: #eae3d8; /* Delicate warm borders */
+  --admin-text-main: #2b2927;
+  --admin-text-muted: #736d67;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body.admin-body {
+  background: var(--admin-bg-body) !important;
+  color: var(--admin-text-main) !important;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Hide body scrollbars completely */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.admin-layout {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* SIDEBAR */
+.admin-sidebar {
+  width: 260px;
+  background: var(--admin-sidebar-bg);
+  color: var(--admin-sidebar-text);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  z-index: 100;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+.admin-sidebar::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.admin-logo {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  gap: 0.75rem;
+}
+
+.admin-nav {
+  flex: 1;
+  padding: 1.25rem 0.75rem;
+  overflow-y: auto;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+.admin-nav::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome, Safari, and Opera */
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.875rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: var(--admin-sidebar-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-bottom: 0.125rem;
+}
+
+.admin-nav-item:hover {
+  background: rgba(255,255,255,0.05);
+  color: white;
+}
+
+.admin-nav-item.active {
+  background: var(--admin-primary);
+  color: white;
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* MAIN CONTENT */
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* TOPBAR */
+.admin-topbar {
+  display: none; /* Hide entirely on desktop */
+  height: 64px;
+  background: var(--admin-bg-surface);
+  border-bottom: 1px solid var(--admin-border);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  flex-shrink: 0;
+  z-index: 50;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* CONTENT AREA */
+.admin-content {
+  padding: 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* CARDS */
+.admin-card {
+  background: var(--admin-bg-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.admin-stat-card {
+  background: var(--admin-bg-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.stat-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.stat-info .label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--admin-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 0.25rem;
+}
+
+.stat-info .value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--admin-text-main);
+}
+
+/* TABLES */
+.admin-table-container {
+  background: var(--admin-bg-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  background: #f1f5f9;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--admin-border);
+  font-size: 0.875rem;
+  color: var(--admin-text-main);
+}
+
+.admin-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* BUTTONS */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--admin-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--admin-primary-hover);
+}
+
+.btn-outline {
+  background: white;
+  border-color: var(--admin-border);
+  color: var(--admin-text-main);
+}
+
+.btn-outline:hover {
+  background: #f1f5f9;
+}
+
+/* STATUSES */
+.badge {
+  display: inline-flex;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge-pending { background: #fef3c7; color: #92400e; }
+.badge-processing { background: #e0e7ff; color: #3730a3; }
+.badge-shipped { background: #e0f2fe; color: #0369a1; }
+.badge-delivered { background: #dcfce7; color: #166534; }
+.badge-cancelled { background: #fee2e2; color: #991b1b; }
+.badge-refunded { background: #f3f4f6; color: #374151; }
+
+/* FORM INPUTS */
+.admin-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--admin-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #ffffff !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 0.5rem !important;
+  color: #1e293b !important;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.admin-input:focus {
+  border-color: var(--admin-primary) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Fix for invisible dropdown options */
+select.admin-input, 
+select.admin-input option {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+/* UTILS */
+.text-indigo { color: var(--admin-primary); }
+.text-green { color: #10b981; }
+.text-red { color: #ef4444; }
+
+/* MOBILE NAV TOGGLE BUTTON */
+.admin-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  color: var(--admin-text-muted);
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.admin-menu-btn:hover {
+  background: #f1f5f9;
+}
+
+/* SIDEBAR OVERLAY BACKDROP */
+.admin-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 150;
+}
+
+.admin-sidebar-overlay.open {
+  display: block;
+}
+
+/* RESPONSIVE GRID UTILITY CLASSES */
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.admin-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.admin-grid-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.admin-grid-dash {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+}
+
+.admin-grid-dash-bottom {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr;
+  gap: 1.5rem;
+}
+
+.admin-grid-order {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+  gap: 1.5rem;
+}
+
+/* PAGE HEADER — flex row that stacks on mobile */
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* ── MOBILE BREAKPOINT ── */
+@media (max-width: 768px) {
+  /* Show topbar only on mobile */
+  .admin-topbar {
+    display: flex !important;
+  }
+
+  /* Show hamburger button */
+  .admin-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Sidebar becomes a slide-in drawer */
+  .admin-sidebar {
+    display: flex !important;
+    width: 260px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 200;
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  /* Topbar adjustments */
+  .admin-topbar {
+    padding: 0 1rem;
+  }
+
+  /* Reduce content padding */
+  .admin-content {
+    padding: 1rem;
+  }
+
+  /* Tables scroll horizontally */
+  .admin-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* All responsive grids collapse to single column */
+  .admin-grid-2,
+  .admin-grid-3,
+  .admin-grid-stats,
+  .admin-grid-dash,
+  .admin-grid-dash-bottom,
+  .admin-grid-order {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Page header stacks vertically */
+  .admin-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Stat cards go full-width */
+  .admin-stat-card {
+    flex-direction: row;
+  }
+
+  /* Form cards reduce padding */
+  .admin-card {
+    padding: 1rem;
+  }
+
+  /* Flash messages padding */
+  .admin-main > div[style*="padding:1.5rem 2rem"] {
+    padding: 1rem !important;
+  }
+}
+
+/* ── Override global dark-theme styles so they never bleed into admin ── */
+
+/* Inputs / textareas / selects */
+body.admin-body input,
+body.admin-body input[type="text"],
+body.admin-body input[type="email"],
+body.admin-body input[type="password"],
+body.admin-body input[type="number"],
+body.admin-body input[type="tel"],
+body.admin-body input[type="search"],
+body.admin-body input[type="url"],
+body.admin-body input[type="date"],
+body.admin-body textarea,
+body.admin-body select {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid var(--admin-border) !important;
+  color: var(--admin-text-main) !important;
+  border-radius: 0.5rem !important;
+}
+
+body.admin-body input::placeholder,
+body.admin-body textarea::placeholder {
+  color: var(--admin-text-muted) !important;
+}
+
+body.admin-body input:focus,
+body.admin-body textarea:focus,
+body.admin-body select:focus {
+  border-color: var(--admin-primary) !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
+  outline: none !important;
+}
+
+/* Headings — use Inter, not serif */
+body.admin-body h1,
+body.admin-body h2,
+body.admin-body h3,
+body.admin-body h4,
+body.admin-body h5,
+body.admin-body h6 {
+  font-family: 'Inter', sans-serif !important;
+  color: var(--admin-text-main) !important;
+}
+
+/* Checkboxes and radio buttons */
+body.admin-body input[type="checkbox"],
+body.admin-body input[type="radio"] {
+  width: auto !important;
+  accent-color: var(--admin-primary);
+}
+
+/* Select dropdown options */
+body.admin-body select option {
+  background-color: #ffffff !important;
+  color: var(--admin-text-main) !important;
+}
+
+/* Links in admin content area */
+body.admin-body .admin-content a:not(.admin-nav-item):not(.admin-btn):not(.btn-primary):not(.btn-outline) {
+  color: var(--admin-primary);
+}
+
+/* Prevent glass dark panel from appearing in admin */
+body.admin-body .admin-card,
+body.admin-body .admin-stat-card,
+body.admin-body .admin-table-container {
+  background: var(--admin-bg-surface) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}

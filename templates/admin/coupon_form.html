@@ -1,0 +1,78 @@
+{% extends "admin/base.html" %}
+{% block title %}Create Coupon – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+  <div style="display:flex; align-items:center; gap:0.5rem; color:var(--admin-text-muted); font-size:0.875rem; margin-bottom:1rem;">
+    <a href="{{ url_for('admin_coupons') }}" style="color:var(--admin-primary);">Coupons</a>
+    <span>/</span>
+    <span>Create New</span>
+  </div>
+  <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin:0;">Create Coupon</h1>
+</div>
+
+<form method="post" action="{{ url_for('admin_coupon_new') }}" class="admin-card" style="max-width:800px; padding:2rem;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  
+  <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:2rem; border-bottom:1px solid var(--admin-border); padding-bottom:1rem;">Coupon Details</h3>
+
+  <div style="margin-bottom:1.5rem;">
+    <label class="admin-label">Coupon Code *</label>
+    <input type="text" name="code" required placeholder="E.G. SAVE20" class="admin-input" style="text-transform:uppercase;" />
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+    <div>
+      <label class="admin-label">Discount Type *</label>
+      <select name="type" class="admin-input" required>
+        <option value="percentage">Percentage (%)</option>
+        <option value="flat">Flat Amount (₹)</option>
+      </select>
+    </div>
+    <div>
+      <label class="admin-label">Discount Value *</label>
+      <input type="number" step="0.01" name="value" required placeholder="e.g. 20" class="admin-input" />
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+    <div>
+      <label class="admin-label">Minimum Order Amount (₹)</label>
+      <input type="number" step="0.01" name="min_order_amount" value="0" class="admin-input" />
+    </div>
+    <div>
+      <label class="admin-label">Max Discount (₹) <span style="font-size:0.7rem; font-weight:normal; color:var(--admin-text-muted);">(for % type)</span></label>
+      <input type="number" step="0.01" name="max_discount" placeholder="Leave blank for no limit" class="admin-input" />
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+    <div>
+      <label class="admin-label">Usage Limit (Total)</label>
+      <input type="number" name="usage_limit" placeholder="Leave blank for unlimited" class="admin-input" />
+    </div>
+    <div>
+      <label class="admin-label">Usage Limit Per User</label>
+      <input type="number" name="usage_limit_per_user" value="1" class="admin-input" />
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+    <div>
+      <label class="admin-label">Expiry Date</label>
+      <input type="date" name="expires_at" class="admin-input" />
+    </div>
+    <div style="display:flex; align-items:flex-end; padding-bottom:0.75rem;">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; color:var(--admin-text-main);">
+            <input type="checkbox" name="is_active" checked style="width:18px; height:18px; accent-color:var(--admin-primary);">
+            Active
+        </label>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:1rem; padding-top:1rem; border-top:1px solid var(--admin-border);">
+    <button type="submit" class="admin-btn btn-primary" style="padding:0.75rem 2rem; font-weight:700;">Create Coupon</button>
+    <a href="{{ url_for('admin_coupons') }}" class="admin-btn btn-outline" style="padding:0.75rem 2rem;">Cancel</a>
+  </div>
+</form>
+{% endblock %}

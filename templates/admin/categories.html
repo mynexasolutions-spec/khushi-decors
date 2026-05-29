@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+{% block title %}Categories – StoreAdmin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+  <div>
+    <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin-bottom:0.25rem;">Categories</h1>
+    <p style="color:var(--admin-text-muted); font-size:0.875rem;">Organize your products into logical groups.</p>
+  </div>
+  <a href="{{ url_for('admin_category_new') }}" class="admin-btn btn-primary">+ New Category</a>
+</div>
+
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Parent</th>
+        <th>Slug</th>
+        <th>Products</th>
+        <th>Status</th>
+        <th style="text-align:right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in categories %}
+      <tr>
+        <td style="font-weight:600;">
+          {% if c.parent_id %}
+          <span style="color:var(--admin-text-muted); margin-right:0.5rem;">↳</span>
+          {% endif %}
+          {{ c.name }}
+        </td>
+        <td style="color:var(--admin-text-muted);">
+          {{ c.parent_name or '-' }}
+        </td>
+        <td style="color:var(--admin-text-muted); font-family:monospace; font-size:0.75rem;">{{ c.slug }}</td>
+        <td><span style="font-weight:600;">{{ c.product_count }}</span></td>
+        <td>
+          {% if c.is_featured %}
+          <span class="admin-badge" style="background:rgba(16,185,129,0.1); color:#10b981;">Featured</span>
+          {% else %}
+          <span style="color:var(--admin-text-muted); font-size:0.8rem;">Standard</span>
+          {% endif %}
+        </td>
+        <td style="text-align:right; display:flex; justify-content:flex-end; gap:0.5rem;">
+          <a href="{{ url_for('admin_category_edit', cat_id=c.id) }}" class="admin-btn" style="padding:0.375rem 0.75rem; font-size:0.8125rem; background:rgba(96,165,250,0.1); color:var(--primary);">Edit</a>
+          <form action="{{ url_for('admin_category_delete', cat_id=c.id) }}" method="post" 
+                onsubmit="return confirm('Are you sure you want to delete \'{{ c.name }}\'? {% if c.product_count > 0 %}{{ c.product_count }} products linked to this category will be uncategorized.{% endif %}')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="admin-btn" style="padding:0.375rem 0.75rem; font-size:0.8125rem; color:#ef4444; background:rgba(239,68,68,0.05); border:none;">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center; padding:3rem; color:var(--admin-text-muted);">No categories found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

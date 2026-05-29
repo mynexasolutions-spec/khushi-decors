@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% block title %}Edit Value – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+  <div style="display:flex; align-items:center; gap:0.5rem; color:var(--admin-text-muted); font-size:0.875rem; margin-bottom:1rem;">
+    <a href="{{ url_for('admin_attributes') }}" style="color:var(--admin-primary);">Attributes</a>
+    <span>/</span>
+    <a href="{{ url_for('admin_attribute_values', attr_id=attribute.id) }}" style="color:var(--admin-primary);">{{ attribute.name }}</a>
+    <span>/</span>
+    <span>Edit Value</span>
+  </div>
+  <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin:0;">Edit Value</h1>
+</div>
+
+<form method="post" action="{{ url_for('admin_attribute_value_edit', val_id=value.id) }}" class="admin-card" style="padding:2.5rem; max-width:600px;" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+  <div style="margin-bottom:1.5rem;">
+    <label class="admin-label">Value Content *</label>
+    <input type="text" name="value" value="{{ value.value }}" required class="admin-input" style="background:#fff;" />
+  </div>
+
+  <div style="margin-bottom:2rem;">
+    <label class="admin-label">Value Image/Icon (Optional)</label>
+    <div style="display:flex; gap:1.5rem; align-items:start; background:#f9fafb; padding:1.25rem; border-radius:0.75rem; border:1px solid var(--admin-border);">
+        {% if value.image_url %}
+        <div style="width:100px; height:100px; border-radius:8px; overflow:hidden; border:1px solid var(--admin-border); background:white;">
+            <img src="{{ resolve_image(value.image_url) }}" style="width:100%; height:100%; object-fit:cover;" />
+        </div>
+        {% endif %}
+        <div style="flex:1;">
+            <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--admin-text-muted); text-transform:uppercase; margin-bottom:0.5rem;">Upload Image</label>
+            <input type="file" name="image_file" class="admin-input" accept="image/*" style="padding:0.5rem; background:white;" />
+        </div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:1rem; padding-top:1.5rem; border-top:1px solid var(--admin-border);">
+    <button type="submit" class="admin-btn btn-primary" style="padding:0.75rem 2rem; font-weight:700;">Save Value</button>
+    <a href="{{ url_for('admin_attribute_values', attr_id=attribute.id) }}" class="admin-btn btn-outline" style="padding:0.75rem 2rem;">Cancel</a>
+  </div>
+</form>
+{% endblock %}

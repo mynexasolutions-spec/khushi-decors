@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Khushi Decors | Premium Home Decor & Interior Styling{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/index.css">
+{% endblock %}
+
+{% block content %}
+<div id="mainPage" class="page active-page">
+  <!-- Hero Banner Slider -->
+  <div class="hero-slider" id="heroSlider">
+    <div class="slide active-slide" style="background-image: linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.1)), url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1932&auto=format');">
+      <div class="slide-content">
+        <h2>Elevate Everyday Living</h2>
+        <button class="scroll-btn" id="scrollToCatalog">Shop Bestsellers</button>
+      </div>
+    </div>
+    <div class="slide" style="background-image: linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=1858&auto=format');">
+      <div class="slide-content">
+        <h2>Artisan Crafted</h2>
+        <button class="scroll-btn explore-btn" onclick="window.location.href='/shop'">Discover Now</button>
+      </div>
+    </div>
+    <div class="slide" style="background-image: linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('/static/images/WD5.jpg');">
+      <div class="slide-content">
+        <h2>Curated Interiors</h2>
+        <button class="scroll-btn explore-btn" onclick="window.location.href='/shop'">View Collection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trust Bar -->
+  <div class="trust-bar">
+    <div class="trust-label">As featured in</div>
+    <div class="trust-logos">
+      <span><i class="fa-solid fa-hotel"></i> Architectural Digest</span>
+      <span><i class="fa-solid fa-couch"></i> ELLE DECOR</span>
+      <span><i class="fa-solid fa-house-chimney-window"></i> Livingetc</span>
+      <span><i class="fa-solid fa-compass-drafting"></i> Vogue India</span>
+      <span><i class="fa-solid fa-cubes"></i> GoodHomes</span>
+    </div>
+  </div>
+
+  <!-- Shop by Category Catalog -->
+  <div class="catalog-section" id="catalogSection">
+    <h2 class="section-title">Shop by Category</h2>
+    <div class="catalog-grid">
+      <div class="catalog-card" data-page="allProducts"><img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=2158&auto=format" alt="All"><div class="card-label">All Products</div></div>
+      {% for cat in featured_categories %}
+      <div class="catalog-card" data-page="{{ cat.slug }}"><img src="{{ resolve_image(cat.img) }}" alt="{{ cat.label }}" onerror="this.src='/static/images/placeholder.png'"><div class="card-label">{{ cat.label }}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Featured Bestsellers Section -->
+  <div class="featured-section" id="featuredSection">
+    <h2 class="section-title">Curated Bestsellers</h2>
+    <p class="section-subtitle">Handpicked masterworks loved by interior designers</p>
+    <div class="featured-grid">
+      {% for p in featured[:4] %}
+      <div class="featured-card">
+        {% if p.is_featured %}
+        <span class="card-badge bestseller-badge">Bestseller</span>
+        {% elif p.sale_price and p.sale_price < p.price %}
+        <span class="card-badge sale-badge">Sale</span>
+        {% else %}
+        <span class="card-badge new-badge">New</span>
+        {% endif %}
+        <img src="{{ resolve_image(p.image_url) }}" alt="{{ p.name }}" onerror="this.src='/static/images/placeholder.png'">
+        <div class="featured-card-content">
+          <h4>{{ p.name }}</h4>
+          <p class="featured-card-desc">{{ p.short_description or p.description[:90] or 'Premium handcrafted interior decor.' }}</p>
+          <p class="price">
+            {% if p.sale_price and p.sale_price < p.price %}
+            <span style="text-decoration: line-through; opacity: 0.6; font-size: 0.85em; margin-right: 0.5rem;">₹{{ "%.0f"|format(p.price) }}</span>
+            ₹{{ "%.0f"|format(p.sale_price) }}
+            {% else %}
+            ₹{{ "%.0f"|format(p.price) }}
+            {% endif %}
+          </p>
+          <div class="btn-group">
+            <button class="btn add-to-cart" data-name="{{ p.name }}" data-price="{{ '%.0f'|format(p.sale_price or p.price) }}">Add to Bag</button>
+            <button class="btn btn-outline buy-now" data-name="{{ p.name }}" data-price="{{ '%.0f'|format(p.sale_price or p.price) }}">Buy Now</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Brand Philosophy -->
+  <div class="brand-story-section">
+    <div class="story-container">
+      <div class="story-image">
+        <img src="https://images.unsplash.com/photo-1616486038856-74749f7004d7?q=80&w=1200&auto=format" alt="Artisan Crafting Interior">
+        <div class="story-floating-badge">
+          <span class="badge-number">100%</span>
+          <span class="badge-label">Handcrafted in India</span>
+        </div>
+      </div>
+      <div class="story-content">
+        <span class="story-pretitle">OUR PHILOSOPHY</span>
+        <h2>Timeless Design Meets Conscious Craftsmanship</h2>
+        <p class="story-lead">At Khushi Decors, we believe that your home should be an authentic reflection of your journey. Each piece in our collection is thoughtfully designed and artisan-crafted to bring warmth, character, and soul to your everyday spaces.</p>
+        <p>We source natural materials like organic cotton jute, sustainably harvested wood, and natural clay to create decor that is not only beautiful but also kind to our planet. By partnering with local Indian master craftspeople, we preserve traditional techniques while introducing modern interior aesthetics.</p>
+        <div class="story-features">
+          <div class="story-feature-item">
+            <i class="fas fa-hand-holding-heart"></i>
+            <div>
+              <h5>Artisanal Spirit</h5>
+              <p>Every single product carries the distinct touch and soul of the maker.</p>
+            </div>
+          </div>
+          <div class="story-feature-item">
+            <i class="fas fa-seedling"></i>
+            <div>
+              <h5>Sustainable Luxury</h5>
+              <p>Ethically sourced biodegradable materials crafted for generations to enjoy.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room Style Planner Visualizer -->
+  <div class="style-planner-section">
+    <h2 class="section-title">Curated Style Collections</h2>
+    <p class="section-subtitle">Select a curated collection to view designer styling tips and recommended product pairings</p>
+    <div class="planner-container">
+      <div class="planner-controls" style="grid-template-columns: 1fr; border-bottom: none; padding-bottom: 0;">
+        <div class="control-group" style="align-items: center;">
+          <span class="control-label"><i class="fas fa-filter"></i> Choose Collection Style</span>
+          <div class="planner-buttons" id="collectionSelector" style="justify-content: center; margin-top: 0.5rem;">
+            <button class="planner-btn active" data-collection="wallDecor">Wall Art Sets</button>
+            <button class="planner-btn" data-collection="lamps">Cozy Lighting Sets</button>
+            <button class="planner-btn" data-collection="vases">Vase & Vessel Sets</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="planner-visualizer" id="plannerVisualizer">
+        <div class="visualizer-image-side" id="visualizerImage" style="background-image: url('/static/images/WD1.jpg');">
+          <div class="visualizer-overlay">
+            <h3 id="visualizerTitle">Wall Art Collection</h3>
+            <p id="visualizerStylingTip"><strong>Styling Tip:</strong> Combine rich textures like organic cotton macrame and boho tapestries with minimalist clocks to create an inviting, artistic focal wall.</p>
+          </div>
+        </div>
+        <div class="visualizer-content-side">
+          <h4>Featured Products</h4>
+          <p>Shop these direct pairings to instantly transform your space:</p>
+          <div class="recommendations-list" id="recommendationsList">
+            <!-- Dynamically populated in JavaScript -->
+          </div>
+          <button class="planner-explore-btn" id="plannerExploreBtn">Shop This Collection Style →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Testimonials Section -->
+  <div class="testimonials-section">
+    <h2 class="section-title">Voices of Khushi Decors Homes</h2>
+    <p class="section-subtitle">Real feedback from homes we've had the pleasure of transforming</p>
+    <div class="testimonials-grid">
+      <!-- Testimonial 1 -->
+      <div class="testimonial-card">
+        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p class="review-text">"The Macrame Wall Hanging completely changed the vibe of our bedroom. It looks extremely high-quality and expensive, and the texture is so soft and thick. Delivery was surprisingly fast too!"</p>
+        <div class="client-profile">
+          <div class="client-initials">AS</div>
+          <div class="client-info">
+            <h5>Aishwarya Sharma</h5>
+            <span>Mumbai, India</span>
+          </div>
+        </div>
+      </div>
+      <!-- Testimonial 2 -->
+      <div class="testimonial-card">
+        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p class="review-text">"I ordered two of the Fiddle Leaf plants and the Ribbed Vases for our new apartment. They look incredibly realistic! My guests couldn't believe they were artificial plants. Will definitely shop again."</p>
+        <div class="client-profile">
+          <div class="client-initials">RN</div>
+          <div class="client-info">
+            <h5>Rohan Nair</h5>
+            <span>Bengaluru, India</span>
+          </div>
+        </div>
+      </div>
+      <!-- Testimonial 3 -->
+      <div class="testimonial-card">
+        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p class="review-text">"The Rattan Lamp is a work of art. The warm patterns it casts on my wall in the evening are so soothing. It's the perfect statement piece for my bedside table. Customer support was very helpful!"</p>
+        <div class="client-profile">
+          <div class="client-initials">PK</div>
+          <div class="client-info">
+            <h5>Pooja K.</h5>
+            <span>Delhi, India</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Consultation Appointment Form Banner -->
+  <div class="consultation-banner-section">
+    <div class="consultation-container">
+      <div class="consultation-content">
+        <span class="consultation-pretitle">EXCLUSIVE DESIGN SERVICE</span>
+        <h2>Struggling to style your space? Let us help you.</h2>
+        <p>Book a complimentary 15-minute virtual session with our elite interior styling experts. Get personalized suggestions, color matching advice, and a bespoke product checklist tailored exactly to your home's layout.</p>
+        <form class="consultation-form" id="consultationForm">
+          <input type="text" placeholder="Your Name" id="consultName" required>
+          <input type="tel" placeholder="Your Phone Number" id="consultPhone" required>
+          <button type="submit" class="consult-submit-btn">Get Free Consultation</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quality Badges Section -->
+  <div class="quality-section">
+    <h3>Why India Loves Khushi Decors</h3>
+    <div class="badge-container">
+      <div class="badge-item"><i class="fas fa-truck"></i> Free Shipping*</div>
+      <div class="badge-item"><i class="fas fa-rupee-sign"></i> COD Available</div>
+      <div class="badge-item"><i class="fas fa-arrow-right"></i> Easy 7-Day Returns</div>
+      <div class="badge-item"><i class="fas fa-leaf"></i> Eco-friendly</div>
+    </div>
+    <button class="view-products-btn" id="viewAllProductsBtn">Explore Entire Catalogue →</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/index.js"></script>
+{% endblock %}

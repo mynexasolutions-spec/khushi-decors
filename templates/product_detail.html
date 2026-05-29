@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} | Khushi Decors{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/product.css">
+{% endblock %}
+
+{% block content %}
+<div class="product-detail-wrapper">
+  <!-- Back Button navigation -->
+  <button class="btn btn-outline" onclick="window.history.back()" style="border-radius: 50px; padding: 0.6rem 1.5rem; margin-bottom: 1.5rem;">
+    <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Back to Shop
+  </button>
+
+  <div class="product-detail-grid">
+    <!-- Left Column: Thumbnail Switcher Gallery -->
+    <div class="product-gallery-container">
+      <div class="product-gallery-thumbs">
+        {% for url in gallery_images %}
+          <img src="{{ url }}" alt="Thumbnail {{ loop.index }}" class="gallery-thumb-item {% if loop.first %}active{% endif %}" data-idx="{{ loop.index0 }}">
+        {% endfor %}
+      </div>
+      <div class="product-gallery-main">
+        <img src="{{ gallery_images[0] }}" alt="{{ product.name }}" id="mainProductImg">
+      </div>
+    </div>
+
+    <!-- Right Column: Details & Actions -->
+    <div class="product-info-panel">
+      <span class="product-info-cat">{{ category_label }}</span>
+      <h2 class="product-info-title">{{ product.name }}</h2>
+      
+      <div class="product-info-rating">
+        <div class="stars">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        </div>
+        <span class="reviews-count">(18 Verified Reviews)</span>
+      </div>
+
+      <div class="product-info-price">₹{{ product.price }}</div>
+      
+      <p class="product-info-desc">
+        Artisan crafted from premium biodegradable materials. This statement masterpiece brings elegant styling accents and soft organic texture to bedrooms, hallways, or living spaces. Designed carefully to harmonize with modern minimalist and rich bohemian decors alike.
+      </p>
+
+      <div class="product-info-actions">
+        <div class="qty-control-wrapper">
+          <span class="qty-control-label">Quantity:</span>
+          <div class="quantity-selector">
+            <button id="detailQtyDec">-</button>
+            <span id="detailQtyVal">1</span>
+            <button id="detailQtyInc">+</button>
+          </div>
+        </div>
+        <div class="btn-group" style="justify-content: flex-start; margin-top: 1rem; gap: 1.25rem;">
+          <button class="btn btn-primary" id="detailAddToCart" data-name="{{ product.name }}" data-price="{{ product.price }}" style="padding: 0.9rem 2.5rem; font-size: 0.95rem; font-weight: 700; border-radius: 50px;">
+            <i class="fas fa-bag-shopping" style="margin-right: 8px;"></i> Add to Bag
+          </button>
+          <button class="btn btn-outline" id="detailBuyNow" data-name="{{ product.name }}" data-price="{{ product.price }}" style="padding: 0.9rem 2.5rem; font-size: 0.95rem; font-weight: 700; border-radius: 50px; border-width: 2px;">
+            Buy Now
+          </button>
+        </div>
+      </div>
+
+      <div class="product-detail-badges">
+        <div class="detail-badge-item"><i class="fas fa-truck"></i> Free Shipping on ₹2000+</div>
+        <div class="detail-badge-item"><i class="fas fa-rupee-sign"></i> Cash on Delivery</div>
+        <div class="detail-badge-item"><i class="fas fa-shield-halved"></i> 100% Handcrafted</div>
+        <div class="detail-badge-item"><i class="fas fa-seedling"></i> Eco-friendly Materials</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Long Description Specs/Accordions -->
+  <div class="product-description-tabs" style="margin-top: 3.5rem; border-top: 1px solid #f0ede8; padding-top: 3rem;">
+    <div class="tabs-header" style="display:flex; gap: 2rem; border-bottom: 2.5px solid #f7f5f0; margin-bottom: 1.5rem;">
+      <h3 class="tab-title active" style="font-family:'Playfair Display', serif; font-size:1.4rem; padding-bottom: 0.75rem; border-bottom: 2.5px solid var(--primary); margin-bottom: -2.5px; color: var(--dark-charcoal);">Detailed Craftsmanship & Styling Guidelines</h3>
+    </div>
+    <div class="tab-content" style="color:#5C5850; line-height: 1.8; font-size: 0.95rem; display: flex; flex-direction: column; gap: 1rem;">
+      <p>
+        This hand-selected piece represents the pinnacle of sustainable luxury. Individually woven or structured by multi-generational Indian craftspeople, it features carefully processed natural raw materials (organic cotton fibers, seasoned teak wood, or hand-fired ceramic clay) sourced directly from local eco-farms.
+      </p>
+      <p>
+        <strong>Design Styling Recommendations:</strong> For the ultimate designer look, display this piece in high-visibility areas such as entryway consoles, bedroom nightstands, or central living space gallery walls. Pair it with soft warm-tone accent lighting and dry organic botanical sprigs to capture an inviting, cohesive, and magazine-worthy aesthetic.
+      </p>
+      <ul style="padding-left: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; list-style-type: square; color: #5C5850;">
+        <li><strong>Materials:</strong> 100% natural organic cotton, seasoned pine support, clay components</li>
+        <li><strong>Dimensions:</strong> Standard Size: 32" H x 18" W x 2" D</li>
+        <li><strong>Origin:</strong> Proudly designed and hand-woven in Maharashtra, India</li>
+        <li><strong>Care:</strong> Gentle dry dusting or light vacuum clean; avoid direct exposure to moisture</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Related Products Grid section -->
+  {% if related_products %}
+    <div class="related-products-section">
+      <h3 class="related-products-title">Complete the Styling Look</h3>
+      <p class="related-products-subtitle">Handpicked masterworks to pair perfectly in your room spaces</p>
+      
+      <div class="related-grid">
+        {% for item in related_products %}
+          <div class="shop-product-card related-product-card" data-name="{{ item.name }}" onclick="window.location.href='/product/{{ item.id }}'">
+            <div class="shop-card-img-wrap" style="cursor: pointer;">
+              <img src="{{ resolve_image(item.image_url) }}" alt="{{ item.name }}" loading="lazy" onerror="this.src='/static/images/placeholder.png'">
+              <span class="shop-card-cat-tag">{{ category_label }}</span>
+            </div>
+            <div class="shop-card-body">
+              <h4 class="shop-card-name" style="cursor: pointer;">{{ item.name }}</h4>
+              <p class="shop-card-price">₹{{ "%.0f"|format(item.price) }}</p>
+              <div class="shop-card-actions">
+                <button class="btn add-to-cart" data-name="{{ item.name }}" data-price="{{ '%.0f'|format(item.sale_price or item.price) }}">
+                  <i class="fas fa-bag-shopping"></i> Add
+                </button>
+                <button class="btn btn-outline buy-now" data-name="{{ item.name }}" data-price="{{ '%.0f'|format(item.sale_price or item.price) }}">
+                  Buy Now
+                </button>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/product.js"></script>
+{% endblock %}

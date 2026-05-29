@@ -1,0 +1,126 @@
+{% extends "admin/base.html" %}
+{% block title %}Products – StoreAdmin{% endblock %}
+
+{% block content %}
+{% set placeholder_url = url_for('static', filename='images/placeholder.png') %}
+<div class="admin-page-header">
+  <div>
+    <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin-bottom:0.25rem;">Products</h1>
+    <p style="color:var(--admin-text-muted); font-size:0.875rem;">Manage your store's items, stock, and pricing.</p>
+  </div>
+  <a href="{{ url_for('admin_product_new') }}" class="admin-btn btn-primary">+ Add Product</a>
+</div>
+
+<!-- Filters -->
+<div class="admin-card" style="margin-bottom:1.5rem; padding:1.25rem;">
+  <form method="get" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end;">
+    <div style="flex:1; min-width:200px;">
+      <label class="admin-label">Search</label>
+      <input type="text" name="search" value="{{ search }}" placeholder="Name or SKU..." class="admin-input" />
+    </div>
+    <div style="min-width:160px;">
+      <label class="admin-label">Category</label>
+      <select name="category" class="admin-input">
+        <option value="">All Categories</option>
+        {% for c in categories %}
+        <option value="{{ c.slug }}" {% if selected_category == c.slug %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="min-width:160px;">
+      <label class="admin-label">Brand</label>
+      <select name="brand" class="admin-input">
+        <option value="">All Brands</option>
+        {% for b in brands %}
+        <option value="{{ b.slug }}" {% if selected_brand == b.slug %}selected{% endif %}>{{ b.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="admin-btn btn-primary" style="padding:0.6rem 1.5rem;">Filter</button>
+    {% if search or selected_category or selected_brand %}
+    <a href="{{ url_for('admin_products') }}" style="color:var(--admin-text-muted); font-size:0.875rem; padding-bottom:0.5rem;">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Table -->
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th style="width:64px;">Image</th>
+        <th>Product Info</th>
+        <th>SKU</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Status</th>
+        <th style="text-align:right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>
+          <div style="width:48px; height:48px; background:white; border-radius:8px; overflow:hidden; border:1px solid var(--admin-border); display:flex; align-items:center; justify-content:center;">
+            <img src="{{ resolve_image(p.image_url) }}" alt="{{ p.name }}" style="width:100%; height:100%; object-fit:contain; padding:2px;" onerror="this.src='{{ placeholder_url }}'" />
+          </div>
+        </td>
+        <td>
+          <div style="font-weight:600; font-size:0.875rem;">{{ p.name[:50] }}</div>
+          <div style="font-size:0.75rem; color:var(--admin-text-muted);">{{ p.brand_name or 'No Brand' }}</div>
+        </td>
+        <td style="color:var(--admin-text-muted); font-family:monospace; font-size:0.8125rem;">{{ p.sku or '—' }}</td>
+        <td>{{ p.category_name or '—' }}</td>
+        <td>
+          {% if p.sale_price and p.sale_price < p.price %}
+          <div class="text-indigo" style="font-weight:700;">₹{{ "%.0f"|format(p.sale_price) }}</div>
+          <div style="text-decoration:line-through; color:var(--admin-text-muted); font-size:0.75rem;">₹{{ "%.0f"|format(p.price) }}</div>
+          {% else %}
+          <div style="font-weight:600;">₹{{ "%.0f"|format(p.price) }}</div>
+          {% endif %}
+        </td>
+        <td>
+          <div style="font-weight:500; {% if p.stock_quantity <= 5 %}color:#ef4444;{% endif %}">{{ p.stock_quantity }} in stock</div>
+        </td>
+        <td>
+          <div style="display:flex; flex-direction:column; gap:0.25rem;">
+            <span class="badge {% if p.is_active %}badge-delivered{% else %}badge-cancelled{% endif %}" style="width:fit-content;">
+              {{ 'Active' if p.is_active else 'Archived' }}
+            </span>
+            {% if p.is_featured %}
+            <span class="admin-badge" style="background:rgba(234,179,8,0.1); color:#ca8a04; font-size:0.7rem; width:fit-content; border:1px solid rgba(234,179,8,0.2);">★ Featured</span>
+            {% endif %}
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+            <a href="{{ url_for('admin_product_edit', product_id=p.id) }}" class="admin-btn btn-outline" style="padding:0.375rem 0.75rem; font-size:0.8125rem;">Edit</a>
+            {% if p.type == 'variable' %}
+            <a href="{{ url_for('admin_product_variations', product_id=p.id) }}" class="admin-btn btn-outline" style="padding:0.375rem 0.75rem; font-size:0.8125rem; color:var(--admin-primary);">Variations</a>
+            {% endif %}
+            <form action="{{ url_for('admin_product_delete', product_id=p.id) }}" method="post" onsubmit="return confirm('Archive this product?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="admin-btn" style="padding:0.375rem 0.75rem; font-size:0.8125rem; color:#ef4444; background:rgba(239,68,68,0.05); border:none;">Archive</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" style="text-align:center; padding:3rem; color:var(--admin-text-muted);">No products found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<div style="display:flex; justify-content:center; gap:0.375rem; margin-top:2rem;">
+  {% for p_num in range(1, total_pages+1) %}
+  <a href="{{ url_for('admin_products', page=p_num, search=search, category=selected_category, brand=selected_brand) }}" 
+     style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:0.5rem; text-decoration:none; font-size:0.875rem; font-weight:500;
+     {% if p_num == page %}background:var(--admin-primary); color:white;{% else %}background:white; border:1px solid var(--admin-border); color:var(--admin-text-main);{% endif %}">{{ p_num }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

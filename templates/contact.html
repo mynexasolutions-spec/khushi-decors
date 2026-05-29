@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Get in Touch | Khushi Decors{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/contact.css">
+{% endblock %}
+
+{% block content %}
+<div class="contact-page-wrapper">
+  <!-- Page Banner -->
+  <div class="page-banner" style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=1600&auto=format');">
+    <div class="banner-content">
+      <h1>Get in Touch</h1>
+      <p>Let's collaborate on styling your sanctuary</p>
+    </div>
+  </div>
+  
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem;">
+    <div class="contact-content-grid">
+      <!-- Direct Channels Card -->
+      <div class="contact-card-premium">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem;">Direct Channels</h3>
+        <p style="color: #6E695F; line-height: 1.6; margin-bottom: 2rem;">Have questions regarding a product custom size, bulk wholesale orders, or looking to schedule a return? Reach our design concierge team via any of these channels:</p>
+        
+        <div class="contact-channels">
+          <div class="channel-item">
+            <div class="channel-icon"><i class="fas fa-envelope"></i></div>
+            <div class="channel-details">
+              <h5>Email Us</h5>
+              <p>hello@khushidecors.com</p>
+            </div>
+          </div>
+          <div class="channel-item">
+            <div class="channel-icon"><i class="fas fa-phone-alt"></i></div>
+            <div class="channel-details">
+              <h5>Call/WhatsApp</h5>
+              <p>+91 98765 43210</p>
+            </div>
+          </div>
+          <div class="channel-item">
+            <div class="channel-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="channel-details">
+              <h5>Head Studio</h5>
+              <p>Level 4, High Street Phoenix, Senapati Bapat Marg, Mumbai, MH</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Google Map Iframe Embed -->
+        <div class="contact-map-wrapper" style="margin-top: 1.8rem; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-soft); border: 1px solid #f0ede8; height: 200px; width: 100%;">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3771.803730225134!2d72.82283997576595!3d18.995304382190367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7cef706fcb665%3A0xe7c569f1a5c68f5c!2sHigh%20Street%20Phoenix!5e0!3m2!1sen!2sin!4v1716654000000!5m2!1sen!2sin" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+      
+      <!-- Concierge Form -->
+      <form class="contact-form-premium" id="conciergeContactForm">
+        <h3>Drop Us a Message</h3>
+        <p style="color: #6E695F; font-size: 0.9rem; margin-bottom: 0.5rem;">Send a query and get a designer callback within 24 hours.</p>
+        
+        <div class="edit-input-group">
+          <input type="text" id="contactName" placeholder="Full Name" required style="border-radius: 12px; padding: 0.8rem 1rem;">
+        </div>
+        <div class="edit-input-group">
+          <input type="tel" id="contactPhone" placeholder="Phone Number" required style="border-radius: 12px; padding: 0.8rem 1rem;">
+        </div>
+        <div class="edit-input-group">
+          <textarea id="contactMsg" placeholder="Describe your design styling requirements..." required rows="5" style="width: 100%; border: 1px solid #e0dbd0; border-radius: 12px; padding: 0.8rem 1rem; font-family: inherit; font-size: 0.85rem; resize: none;"></textarea>
+        </div>
+        <button type="submit" class="place-order-btn-enhanced" style="margin-top: 0.5rem; font-size: 0.9rem; font-weight: 600;">
+          <i class="fas fa-paper-plane"></i> Send Concierge Message
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('conciergeContactForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('contactName').value;
+      window.KhushiDecors.showToast(`Thank you ${name}! Callback registered successfully! 📨`, "#4A6552");
+      e.target.reset();
+    });
+  });
+</script>
+{% endblock %}

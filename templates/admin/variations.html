@@ -1,0 +1,417 @@
+{% extends "admin/base.html" %}
+{% block title %}Variations for {{ product.name }} – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+  <div style="display:flex; align-items:center; gap:0.5rem; color:var(--admin-text-muted); font-size:0.875rem; margin-bottom:1rem;">
+    <a href="{{ url_for('admin_products') }}" style="color:var(--admin-primary);">Products</a>
+    <span>/</span>
+    <a href="{{ url_for('admin_product_edit', product_id=product.id) }}" style="color:var(--admin-primary);">{{ product.name }}</a>
+    <span>/</span>
+    <span>Variations</span>
+  </div>
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+      <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin:0;">Manage Variations: {{ product.name }}</h1>
+      {% if variations %}
+      <button type="submit" form="bulkUpdateForm" class="admin-btn btn-primary" style="padding:0.6rem 1.5rem; font-weight:700; box-shadow:0 4px 12px rgba(99,102,241,0.25);">Save All Changes</button>
+      {% endif %}
+  </div>
+</div>
+
+<div class="variation-manager-layout">
+  
+  <!-- Sidebar: Add Variation -->
+  <div class="variation-sidebar">
+    <div class="admin-card" style="position:sticky; top:2rem;">
+      <h3 style="font-size:1rem; font-weight:700; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+          <span style="width:8px; height:8px; background:var(--admin-primary); border-radius:99px;"></span>
+          Add New Variation
+      </h3>
+      <form method="post" action="{{ url_for('admin_variation_new', product_id=product.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        
+        <div style="margin-bottom:1.25rem;">
+          <label class="admin-label">Variation SKU *</label>
+          <input type="text" name="sku" required placeholder="e.g. {{ product.name[:3]|upper }}-VAR1" class="admin-input" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
+          <div>
+            <label class="admin-label">Price (₹) *</label>
+            <input type="number" step="0.01" name="price" required class="admin-input" value="{{ product.price }}" />
+          </div>
+          <div>
+            <label class="admin-label">Stock</label>
+            <input type="number" name="stock_quantity" value="0" class="admin-input" />
+          </div>
+        </div>
+
+        <div style="background:#f8fafc; padding:1.25rem; border-radius:0.75rem; border:1px solid var(--admin-border); margin-bottom:1.5rem;">
+          <h4 style="font-size:0.75rem; font-weight:700; margin-bottom:1rem; text-transform:uppercase; color:var(--admin-text-muted); letter-spacing:0.05em;">Configuration</h4>
+          {% for attr in attributes %}
+          <div style="margin-bottom:1rem;">
+            <label class="admin-label" style="text-transform:none; font-weight:600;">{{ attr.name }}</label>
+            <select name="attr_{{ attr.id }}" required class="admin-input" style="background:white;">
+              <option value="">— Select {{ attr.name }} —</option>
+              {% for val in attr.options %}
+              <option value="{{ val.id }}">{{ val.value }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endfor %}
+        </div>
+
+        <button type="submit" class="admin-btn btn-primary" style="width:100%; justify-content:center; padding:0.875rem; font-weight:700;">Create Variation</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Content: Existing Variations -->
+  <div class="variation-main">
+    <div class="admin-card" style="padding:0; overflow:hidden;">
+      <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--admin-border); background:#fafafa; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+          <h3 style="font-size:1rem; font-weight:700;">Existing Variations ({{ variations|length }})</h3>
+          <span style="font-size:0.75rem; color:var(--admin-text-muted);">Click "Edit" to expand details →</span>
+      </div>
+
+      <form id="bulkUpdateForm" method="post" enctype="multipart/form-data" action="{{ url_for('admin_variations_bulk_update', product_id=product.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        
+        {% if variations %}
+        <div class="variation-cards">
+          {% for v in variations %}
+          <div class="var-card">
+            <div class="var-card-header" onclick="this.closest('.var-card').classList.toggle('var-expanded')">
+              <div class="var-combo-badge">{{ v.option_names or v.sku }}</div>
+              <div class="var-card-summary">
+                <span class="var-price-badge">₹{{ '%.0f'|format(v.price or 0) }}</span>
+                <span class="var-stock-badge {% if (v.stock_quantity or 0) <= 5 %}var-stock-low{% endif %}">
+                  {{ v.stock_quantity or 0 }} in stock
+                </span>
+              </div>
+              <button type="button" class="var-expand-btn">✏️ Edit</button>
+            </div>
+
+            <div class="var-card-body">
+              <div class="var-fields-row">
+                <div class="var-field">
+                  <label>SKU</label>
+                  <input type="text" name="sku_{{ v.id }}" value="{{ v.sku or '' }}" class="admin-input" />
+                </div>
+                <div class="var-field">
+                  <label>Name Override</label>
+                  <input type="text" name="name_{{ v.id }}" value="{{ v.name or '' }}" placeholder="Leave blank to auto-generate" class="admin-input" />
+                </div>
+                <div class="var-field">
+                  <label>Price (₹)</label>
+                  <input type="number" step="0.01" name="price_{{ v.id }}" value="{{ '%.2f'|format(v.price or 0) }}" class="admin-input" />
+                </div>
+                <div class="var-field">
+                  <label>Stock</label>
+                  <input type="number" name="stock_{{ v.id }}" value="{{ v.stock_quantity or 0 }}" class="admin-input" />
+                </div>
+                <div class="var-field var-field-image">
+                  <label>Images</label>
+                  <input type="file" name="image_{{ v.id }}" multiple accept="image/*" />
+                  {% set var_imgs = v.id %}
+                  <div style="display:flex; gap:0.3rem; flex-wrap:wrap; margin-top:0.3rem;">
+                    {% for vi in variation_images.get(v.id|string, []) %}
+                    <div style="position:relative; width:50px; height:50px; border-radius:6px; overflow:hidden; border:2px solid {% if vi.is_primary %}var(--admin-primary){% else %}var(--admin-border){% endif %};">
+                      <img src="{{ resolve_image(vi.file_url) }}" style="width:100%; height:100%; object-fit:cover;" />
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="var-desc-section">
+                <div class="var-desc-tabs">
+                  <button type="button" class="var-tab active" onclick="switchVarTab(this, 'preview')">Preview</button>
+                  <button type="button" class="var-tab" onclick="switchVarTab(this, 'edit')">Edit HTML</button>
+                </div>
+                <div class="var-preview-box">
+                  {{ v.description or '' | safe }}
+                </div>
+                <textarea name="description_{{ v.id }}" class="var-edit-box" style="display:none;" placeholder="Paste or edit HTML description here…">{{ v.description or '' }}</textarea>
+                <input type="text" name="short_desc_{{ v.id }}" value="{{ v.short_description or '' }}" placeholder="Short description (shown in listing cards)" class="admin-input" style="margin-top:0.5rem; font-size:0.8rem;" />
+              </div>
+
+              <div class="var-card-actions">
+                <button type="button" onclick="if(confirm('Delete this variation?')){document.getElementById('df_{{ v.id }}').submit()}" class="admin-btn" style="color:#ef4444; font-size:0.8rem;">🗑 Delete</button>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div style="padding:1.25rem 1.5rem; border-top:1px solid var(--admin-border); text-align:right;">
+          <button type="submit" class="admin-btn btn-primary" style="padding:0.7rem 2rem; font-weight:700;">💾 Save All Changes</button>
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:4rem; color:var(--admin-text-muted);">
+          <div style="font-size:2rem; margin-bottom:1rem;">📦</div>
+          No variations yet. Use the form on the left to add one.
+        </div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Delete Forms -->
+{% for v in variations %}
+<form id="df_{{ v.id }}" action="{{ url_for('admin_variation_delete', var_id=v.id) }}" method="post" style="display:none;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" name="product_id" value="{{ product.id }}" />
+</form>
+{% endfor %}
+
+<script>
+function switchVarTab(btn, tab) {
+  var card = btn.closest('.var-card');
+  card.querySelectorAll('.var-tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  card.querySelector('.var-preview-box').style.display = tab === 'preview' ? '' : 'none';
+  card.querySelector('.var-edit-box').style.display = tab === 'edit' ? '' : 'none';
+}
+</script>
+
+<style>
+.variation-manager-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+.variation-sidebar {
+    flex: 0 0 350px;
+}
+.variation-main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Card-based variation list ── */
+.variation-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+}
+
+.var-card {
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+.var-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.var-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    background: #fafafa;
+    border-bottom: 1px solid transparent;
+    transition: background 0.15s;
+}
+.var-card-header:hover {
+    background: #f0f0f0;
+}
+.var-expanded .var-card-header {
+    border-bottom-color: var(--admin-border);
+}
+
+.var-combo-badge {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--admin-primary);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.var-card-summary {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+.var-price-badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+}
+.var-stock-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    background: #f3f4f6;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+}
+.var-stock-low {
+    color: #991b1b;
+    background: #fef2f2;
+}
+.var-expand-btn {
+    background: none;
+    border: 1px solid var(--admin-border);
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: var(--admin-text-muted);
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+.var-expand-btn:hover {
+    background: var(--admin-primary);
+    color: #fff;
+    border-color: var(--admin-primary);
+}
+
+/* Collapsed body */
+.var-card-body {
+    display: none;
+    padding: 1rem;
+    animation: slideDown 0.2s ease;
+}
+.var-expanded .var-card-body {
+    display: block;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; max-height: 0; }
+    to   { opacity: 1; max-height: 2000px; }
+}
+
+/* Field grid */
+.var-fields-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.var-field label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--admin-text-muted);
+    margin-bottom: 0.3rem;
+}
+.var-field input {
+    width: 100%;
+    box-sizing: border-box;
+}
+.var-field-image input {
+    font-size: 0.75rem;
+    padding-top: 0.4rem;
+}
+
+/* Description tabs */
+.var-desc-section {
+    margin-bottom: 0.5rem;
+}
+.var-desc-tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+.var-tab {
+    background: #f3f4f6;
+    border: 1px solid transparent;
+    border-radius: 6px 6px 0 0;
+    padding: 0.35rem 1rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: var(--admin-text-muted);
+    font-weight: 600;
+}
+.var-tab.active {
+    background: #fff;
+    border-color: var(--admin-border);
+    border-bottom-color: #fff;
+    color: var(--admin-primary);
+}
+.var-preview-box {
+    background: #fff;
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    min-height: 60px;
+}
+.var-preview-box h1, .var-preview-box h2, .var-preview-box h3, .var-preview-box h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-family: inherit;
+}
+.var-preview-box p {
+    margin: 0 0 0.5rem 0;
+}
+.var-preview-box table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+.var-preview-box td {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #e5e7eb;
+}
+.var-preview-box .desc-key {
+    font-weight: 700;
+    color: var(--admin-text-muted);
+    width: 40%;
+}
+.var-edit-box {
+    width: 100%;
+    min-height: 80px;
+    font-family: monospace;
+    font-size: 0.75rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.var-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+@media (max-width: 768px) {
+    .var-fields-row {
+        grid-template-columns: 1fr 1fr;
+    }
+    .variation-sidebar {
+        flex: none;
+        width: 100%;
+    }
+    .var-card-summary {
+        display: none;
+    }
+}
+@media (max-width: 480px) {
+    .var-fields-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

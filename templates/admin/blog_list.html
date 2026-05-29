@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block title %}Blog Posts – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+  <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin:0;">Blog Posts</h1>
+  <a href="{{ url_for('admin_blog_new') }}" class="admin-btn btn-primary" style="text-decoration:none; padding:0.6rem 1.2rem;">+ New Post</a>
+</div>
+
+<div class="admin-card" style="padding:0; overflow:hidden;">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th style="padding-left:1rem;">Title</th>
+        <th>Author</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th style="text-align:right; padding-right:1rem;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in posts %}
+      <tr>
+        <td style="padding-left:1rem; font-weight:600;">{{ p.title }}</td>
+        <td>{{ p.author }}</td>
+        <td>
+          {% if p.published %}
+          <span style="background:#d1fae5; color:#065f46; padding:0.2rem 0.6rem; border-radius:6px; font-size:0.75rem; font-weight:600;">Published</span>
+          {% else %}
+          <span style="background:#fef3c7; color:#92400e; padding:0.2rem 0.6rem; border-radius:6px; font-size:0.75rem; font-weight:600;">Draft</span>
+          {% endif %}
+        </td>
+        <td style="color:var(--admin-text-muted);">{{ p.created_at|date_short }}</td>
+        <td style="text-align:right; padding-right:1rem;">
+          <a href="{{ url_for('admin_blog_edit', post_id=p.id) }}" class="admin-btn" style="padding:0.3rem 0.7rem; font-size:0.75rem;">Edit</a>
+          <form method="POST" action="{{ url_for('admin_blog_delete', post_id=p.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="admin-btn" style="padding:0.3rem 0.7rem; font-size:0.75rem; color:#ef4444;" onclick="return confirm('Delete this post?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" style="text-align:center; padding:3rem; color:var(--admin-text-muted);">No blog posts yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

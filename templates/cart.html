@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Bag | Khushi Decors{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/cart.css">
+{% endblock %}
+
+{% block content %}
+<!-- Compact Page Banner -->
+<div class="page-banner" style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1600&auto=format');">
+  <div class="banner-content">
+    <h1>Your Shopping Bag</h1>
+    <p>Review your selected designer items</p>
+  </div>
+</div>
+
+<!-- Stepper & Bag grid, loaded dynamically from localStorage -->
+<div class="cart-wrapper">
+  <!-- Stepper -->
+  <div class="checkout-stepper">
+    <div class="step-item active">
+      <div class="step-dot">1</div>
+      <div class="step-label">Bag</div>
+    </div>
+    <div class="step-item">
+      <div class="step-dot">2</div>
+      <div class="step-label">Checkout</div>
+    </div>
+    <div class="step-item">
+      <div class="step-dot">3</div>
+      <div class="step-label">Success</div>
+    </div>
+  </div>
+
+  <h1 style="margin-bottom:1.5rem;"><i class="fas fa-shopping-bag"></i> Your Shopping Bag</h1>
+  
+  <!-- Content loaded dynamically from localStorage by static/js/cart.js -->
+  <p style="text-align:center; padding: 4rem 1rem; color:#8a857a; font-size:1.1rem;">Loading your items...</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/cart.js"></script>
+{% endblock %}

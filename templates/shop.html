@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Shop Collections | Khushi Decors{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/shop.css">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page-wrapper">
+  <!-- Small Compact Page Banner -->
+  <div class="page-banner" style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1600&auto=format');">
+    <div class="banner-content">
+      <h1>Shop Our Collections</h1>
+      <p>Handpicked artisan crafts for premium living</p>
+    </div>
+  </div>
+
+  <!-- Mobile sticky header bar -->
+  <div class="shop-mobile-bar">
+    <button class="back-home-shop" id="shopBackBtn" onclick="window.location.href='/'"><i class="fas fa-arrow-left"></i></button>
+    <h1 class="shop-mobile-title">Our Collections</h1>
+    <button class="shop-filter-toggle" id="filterToggleBtn">
+      <i class="fas fa-sliders-h"></i> Filters
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="filter-drawer-overlay" id="filterOverlay"></div>
+
+  <!-- Shop Page Layout Grid -->
+  <div class="shop-layout">
+    <!-- ===== SIDEBAR FILTERS ===== -->
+    <aside class="shop-sidebar" id="shopSidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-header">
+          <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+          <button class="sidebar-close-btn" id="sidebarCloseBtn"><i class="fas fa-times"></i></button>
+          <button class="clear-all-btn" id="clearAllFilters">Clear All</button>
+        </div>
+
+        <!-- Category list selector filter -->
+        <div class="filter-group">
+          <h4 class="filter-group-title">Category</h4>
+          <ul class="filter-cat-list">
+            <li class="filter-cat-item active" data-cat="all">
+              <i class="fas fa-th-large"></i> All Products
+            </li>
+            <li class="filter-cat-item" data-cat="wallDecor">
+              <i class="fas fa-image"></i> Wall Decor
+            </li>
+            <li class="filter-cat-item" data-cat="artificialPlants">
+              <i class="fas fa-seedling"></i> Artificial Plants
+            </li>
+            <li class="filter-cat-item" data-cat="lamps">
+              <i class="fas fa-lightbulb"></i> Designer Lamps
+            </li>
+            <li class="filter-cat-item" data-cat="vases">
+              <i class="fas fa-flask"></i> Vases & Vessels
+            </li>
+            <li class="filter-cat-item" data-cat="clocks">
+              <i class="fas fa-clock"></i> Statement Clocks
+            </li>
+          </ul>
+        </div>
+
+        <!-- Price sliders range filter -->
+        <div class="filter-group">
+          <h4 class="filter-group-title">Price Range</h4>
+          <div class="price-range-display">
+            <span id="priceMinLabel">₹699</span>
+            <span id="priceMaxLabel">₹3299</span>
+          </div>
+          <div class="price-sliders">
+            <input type="range" class="price-range-input" id="priceMinSlider" min="699" max="3299" value="699" step="50">
+            <input type="range" class="price-range-input" id="priceMaxSlider" min="699" max="3299" value="3299" step="50">
+          </div>
+          <div class="price-inputs-row">
+            <div class="price-input-box">
+              <label>Min</label>
+              <input type="number" id="priceMinInput" value="699" min="699" max="3299">
+            </div>
+            <div class="price-range-sep">—</div>
+            <div class="price-input-box">
+              <label>Max</label>
+              <input type="number" id="priceMaxInput" value="3299" min="699" max="3299">
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Sort select options list -->
+        <div class="filter-group">
+          <h4 class="filter-group-title">Sort By</h4>
+          <ul class="sort-list" id="mobileSortList">
+            <li class="sort-item active" data-sort="default">Recommended</li>
+            <li class="sort-item" data-sort="price-asc">Price: Low → High</li>
+            <li class="sort-item" data-sort="price-desc">Price: High → Low</li>
+            <li class="sort-item" data-sort="name-asc">Name: A → Z</li>
+          </ul>
+        </div>
+
+        <button class="apply-filters-btn" id="applyFiltersBtn">Apply Filters</button>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN RESULTS COLUMN ===== -->
+    <main class="shop-main">
+      <!-- Desktop Filters top-bar -->
+      <div class="shop-topbar">
+        <div class="shop-breadcrumb">
+          <span id="shopBreadcrumb">All Products</span>
+        </div>
+        <div class="shop-topbar-right">
+          <div class="shop-search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="shopSearchInput" placeholder="Search products…">
+          </div>
+          <div class="shop-sort-select-wrap">
+            <select id="shopSortSelect">
+              <option value="default">Recommended</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="name-asc">Name: A → Z</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active chips indicators -->
+      <div class="active-filter-chips" id="activeFilterChips"></div>
+
+      <!-- Results stats -->
+      <p class="results-count" id="resultsCount"></p>
+
+      <!-- Products Grid -->
+      <div class="shop-grid" id="shopGrid">
+        <!-- Rendered Dynamically in JS -->
+      </div>
+
+      <!-- Empty state layout -->
+      <div class="shop-empty" id="shopEmpty" style="display:none;">
+        <i class="fas fa-search"></i>
+        <h3>No products found</h3>
+        <p>Try adjusting your filters or search term.</p>
+        <button class="btn" id="shopEmptyReset">Reset Filters</button>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.DB_PRODUCTS = {{ products | tojson | safe }};
+  window.DB_CATEGORIES = {{ categories | tojson | safe }};
+</script>
+<script src="/static/js/shop.js"></script>
+{% endblock %}

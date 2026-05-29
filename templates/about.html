@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Our Story | Khushi Decors{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/about.css">
+{% endblock %}
+
+{% block content %}
+<div class="about-page-wrapper">
+  <!-- Page Banner -->
+  <div class="page-banner" style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1600&auto=format');">
+    <div class="banner-content">
+      <h1>Our Story</h1>
+      <p>Crafting luxury, preserving artisanal spirit</p>
+    </div>
+  </div>
+  
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem;">
+    <!-- Grid Content -->
+    <div class="about-grid-decor">
+      <div class="about-story-content">
+        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; color: var(--primary);">Craftsmanship</span>
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 2.2rem; margin: 0.5rem 0 1.25rem;">Designing Homes with Soul</h2>
+        <p style="color: #6E695F; line-height: 1.7; margin-bottom: 1rem;">
+          Founded with the dream of bridging traditional Indian artistry and contemporary interior design, Khushi Decors stands as a testament to ethical design and sustainable luxury. Each item in our gallery tells a rich, unique story of master dedication.
+        </p>
+        <p style="color: #6E695F; line-height: 1.7;">
+          We believe a home is a dynamic sanctuary that represents your milestones. We work directly with generational artisans, sourcing natural, biodegradable materials to bring timeless, warm elements into your daily life.
+        </p>
+      </div>
+      <div>
+        <img src="https://images.unsplash.com/photo-1616486038856-74749f7004d7?q=80&w=800&auto=format" alt="Artisan Crafting" style="width: 100%; border-radius: 28px; box-shadow: var(--shadow-hover); max-height: 380px; object-fit: cover;">
+      </div>
+    </div>
+    
+    <!-- Core Pillars -->
+    <h3 style="text-align: center; font-size: 1.8rem; font-family: 'Playfair Display', serif; margin-top: 4rem; margin-bottom: 2rem;">Our Core Pillars</h3>
+    <div class="about-features-panel">
+      <div class="about-feature-card">
+        <i class="fas fa-hand-holding-heart"></i>
+        <h4>100% Handcrafted</h4>
+        <p>Preserving regional Indian craftsmanship with ethical wage practices.</p>
+      </div>
+      <div class="about-feature-card">
+        <i class="fas fa-seedling"></i>
+        <h4>Eco-Conscious</h4>
+        <p>Using natural materials like jute, organic cotton, wood, and organic clay.</p>
+      </div>
+      <div class="about-feature-card">
+        <i class="fas fa-gem"></i>
+        <h4>Premium Finish</h4>
+        <p>Carefully hand-checked quality ensures high durability and stunning aesthetics.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

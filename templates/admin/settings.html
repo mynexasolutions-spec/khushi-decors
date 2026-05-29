@@ -1,0 +1,209 @@
+{% extends "admin/base.html" %}
+{% block title %}Settings – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+  <div>
+    <h1 style="font-size:1.75rem; font-weight:700; color:var(--admin-text);">Store Settings</h1>
+    <p style="color:var(--admin-text-muted); font-size:0.875rem; margin-top:0.25rem;">Configure payment methods and store options</p>
+  </div>
+</div>
+
+<form method="POST" action="{{ url_for('admin_settings') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+  <!-- Payment Methods -->
+  <div class="admin-card" style="margin-bottom:1.5rem;">
+    <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--admin-border);">
+      <h2 style="font-size:1rem; font-weight:700; color:var(--admin-text);">Payment Methods</h2>
+      <p style="font-size:0.82rem; color:var(--admin-text-muted); margin-top:0.2rem;">Enable or disable payment options shown at checkout</p>
+    </div>
+    <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1.5rem;">
+
+      <!-- COD Toggle -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem; background:var(--admin-bg); border-radius:0.75rem; border:1px solid var(--admin-border);">
+        <div>
+          <div style="font-weight:600; font-size:0.95rem; color:var(--admin-text);">Cash on Delivery (COD)</div>
+          <div style="font-size:0.82rem; color:var(--admin-text-muted); margin-top:0.25rem;">Allow customers to pay when order is delivered</div>
+        </div>
+        <label style="position:relative; display:inline-block; width:48px; height:26px; flex-shrink:0; cursor:pointer;">
+          <input type="checkbox" name="cod_enabled" id="cod_enabled"
+                 {% if settings.cod_enabled == 'true' %}checked{% endif %}
+                 style="opacity:0; width:0; height:0; position:absolute;" />
+          <span style="position:absolute; inset:0; background:var(--admin-border); border-radius:999px; transition:0.3s;" id="codSlider"></span>
+          <span id="codThumb" style="position:absolute; width:20px; height:20px; background:white; border-radius:50%; top:3px; left:3px; transition:0.3s; pointer-events:none;"></span>
+        </label>
+      </div>
+
+      <!-- Online Payment (Razorpay) Toggle -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem; background:var(--admin-bg); border-radius:0.75rem; border:1px solid var(--admin-border);">
+        <div>
+          <div style="font-weight:600; font-size:0.95rem; color:var(--admin-text);">Online Payment (UPI / Bank)</div>
+          <div style="font-size:0.82rem; color:var(--admin-text-muted); margin-top:0.25rem;">Allow customers to pay online via Razorpay (UPI, Cards, NetBanking). Razorpay API keys must be configured below.</div>
+        </div>
+        <label style="position:relative; display:inline-block; width:48px; height:26px; flex-shrink:0; cursor:pointer;">
+          <input type="checkbox" name="online_payment_enabled" id="online_payment_enabled"
+                 {% if settings.online_payment_enabled == 'true' %}checked{% endif %}
+                 style="opacity:0; width:0; height:0; position:absolute;" />
+          <span style="position:absolute; inset:0; background:var(--admin-border); border-radius:999px; transition:0.3s;" id="onlineSliderBg"></span>
+          <span id="onlineThumb" style="position:absolute; width:20px; height:20px; background:white; border-radius:50%; top:3px; left:3px; transition:0.3s; pointer-events:none;"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shipping Settings -->
+  <div class="admin-card" style="margin-bottom:1.5rem;">
+    <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--admin-border);">
+      <h2 style="font-size:1rem; font-weight:700; color:var(--admin-text);">Shipping</h2>
+      <p style="font-size:0.82rem; color:var(--admin-text-muted); margin-top:0.2rem;">Configure shipping charges shown at checkout</p>
+    </div>
+    <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1.5rem;">
+
+      <!-- FREE ON ALL ORDERS toggle -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem; background:var(--admin-bg); border-radius:0.75rem; border:2px solid {% if settings.free_shipping_all == 'true' %}#22c55e{% else %}var(--admin-border){% endif %};" id="freeAllRow">
+        <div>
+          <div style="font-weight:700; font-size:0.95rem; color:var(--admin-text);">
+            Free Shipping on <span style="color:#22c55e;">All Orders</span>
+          </div>
+          <div style="font-size:0.82rem; color:var(--admin-text-muted); margin-top:0.25rem;">Every customer gets free shipping regardless of cart value. Overrides all other shipping settings.</div>
+        </div>
+        <label style="position:relative; display:inline-block; width:48px; height:26px; flex-shrink:0; cursor:pointer;">
+          <input type="checkbox" name="free_shipping_all" id="free_shipping_all"
+                 {% if settings.free_shipping_all == 'true' %}checked{% endif %}
+                 style="opacity:0; width:0; height:0; position:absolute;" />
+          <span style="position:absolute; inset:0; background:var(--admin-border); border-radius:999px; transition:0.3s;" id="freeAllSlider"></span>
+          <span id="freeAllThumb" style="position:absolute; width:20px; height:20px; background:white; border-radius:50%; top:3px; left:3px; transition:0.3s; pointer-events:none;"></span>
+        </label>
+      </div>
+
+      <!-- Conditional block: fee + threshold (grayed out when free-all is on) -->
+      <div id="shippingCondBlock" style="display:flex; flex-direction:column; gap:1.5rem; transition:opacity 0.2s; {% if settings.free_shipping_all == 'true' %}opacity:0.4; pointer-events:none;{% endif %}">
+
+        <!-- Shipping fee -->
+        <div style="max-width:400px;">
+          <label class="admin-label" for="shipping_fee">Shipping Fee (₹)</label>
+          <input type="number" id="shipping_fee" name="shipping_fee"
+                 value="{{ settings.shipping_fee or '99' }}"
+                 min="0" step="1" placeholder="99"
+                 class="admin-input" style="box-sizing:border-box;" />
+          <p style="font-size:0.78rem; color:var(--admin-text-muted); margin-top:0.4rem;">Amount charged when the order does not qualify for free shipping.</p>
+        </div>
+
+        <!-- Free Shipping above threshold toggle -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem; background:var(--admin-bg); border-radius:0.75rem; border:1px solid var(--admin-border);">
+          <div>
+            <div style="font-weight:600; font-size:0.95rem; color:var(--admin-text);">Free Shipping Above a Minimum Order Value</div>
+            <div style="font-size:0.82rem; color:var(--admin-text-muted); margin-top:0.25rem;">Waive the shipping fee when cart total reaches the threshold set below</div>
+          </div>
+          <label style="position:relative; display:inline-block; width:48px; height:26px; flex-shrink:0; cursor:pointer;">
+            <input type="checkbox" name="free_shipping_enabled" id="free_shipping_enabled"
+                   {% if settings.free_shipping_enabled != 'false' %}checked{% endif %}
+                   style="opacity:0; width:0; height:0; position:absolute;" />
+            <span style="position:absolute; inset:0; background:var(--admin-border); border-radius:999px; transition:0.3s;" id="freeShipSlider"></span>
+            <span id="freeShipThumb" style="position:absolute; width:20px; height:20px; background:white; border-radius:50%; top:3px; left:3px; transition:0.3s; pointer-events:none;"></span>
+          </label>
+        </div>
+
+        <!-- Threshold input (grayed when threshold-toggle is off) -->
+        <div id="thresholdBlock" style="max-width:400px; transition:opacity 0.2s; {% if settings.free_shipping_enabled == 'false' %}opacity:0.4; pointer-events:none;{% endif %}">
+          <label class="admin-label" for="free_shipping_threshold">Free Shipping Threshold (₹)</label>
+          <input type="number" id="free_shipping_threshold" name="free_shipping_threshold"
+                 value="{{ settings.free_shipping_threshold or '999' }}"
+                 min="0" step="1" placeholder="999"
+                 class="admin-input" style="box-sizing:border-box;" />
+          <p style="font-size:0.78rem; color:var(--admin-text-muted); margin-top:0.4rem;">Orders at or above this amount qualify for free shipping.</p>
+        </div>
+
+      </div><!-- /shippingCondBlock -->
+
+    </div>
+  </div>
+
+  <!-- Razorpay Settings -->
+  <div class="admin-card" style="margin-bottom:1.5rem;">
+    <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--admin-border);">
+      <h2 style="font-size:1rem; font-weight:700; color:var(--admin-text);">Razorpay Integration</h2>
+      <p style="font-size:0.82rem; color:var(--admin-text-muted); margin-top:0.2rem;">API keys for processing online payments. Payments are auto-captured on success.</p>
+    </div>
+    <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
+      <div class="admin-grid-2" style="gap:1rem; max-width:800px;">
+        <div>
+          <label style="display:block; font-size:0.82rem; font-weight:600; color:var(--admin-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;" for="razorpay_key_id">Razorpay Key ID</label>
+          <input type="text" id="razorpay_key_id" name="razorpay_key_id" value="{{ settings.razorpay_key_id or '' }}"
+                 placeholder="rzp_live_..."
+                 style="width:100%; padding:0.75rem 1rem; border:1px solid var(--admin-border); border-radius:0.5rem; background:var(--admin-bg); color:var(--admin-text); font-size:0.9rem; outline:none; font-family:monospace; box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="display:block; font-size:0.82rem; font-weight:600; color:var(--admin-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;" for="razorpay_key_secret">Razorpay Key Secret</label>
+          <input type="password" id="razorpay_key_secret" name="razorpay_key_secret" value="{{ settings.razorpay_key_secret or '' }}"
+                 placeholder="••••••••••••••••"
+                 autocomplete="new-password"
+                 style="width:100%; padding:0.75rem 1rem; border:1px solid var(--admin-border); border-radius:0.5rem; background:var(--admin-bg); color:var(--admin-text); font-size:0.9rem; outline:none; box-sizing:border-box;" />
+        </div>
+      </div>
+      <p style="font-size:0.8rem; color:var(--admin-text-muted);">Key ID and Secret can be found in your <strong>Razorpay Dashboard → Settings → API Keys</strong>. Use live keys for production and test keys for testing.</p>
+    </div>
+  </div>
+
+  <!-- Save Button -->
+  <div style="display:flex; justify-content:flex-end;">
+    <button type="submit" class="admin-btn admin-btn-primary" style="padding:0.875rem 2.5rem; font-size:1rem; font-weight:700;">
+      Save Settings
+    </button>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function initToggle(checkboxId, sliderId, thumbId) {
+    const cb = document.getElementById(checkboxId);
+    const slider = document.getElementById(sliderId);
+    const thumb = document.getElementById(thumbId);
+    if (!cb || !slider || !thumb) return;
+
+    function update() {
+      if (cb.checked) {
+        slider.style.background = 'var(--admin-primary)';
+        thumb.style.left = '25px';
+      } else {
+        slider.style.background = 'var(--admin-border)';
+        thumb.style.left = '3px';
+      }
+    }
+    update();
+    cb.addEventListener('change', update);
+  }
+
+  initToggle('cod_enabled', 'codSlider', 'codThumb');
+  initToggle('online_payment_enabled', 'onlineSliderBg', 'onlineThumb');
+  initToggle('free_shipping_enabled', 'freeShipSlider', 'freeShipThumb');
+  initToggle('free_shipping_all', 'freeAllSlider', 'freeAllThumb');
+
+  // Gray out the conditional block when "free on all" is enabled
+  const freeAllCb    = document.getElementById('free_shipping_all');
+  const condBlock    = document.getElementById('shippingCondBlock');
+  const freeAllRow   = document.getElementById('freeAllRow');
+  const freeShipCb   = document.getElementById('free_shipping_enabled');
+  const threshBlock  = document.getElementById('thresholdBlock');
+
+  function applyFreeAll() {
+    const on = freeAllCb.checked;
+    condBlock.style.opacity        = on ? '0.4' : '1';
+    condBlock.style.pointerEvents  = on ? 'none' : '';
+    freeAllRow.style.borderColor   = on ? '#22c55e' : 'var(--admin-border)';
+  }
+
+  function applyThreshToggle() {
+    const on = freeShipCb.checked;
+    threshBlock.style.opacity       = on ? '1' : '0.4';
+    threshBlock.style.pointerEvents = on ? '' : 'none';
+  }
+
+  freeAllCb.addEventListener('change', applyFreeAll);
+  freeShipCb.addEventListener('change', applyThreshToggle);
+  applyFreeAll();
+  applyThreshToggle();
+</script>
+{% endblock %}

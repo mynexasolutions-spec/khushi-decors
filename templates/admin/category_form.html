@@ -1,0 +1,73 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit Category' if category else 'New Category' }} – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+  <div style="display:flex; align-items:center; gap:0.5rem; color:var(--admin-text-muted); font-size:0.875rem; margin-bottom:1rem;">
+    <a href="{{ url_for('admin_categories') }}" style="color:var(--admin-primary);">Categories</a>
+    <span>/</span>
+    <span>{{ 'Edit' if category else 'New' }}</span>
+  </div>
+  <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin:0;">{{ 'Edit Category' if category else 'Create New Category' }}</h1>
+</div>
+
+<form method="post" action="{% if category %}{{ url_for('admin_category_edit', cat_id=category.id) }}{% else %}{{ url_for('admin_category_new') }}{% endif %}" class="admin-card" style="padding:2.5rem; max-width:700px;" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:1.5rem;">
+    <div>
+      <label class="admin-label">Category Name *</label>
+      <input type="text" name="name" value="{{ category.name if category else '' }}" required class="admin-input" style="background:#fff;" />
+    </div>
+    <div>
+      <label class="admin-label">Slug (Optional)</label>
+      <input type="text" name="slug" value="{{ category.slug if category else '' }}" placeholder="auto-generated-if-empty" class="admin-input" style="background:#fff;" />
+    </div>
+  </div>
+
+  <div style="margin-bottom:1.5rem;">
+    <label class="admin-label">Parent Category</label>
+    <select name="parent_id" class="admin-input" style="background:#fff;">
+      <option value="">— None (Top Level) —</option>
+      {% for cat in categories %}
+        {% if not category or cat.id != category.id %}
+        <option value="{{ cat.id }}" {% if category and category.parent_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+  </div>
+
+  <div style="margin-bottom:1.5rem;">
+    <label class="admin-label">Description</label>
+    <textarea name="description" class="admin-input" rows="3" style="background:#fff;">{{ category.description if category else '' }}</textarea>
+  </div>
+
+  <div style="margin-bottom:2rem;">
+    <label class="admin-label">Category Image</label>
+    <div style="display:flex; gap:1.5rem; align-items:start; background:#f9fafb; padding:1.25rem; border-radius:0.75rem; border:1px solid var(--admin-border);">
+        {% if category and category.image_url %}
+        <div style="width:100px; height:100px; border-radius:8px; overflow:hidden; border:1px solid var(--admin-border); background:white;">
+            <img src="{{ resolve_image(category.image_url) }}" style="width:100%; height:100%; object-fit:cover;" />
+        </div>
+        {% endif %}
+        <div style="flex:1;">
+            <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--admin-text-muted); text-transform:uppercase; margin-bottom:0.5rem;">Upload Image</label>
+            <input type="file" name="image_file" class="admin-input" accept="image/*" style="padding:0.5rem; background:white;" />
+            <input type="hidden" name="image_url" value="{{ category.image_url if category else '' }}" />
+        </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:2rem;">
+    <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer;">
+      <input type="checkbox" name="is_featured" {% if category and category.is_featured %}checked{% endif %} style="width:18px; height:18px; accent-color:var(--admin-primary);" />
+      <span style="font-weight:600; font-size:0.9rem;">Show on Homepage (Featured)</span>
+    </label>
+  </div>
+
+  <div style="display:flex; gap:1rem; padding-top:1.5rem; border-top:1px solid var(--admin-border);">
+    <button type="submit" class="admin-btn btn-primary" style="padding:0.75rem 2rem; font-weight:700;">Save Category</button>
+    <a href="{{ url_for('admin_categories') }}" class="admin-btn btn-outline" style="padding:0.75rem 2rem;">Cancel</a>
+  </div>
+</form>
+{% endblock %}

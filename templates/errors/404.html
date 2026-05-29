@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — Khushi Decors</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #c5a880; /* Elegant bronze/gold */
+      --primary-dark: #b3946a;
+      --bg-gradient: linear-gradient(135deg, #fbfaf8 0%, #f3ede2 100%);
+      --text-main: #2b2927;
+      --text-muted: #736d67;
+      --border: #e8e2d7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      color: var(--text-main);
+      text-align: center;
+    }
+
+    .error-container {
+      max-width: 480px;
+      padding: 3rem 2rem;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .error-code {
+      font-family: 'Outfit', sans-serif;
+      font-size: 7.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 1rem;
+      letter-spacing: -0.05em;
+    }
+
+    .error-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .error-desc {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    .btn-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2.25rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--primary);
+      border: none;
+      border-radius: 0.875rem;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(197, 168, 128, 0.25);
+      transition: all 0.3s;
+    }
+
+    .btn-home:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 6px 16px rgba(197, 168, 128, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-home:active {
+      transform: translateY(1px);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="error-container">
+  <div class="error-code">404</div>
+  <h1 class="error-title">Page Not Found</h1>
+  <p class="error-desc">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+  <a href="/admin" class="btn-home">
+    <i class="fa-solid fa-house"></i>
+    <span>Back to Dashboard</span>
+  </a>
+</div>
+
+</body>
+</html>

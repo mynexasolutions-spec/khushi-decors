@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>{% block title %}Khushi Decors | Premium Home Decor & Interior Styling{% endblock %}</title>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  <!-- Google Fonts: Plus Jakarta Sans + Playfair Display -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Global base styles -->
+  <link rel="stylesheet" href="/static/css/base.css">
+  
+  <!-- Page-specific styles placeholder -->
+  {% block styles %}{% endblock %}
+</head>
+<body>
+  <!-- Global Sidebar Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Mobile Sidebar Menu -->
+  <div class="sidebar" id="sidebar">
+    <i class="fas fa-times close-btn" id="closeSidebar"></i>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/shop">Shop All</a>
+      <a href="/shop?category=wallDecor">Wall Art</a>
+      <a href="/shop?category=artificialPlants">Artificial Plants</a>
+      <a href="/shop?category=lamps">Designer Lamps</a>
+      <a href="/shop?category=vases">Vases & Vessels</a>
+      <a href="/shop?category=clocks">Statement Clocks</a>
+      <a href="/about">About Us</a>
+      <a href="/contact">Contact Us</a>
+      <a href="/account">My Account</a>
+    </nav>
+  </div>
+
+  <!-- Main Header Layout -->
+  <header class="main-header">
+    <div class="menu-icon" id="menuToggle"><i class="fas fa-bars"></i></div>
+    <a class="logo" href="/">
+      <span class="logo-symbol">Khushi</span>
+      <span class="logo-accent">Decors</span>
+    </a>
+    <nav class="desktop-nav">
+      <a class="desktop-nav-link" href="/">Home</a>
+      <a class="desktop-nav-link" href="/shop">Shop</a>
+      <a class="desktop-nav-link" href="/about">About</a>
+      <a class="desktop-nav-link" href="/contact">Contact</a>
+    </nav>
+    <div class="header-right-side">
+      <!-- Header Search Input with options -->
+      <div class="search-container">
+        <div class="search-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <div class="search-dropdown">
+            <input type="text" id="searchInput" placeholder="Search categories..." readonly>
+            <div class="search-options" id="searchOptions">
+              <div class="search-option" data-page="allProducts"><i class="fas fa-th-large"></i> All Products</div>
+              <div class="search-option" data-page="wallDecor"><i class="fas fa-image"></i> Wall Art</div>
+              <div class="search-option" data-page="artificialPlants"><i class="fas fa-seedling"></i> Artificial Plants</div>
+              <div class="search-option" data-page="lamps"><i class="fas fa-lightbulb"></i> Designer Lamps</div>
+              <div class="search-option" data-page="vases"><i class="fas fa-flask"></i> Vases & Vessels</div>
+              <div class="search-option" data-page="clocks"><i class="fas fa-clock"></i> Statement Clocks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- User profile & shopping bag controls -->
+      <div class="header-actions">
+        <a href="/account" title="Account"><i class="fas fa-user-circle" id="loginIcon"></i></a>
+        <div class="cart-icon" id="cartIcon" onclick="window.location.href='/cart'" style="cursor: pointer;">
+          <i class="fas fa-bag-shopping"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Content Block -->
+  {% block content %}{% endblock %}
+
+  <!-- Main Footer Layout -->
+  <footer>
+    <div class="footer-container">
+      <!-- Column 1: Brand Details -->
+      <div class="footer-column" style="flex-grow: 1.5;">
+        <div class="footer-logo">
+          <span class="logo-symbol">Khushi</span>
+          <span class="logo-accent">Decors</span>
+        </div>
+        <p class="footer-tagline" style="line-height:1.6; margin-bottom:1.2rem; color:#b0aba0;">
+          Sustainable luxury and handcrafted Indian interiors, ethically sourced from master generational artisans to elevate modern spaces.
+        </p>
+        <p style="font-size:0.8rem; color:#8a857a; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-clock" style="color:var(--primary)"></i> Mon - Sat: 10:00 AM - 7:00 PM IST
+        </p>
+        <div class="footer-social" style="margin-top: 0.5rem;">
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+        </div>
+      </div>
+
+      <!-- Column 2: Explore Collections -->
+      <div class="footer-column">
+        <h4>Collections</h4>
+        <ul>
+          <li><a href="/shop"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Shop All Items</a></li>
+          <li><a href="/shop?category=wallDecor"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Fine Wall Art</a></li>
+          <li><a href="/shop?category=artificialPlants"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Lush Faux Plants</a></li>
+          <li><a href="/shop?category=lamps"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Ambient Lamps</a></li>
+          <li><a href="/shop?category=vases"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Vases & Vessels</a></li>
+          <li><a href="/shop?category=clocks"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Designer Clocks</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 3: Exclusive Services -->
+      <div class="footer-column">
+        <h4>Design Services</h4>
+        <ul>
+          <li><a href="/"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Free Consultations</a></li>
+          <li><a href="/"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Style Planner</a></li>
+          <li><a href="/contact"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Custom Sizing Requests</a></li>
+          <li><a href="/about"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Artisan Story & Pillars</a></li>
+          <li><a href="/contact"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Corporate Gifting</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 4: Customer Support -->
+      <div class="footer-column">
+        <h4>Customer Care</h4>
+        <ul>
+          <li><a href="/contact"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Track Your Order</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Shipping & COD Policies</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Easy 7-Day Returns</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Help FAQs</a></li>
+          <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem; margin-right:6px; opacity:0.5;"></i> Terms & Privacy</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 5: Connect Concierge -->
+      <div class="footer-column" style="flex-grow: 1.2;">
+        <h4>Connect</h4>
+        <ul class="contact-info" style="margin-bottom: 1.2rem;">
+          <li><i class="fas fa-envelope"></i> hello@khushidecors.com</li>
+          <li><i class="fas fa-phone-alt"></i> +91 98765 43210</li>
+          <li><i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp Support</li>
+        </ul>
+        <div class="newsletter">
+          <p style="margin-bottom: 0.6rem; font-size: 0.82rem;">Sign up for design updates & offers</p>
+          <div class="newsletter-input">
+            <input type="email" placeholder="Your email address" id="newsletterEmail">
+            <button id="newsletterBtn"><i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom" style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.5rem;">
+      <div class="payment-icons" style="font-size: 1.5rem;">
+        <i class="fab fa-cc-visa" title="Visa"></i>
+        <i class="fab fa-cc-mastercard" title="Mastercard"></i>
+        <i class="fab fa-cc-amex" title="American Express"></i>
+        <i class="fab fa-cc-paypal" title="PayPal"></i>
+        <i class="fab fa-cc-apple-pay" title="Apple Pay"></i>
+      </div>
+      <p style="color:#6c757d; font-size:0.75rem;">© 2026 Khushi Decors — Timeless design for modern luxury. Handcrafted with heart in India.</p>
+    </div>
+  </footer>
+
+  <!-- Checkout Success Modal -->
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-icon"><i class="fas fa-check-circle"></i></div>
+      <h3>Order Placed Successfully!</h3>
+      <p>Thank you for shopping with Khushi Decors. Your order will be delivered soon.</p>
+      <button class="modal-close-btn" id="closeModalBtn">Continue Shopping</button>
+    </div>
+  </div>
+
+  <!-- Shared main layout javascript -->
+  <script src="/static/js/main.js"></script>
+  
+  <!-- Page-specific scripts placeholder -->
+  {% block scripts %}{% endblock %}
+</body>
+</html>

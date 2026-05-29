@@ -1,0 +1,121 @@
+{% extends "admin/base.html" %}
+{% block title %}Import Products – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+  <div style="display:flex; align-items:center; gap:0.5rem; color:var(--admin-text-muted); font-size:0.875rem; margin-bottom:1rem;">
+    <a href="{{ url_for('admin_products') }}" style="color:var(--admin-primary);">Products</a>
+    <span>/</span>
+    <span>Bulk Import</span>
+  </div>
+  <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main);">Bulk Import Products</h1>
+  <p style="color:var(--admin-text-muted); font-size:0.875rem;">Upload a WooCommerce-format CSV to bulk-import products to your store.</p>
+</div>
+
+<div class="admin-grid-dash">
+  
+  <div>
+    <form method="post" enctype="multipart/form-data" class="admin-card" style="padding:2.5rem; text-align:center;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      
+      <div id="dropZone" style="border:2px dashed var(--admin-border); border-radius:1rem; padding:4rem 2rem; transition:all 0.3s ease; margin-bottom:1.5rem; background:#f8fafc;">
+        <div style="font-size:3.5rem; margin-bottom:1.5rem; filter:grayscale(1) opacity(0.3);">📥</div>
+        <h3 style="font-size:1.1rem; font-weight:700; color:var(--admin-text-main); margin-bottom:0.5rem;">Upload File</h3>
+        <p style="color:var(--admin-text-muted); font-size:0.875rem; margin-bottom:2rem;">Drag and drop your spreadsheet here or click to browse.</p>
+        
+        <label class="admin-btn btn-primary" style="padding:0.75rem 2rem; cursor:pointer;">
+          Choose CSV File
+          <input type="file" name="csv_file" accept=".csv" id="csvFile" style="display:none;" onchange="showFileName(this)" />
+        </label>
+        
+        <div id="fileName" style="margin-top:1.5rem; font-weight:600; color:var(--admin-primary); font-size:0.9rem;"></div>
+      </div>
+
+      <button type="submit" class="admin-btn btn-primary" style="width:100%; justify-content:center; padding:1rem; font-size:1rem;">Start Import Process</button>
+    </form>
+
+    {% if results %}
+    <div class="admin-card" style="margin-top:1.5rem; padding:2rem;">
+      <h3 style="font-size:1rem; font-weight:700; margin-bottom:1.5rem;">Import Results Summary</h3>
+      <div class="admin-grid-3" style="gap:1rem;">
+        <div style="padding:1.5rem; background:#f0fdf4; border-radius:0.75rem; border:1px solid #bbf7d0; text-align:center;">
+          <div style="font-size:1.75rem; font-weight:800; color:#166534;">{{ results.imported }}</div>
+          <div style="font-size:0.75rem; color:#166534; font-weight:600; text-transform:uppercase;">Success</div>
+        </div>
+        <div style="padding:1.5rem; background:#fffbeb; border-radius:0.75rem; border:1px solid #fef3c7; text-align:center;">
+          <div style="font-size:1.75rem; font-weight:800; color:#92400e;">{{ results.skipped }}</div>
+          <div style="font-size:0.75rem; color:#92400e; font-weight:600; text-transform:uppercase;">Skipped</div>
+        </div>
+        <div style="padding:1.5rem; background:#fef2f2; border-radius:0.75rem; border:1px solid #fecaca; text-align:center;">
+          <div style="font-size:1.75rem; font-weight:800; color:#991b1b;">{{ results.errors|length }}</div>
+          <div style="font-size:0.75rem; color:#991b1b; font-weight:600; text-transform:uppercase;">Errors</div>
+        </div>
+      </div>
+      
+      {% if results.errors %}
+      <div style="margin-top:1.5rem;">
+        <h4 style="font-size:0.875rem; font-weight:700; margin-bottom:0.75rem;">Error Log:</h4>
+        <div style="background:#111827; color:#f8fafc; border-radius:0.5rem; padding:1.25rem; max-height:200px; overflow-y:auto; font-family:monospace; font-size:0.75rem;">
+          {% for e in results.errors %}
+          <div style="margin-bottom:0.25rem;">[Row error] {{ e }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="admin-card">
+      <h3 style="font-size:1rem; font-weight:700; margin-bottom:1rem;">CSV Format Requirements</h3>
+      <p style="font-size:0.875rem; color:var(--admin-text-muted); margin-bottom:1.5rem;">Ensure your spreadsheet contains these exact column names for correct mapping:</p>
+      
+      <div style="display:flex; flex-direction:column; gap:0.5rem;">
+        {% for col in ['post_title', 'sku', 'regular_price', 'sale_price', 'stock', 'images', 'post_name'] %}
+        <div style="display:flex; align-items:center; gap:0.75rem; padding:0.625rem; background:#f1f5f9; border-radius:0.5rem; border:1px solid var(--admin-border);">
+          <span style="width:8px; height:8px; background:var(--admin-primary); border-radius:99px;"></span>
+          <span style="font-family:monospace; font-size:0.8125rem; font-weight:600;">{{ col }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function showFileName(input) {
+    if (input.files[0]) {
+      document.getElementById('fileName').innerHTML = '<span style="color:#000;">Ready to upload:</span> ' + input.files[0].name;
+    }
+  }
+  const dropZone = document.getElementById('dropZone');
+  dropZone.addEventListener('dragover', e => { 
+    e.preventDefault(); 
+    dropZone.style.borderColor = 'var(--admin-primary)';
+    dropZone.style.background = '#eef2ff';
+  });
+  dropZone.addEventListener('dragleave', () => { 
+    dropZone.style.borderColor = 'var(--admin-border)';
+    dropZone.style.background = '#f8fafc';
+  });
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--admin-border)';
+    dropZone.style.background = '#f8fafc';
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.csv')) {
+      const input = document.getElementById('csvFile');
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      input.files = dataTransfer.files;
+      showFileName(input);
+    } else {
+      alert("Please upload a valid CSV file.");
+    }
+  });
+</script>
+{% endblock %}

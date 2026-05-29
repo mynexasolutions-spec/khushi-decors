@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% block title %}Subscribers – StoreAdmin{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+  <div>
+    <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin-bottom:0.25rem;">Newsletter Subscribers</h1>
+    <p style="color:var(--admin-text-muted); font-size:0.875rem;">Manage your newsletter subscribers.</p>
+  </div>
+</div>
+
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Subscribed At</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in subscribers %}
+      <tr>
+        <td style="font-weight:600;">{{ s.email }}</td>
+        <td>{{ s.subscribed_at.strftime('%Y-%m-%d %H:%M') if s.subscribed_at else 'N/A' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="2" style="text-align:center; padding:3rem; color:var(--admin-text-muted);">No subscribers found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

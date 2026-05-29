@@ -1,0 +1,66 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit Attribute' if attribute else 'New Attribute' }} – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+  <div style="display:flex; align-items:center; gap:0.5rem; color:var(--admin-text-muted); font-size:0.875rem; margin-bottom:1rem;">
+    <a href="{{ url_for('admin_attributes') }}" style="color:var(--admin-primary);">Attributes</a>
+    <span>/</span>
+    <span>{{ 'Edit' if attribute else 'New' }}</span>
+  </div>
+  <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin:0;">{{ 'Edit Attribute' if attribute else 'Create New Attribute' }}</h1>
+</div>
+
+<form method="post" action="{% if attribute %}{{ url_for('admin_attribute_edit', attr_id=attribute.id) }}{% else %}{{ url_for('admin_attribute_new') }}{% endif %}" class="admin-card" style="padding:2.5rem; max-width:600px;" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+  <div style="margin-bottom:1.5rem;">
+    <label class="admin-label">Attribute Name *</label>
+    <input type="text" name="name" value="{{ attribute.name if attribute else '' }}" required class="admin-input" style="background:#fff;" />
+  </div>
+
+  <div style="margin-bottom:1.5rem;">
+    <label class="admin-label">Slug (Optional)</label>
+    <input type="text" name="slug" value="{{ attribute.slug if attribute else '' }}" placeholder="auto-generated-if-empty" class="admin-input" style="background:#fff;" />
+  </div>
+
+  <div style="margin-bottom:1.5rem;">
+    <label class="admin-label">Variation Type *</label>
+    <select name="variation_type" required class="admin-input" style="background:#fff;">
+      <option value="secondary" {% if attribute and attribute.variation_type == 'secondary' %}selected{% endif %}>Secondary – changes price/stock/SKU (e.g. Weight, Size)</option>
+      <option value="primary" {% if attribute and attribute.variation_type == 'primary' %}selected{% endif %}>Primary – appears as separate listing (e.g. Flavor)</option>
+      <option value="optional" {% if attribute and attribute.variation_type == 'optional' %}selected{% endif %}>Optional – selection only, no data change (e.g. Gift wrap)</option>
+    </select>
+    <p style="font-size:0.75rem; color:var(--admin-text-muted); margin-top:0.35rem;">
+      <strong>Primary:</strong> Each value shows as a separate product card on shop. <strong>Secondary:</strong> Switches price/stock on product page. <strong>Optional:</strong> Checkbox-style add-on.
+    </p>
+  </div>
+
+  <div style="margin-bottom:2rem;">
+    <label class="admin-label">Attribute Image (Optional)</label>
+    <div style="display:flex; gap:1.5rem; align-items:start; background:#f9fafb; padding:1.25rem; border-radius:0.75rem; border:1px solid var(--admin-border);">
+        {% if attribute and attribute.image_url %}
+        <div style="width:100px; height:100px; border-radius:8px; overflow:hidden; border:1px solid var(--admin-border); background:white;">
+            <img src="{{ resolve_image(attribute.image_url) }}" style="width:100%; height:100%; object-fit:cover;" />
+        </div>
+        {% endif %}
+        <div style="flex:1;">
+            <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--admin-text-muted); text-transform:uppercase; margin-bottom:0.5rem;">Upload Image</label>
+            <input type="file" name="image_file" class="admin-input" accept="image/*" style="padding:0.5rem; background:white;" />
+        </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:2rem;">
+    <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer;">
+      <input type="checkbox" name="is_featured" {% if attribute and attribute.is_featured %}checked{% endif %} style="width:18px; height:18px; accent-color:var(--admin-primary);" />
+      <span style="font-weight:600; font-size:0.9rem;">Show on Shop (Featured)</span>
+    </label>
+  </div>
+
+  <div style="display:flex; gap:1rem; padding-top:1.5rem; border-top:1px solid var(--admin-border);">
+    <button type="submit" class="admin-btn btn-primary" style="padding:0.75rem 2rem; font-weight:700;">Save Attribute</button>
+    <a href="{{ url_for('admin_attributes') }}" class="admin-btn btn-outline" style="padding:0.75rem 2rem;">Cancel</a>
+  </div>
+</form>
+{% endblock %}

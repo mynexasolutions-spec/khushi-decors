@@ -1,0 +1,99 @@
+{% extends "admin/base.html" %}
+{% block title %}{% if post %}Edit{% else %}New{% endif %} Blog Post – StoreAdmin{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+<style>
+  #editor { height: 400px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+  <div style="display:flex; align-items:center; gap:0.5rem; color:var(--admin-text-muted); font-size:0.875rem; margin-bottom:1rem;">
+    <a href="{{ url_for('admin_blog') }}" style="color:var(--admin-primary);">Blog</a>
+    <span>/</span>
+    <span>{% if post %}Edit{% else %}New{% endif %} Post</span>
+  </div>
+  <h1 style="font-size:1.5rem; font-weight:700; color:var(--admin-text-main); margin:0;">{% if post %}Edit{% else %}New{% endif %} Blog Post</h1>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="admin-card" style="max-width:900px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+  <div style="display:grid; gap:1.25rem;">
+    <div>
+      <label class="admin-label">Title *</label>
+      <input type="text" name="title" value="{{ post.title if post else '' }}" required class="admin-input" style="font-size:1.1rem; padding:0.75rem 1rem;" />
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div>
+        <label class="admin-label">Slug</label>
+        <input type="text" name="slug" value="{{ post.slug if post else '' }}" placeholder="Auto-generated from title" class="admin-input" />
+      </div>
+      <div>
+        <label class="admin-label">Author</label>
+        <input type="text" name="author" value="{{ post.author if post else 'Admin' }}" class="admin-input" />
+      </div>
+    </div>
+
+    <div>
+      <label class="admin-label">Excerpt (shown in blog listing)</label>
+      <textarea name="excerpt" rows="2" class="admin-input" style="resize:vertical;">{{ post.excerpt if post else '' }}</textarea>
+    </div>
+
+    <div>
+      <label class="admin-label">Featured Image URL</label>
+      <input type="text" name="image_url" value="{{ post.image_url if post else '' }}" placeholder="https://..." class="admin-input" />
+    </div>
+    <div>
+      <label class="admin-label">Or upload image</label>
+      <input type="file" name="image_file" accept="image/*" />
+    </div>
+
+    <div>
+      <label class="admin-label">Content</label>
+      <input type="hidden" name="content" id="contentInput" value="{{ post.content if post else '' }}" />
+      <div id="editor">{{ post.content|safe if post else '' }}</div>
+    </div>
+
+    <div>
+      <label>
+        <input type="checkbox" name="published" {% if post and post.published %}checked{% endif %} />
+        <span style="font-weight:600; font-size:0.9rem;">Published</span>
+      </label>
+    </div>
+
+    <div style="display:flex; gap:1rem;">
+      <button type="submit" class="admin-btn btn-primary" style="padding:0.7rem 2rem; font-weight:700;">{% if post %}Update{% else %}Create{% endif %} Post</button>
+      <a href="{{ url_for('admin_blog') }}" class="admin-btn" style="padding:0.7rem 2rem;">Cancel</a>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script>
+  var quill = new Quill('#editor', {
+    theme: 'snow',
+    placeholder: 'Write your blog post here...',
+    modules: {
+      toolbar: [
+        [{ header: [1,2,3,false] }],
+        ['bold','italic','underline','strike'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['blockquote','code-block'],
+        [{ align: [] }],
+        ['link','image'],
+        ['clean']
+      ]
+    }
+  });
+
+  document.querySelector('form').addEventListener('submit', function() {
+    document.getElementById('contentInput').value = quill.root.innerHTML;
+  });
+</script>
+{% endblock %}

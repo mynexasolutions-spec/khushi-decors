@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — Khushi Decors Admin</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #c5a880; /* Elegant bronze/gold */
+      --primary-dark: #b3946a;
+      --bg-gradient: linear-gradient(135deg, #fbfaf8 0%, #f3ede2 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text-main: #2b2927;
+      --text-muted: #736d67;
+      --border: #e8e2d7;
+      --error-bg: #fdf2f2;
+      --error-text: #de3b3b;
+      --success-bg: #f2fdf5;
+      --success-text: #1a8754;
+      --info-bg: #f0f7ff;
+      --info-text: #0d6efd;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      color: var(--text-main);
+    }
+
+    .register-container {
+      width: 100%;
+      max-width: 520px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .brand-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .brand-logo h1 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 2.25rem;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .brand-logo h1 span {
+      color: var(--primary);
+      font-weight: 300;
+    }
+
+    .brand-logo p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 600;
+    }
+
+    .register-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 20px 40px rgba(115, 109, 103, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* Flash Alerts */
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .alert-error {
+      background-color: var(--error-bg);
+      color: var(--error-text);
+      border: 1px solid rgba(222, 59, 59, 0.15);
+    }
+
+    .alert-success {
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid rgba(26, 135, 84, 0.15);
+    }
+
+    .alert-info {
+      background-color: var(--info-bg);
+      color: var(--info-text);
+      border: 1px solid rgba(13, 110, 253, 0.15);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      transition: color 0.3s;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 1rem 1.25rem 1rem 3rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: #fff;
+      border: 1px solid var(--border);
+      border-radius: 0.875rem;
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(197, 168, 128, 0.15);
+      background-color: #fff;
+    }
+
+    .form-input:focus + .input-icon {
+      color: var(--primary);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      color: #fff;
+      background: var(--primary);
+      border: none;
+      border-radius: 0.875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(197, 168, 128, 0.25);
+      transition: all 0.3s;
+      margin-top: 1.5rem;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 6px 16px rgba(197, 168, 128, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:active {
+      transform: translateY(1px);
+    }
+
+    .card-footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .card-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .card-footer a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="register-container">
+  <div class="brand-logo">
+    <h1>Khushi<span>Decors</span></h1>
+    <p>Admin Console</p>
+  </div>
+
+  <div class="register-card">
+    <h2 class="card-title">Create Account</h2>
+    <p class="card-subtitle">Please enter your details to sign up</p>
+
+    <!-- Flashed messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'error' if category == 'error' else 'success' if category == 'success' else 'info' }}">
+            {% if category == 'error' %}
+              <i class="fa-solid fa-circle-exclamation"></i>
+            {% elif category == 'success' %}
+              <i class="fa-solid fa-circle-check"></i>
+            {% else %}
+              <i class="fa-solid fa-circle-info"></i>
+            {% endif %}
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.register') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+      <div class="form-row">
+        <div>
+          <label class="form-label" for="reg-first-name">First Name *</label>
+          <div class="input-wrapper">
+            <input type="text" id="reg-first-name" name="first_name" class="form-input" placeholder="John" required style="padding-left: 1.25rem;" />
+          </div>
+        </div>
+        <div>
+          <label class="form-label" for="reg-last-name">Last Name</label>
+          <div class="input-wrapper">
+            <input type="text" id="reg-last-name" name="last_name" class="form-input" placeholder="Doe" style="padding-left: 1.25rem;" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-email">Email Address *</label>
+        <div class="input-wrapper">
+          <input type="email" id="reg-email" name="email" class="form-input" placeholder="john.doe@example.com" required autocomplete="email" />
+          <i class="fa-solid fa-envelope input-icon"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-password">Password *</label>
+        <div class="input-wrapper">
+          <input type="password" id="reg-password" name="password" class="form-input" placeholder="••••••••" required autocomplete="new-password" />
+          <i class="fa-solid fa-lock input-icon"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-confirm-password">Confirm Password *</label>
+        <div class="input-wrapper">
+          <input type="password" id="reg-confirm-password" name="confirm_password" class="form-input" placeholder="••••••••" required autocomplete="new-password" />
+          <i class="fa-solid fa-check-double input-icon"></i>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btn-register-submit">
+        <span>Create Account</span>
+        <i class="fa-solid fa-user-plus"></i>
+      </button>
+    </form>
+
+    <div class="card-footer">
+      <span>Already have an account? </span>
+      <a href="{{ url_for('auth.login') }}">Log in here</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
