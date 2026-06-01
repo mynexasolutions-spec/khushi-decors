@@ -103,7 +103,7 @@
         {% for item in related_products %}
           <div class="shop-product-card related-product-card" data-name="{{ item.name }}" onclick="window.location.href='/product/{{ item.id }}'">
             <div class="shop-card-img-wrap" style="cursor: pointer;">
-              <img src="{{ resolve_image(item.image_url) }}" alt="{{ item.name }}" loading="lazy" onerror="this.src='/static/images/placeholder.png'">
+              <img src="{{ resolve_image(item.image_url) }}" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='/static/images/placeholder.png'">
               <span class="shop-card-cat-tag">{{ category_label }}</span>
             </div>
             <div class="shop-card-body">

@@ -63,7 +63,7 @@
       <tr>
         <td>
           <div style="width:48px; height:48px; background:white; border-radius:8px; overflow:hidden; border:1px solid var(--admin-border); display:flex; align-items:center; justify-content:center;">
-            <img src="{{ resolve_image(p.image_url) }}" alt="{{ p.name }}" style="width:100%; height:100%; object-fit:contain; padding:2px;" onerror="this.src='{{ placeholder_url }}'" />
+            <img src="{{ resolve_image(p.image_url) }}" alt="{{ p.name }}" style="width:100%; height:100%; object-fit:contain; padding:2px;" onerror="this.onerror=null; this.src='{{ placeholder_url }}'" />
           </div>
         </td>
         <td>

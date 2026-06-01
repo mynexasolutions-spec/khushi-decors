@@ -48,7 +48,7 @@
     <div class="catalog-grid">
       <div class="catalog-card" data-page="allProducts"><img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=2158&auto=format" alt="All"><div class="card-label">All Products</div></div>
       {% for cat in featured_categories %}
-      <div class="catalog-card" data-page="{{ cat.slug }}"><img src="{{ resolve_image(cat.img) }}" alt="{{ cat.label }}" onerror="this.src='/static/images/placeholder.png'"><div class="card-label">{{ cat.label }}</div></div>
+      <div class="catalog-card" data-page="{{ cat.slug }}"><img src="{{ resolve_image(cat.img) }}" alt="{{ cat.label }}" onerror="this.onerror=null; this.src='/static/images/placeholder.png'"><div class="card-label">{{ cat.label }}</div></div>
       {% endfor %}
     </div>
   </div>
@@ -67,7 +67,7 @@
         {% else %}
         <span class="card-badge new-badge">New</span>
         {% endif %}
-        <img src="{{ resolve_image(p.image_url) }}" alt="{{ p.name }}" onerror="this.src='/static/images/placeholder.png'">
+        <img src="{{ resolve_image(p.image_url) }}" alt="{{ p.name }}" onerror="this.onerror=null; this.src='/static/images/placeholder.png'">
         <div class="featured-card-content">
           <h4>{{ p.name }}</h4>
           <p class="featured-card-desc">{{ p.short_description or p.description[:90] or 'Premium handcrafted interior decor.' }}</p>
