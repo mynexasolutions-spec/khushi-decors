@@ -3,7 +3,7 @@
 {% block title %}Shop Collections | Khushi Decors{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="/static/css/shop.css">
+<link rel="stylesheet" href="/static/css/shop.css?v=2.2">
 {% endblock %}
 
 {% block content %}
@@ -43,24 +43,34 @@
         <div class="filter-group">
           <h4 class="filter-group-title">Category</h4>
           <ul class="filter-cat-list">
-            <li class="filter-cat-item active" data-cat="all">
-              <i class="fas fa-th-large"></i> All Products
+            <li class="filter-cat-item {% if not current_categories or 'all' in current_categories %}active{% endif %}" data-cat="all">
+              <i class="fas fa-th-large"></i>
+              <a href="/shop" class="cat-link" style="text-decoration: none; color: inherit; flex-grow: 1;">All Products</a>
             </li>
-            <li class="filter-cat-item" data-cat="wallDecor">
-              <i class="fas fa-image"></i> Wall Decor
-            </li>
-            <li class="filter-cat-item" data-cat="artificialPlants">
-              <i class="fas fa-seedling"></i> Artificial Plants
-            </li>
-            <li class="filter-cat-item" data-cat="lamps">
-              <i class="fas fa-lightbulb"></i> Designer Lamps
-            </li>
-            <li class="filter-cat-item" data-cat="vases">
-              <i class="fas fa-flask"></i> Vases & Vessels
-            </li>
-            <li class="filter-cat-item" data-cat="clocks">
-              <i class="fas fa-clock"></i> Statement Clocks
-            </li>
+            {% for cat in parent_cats %}
+              {% set children = children_map.get(cat.id|string) %}
+              {% set is_active = current_categories and cat.slug in current_categories %}
+              <li class="filter-cat-item {% if is_active %}active{% endif %}" data-cat="{{ cat.slug }}" style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+                <div class="cat-item-main" style="display: flex; align-items: center; gap: 0.75rem; width: 100%;">
+                  <i class="fas fa-tag"></i>
+                  <a href="/shop?category={{ cat.slug }}" class="cat-link" style="text-decoration: none; color: inherit; flex-grow: 1;">{{ cat.name }}</a>
+                  {% if children %}
+                    <i class="fas fa-chevron-down accordion-toggle" style="font-size: 0.72rem; cursor: pointer; transition: transform 0.25s ease; padding: 4px;" data-toggle="sub-{{ cat.slug }}"></i>
+                  {% endif %}
+                </div>
+                {% if children %}
+                  <ul class="filter-subcat-list" id="sub-{{ cat.slug }}" style="margin-left: 1.25rem; margin-top: 0.25rem; list-style: none; padding-left: 0; display: none; flex-direction: column; gap: 0.25rem; width: 100%;">
+                    {% for sub in children %}
+                      {% set is_sub_active = current_categories and sub.slug in current_categories %}
+                      <li class="filter-cat-item {% if is_sub_active %}active{% endif %}" data-cat="{{ sub.slug }}" style="font-size: 0.85em; opacity: 0.85; padding: 0.25rem 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-chevron-right" style="font-size: 0.6rem; opacity: 0.6;"></i>
+                        <a href="/shop?category={{ sub.slug }}" class="cat-link" style="text-decoration: none; color: inherit; flex-grow: 1;">{{ sub.name }}</a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </li>
+            {% endfor %}
           </ul>
         </div>
 
@@ -68,36 +78,28 @@
         <div class="filter-group">
           <h4 class="filter-group-title">Price Range</h4>
           <div class="price-range-display">
-            <span id="priceMinLabel">₹699</span>
-            <span id="priceMaxLabel">₹3299</span>
+            <span id="priceMinLabel">₹{{ min_price or global_min }}</span>
+            <span id="priceMaxLabel">₹{{ max_price or global_max }}</span>
           </div>
-          <div class="price-sliders">
-            <input type="range" class="price-range-input" id="priceMinSlider" min="699" max="3299" value="699" step="50">
-            <input type="range" class="price-range-input" id="priceMaxSlider" min="699" max="3299" value="3299" step="50">
+          <div class="price-sliders" style="position: relative; margin-bottom: 1.25rem; height: 6px;">
+            <input type="range" class="price-range-input" id="priceMinSlider" min="{{ global_min }}" max="{{ global_max }}" value="{{ min_price or global_min }}" step="50" style="position: absolute; width: 100%; pointer-events: none; -webkit-appearance: none; background: none; z-index: 5;">
+            <input type="range" class="price-range-input" id="priceMaxSlider" min="{{ global_min }}" max="{{ global_max }}" value="{{ max_price or global_max }}" step="50" style="position: absolute; width: 100%; pointer-events: none; -webkit-appearance: none; background: none; z-index: 6;">
+            <div class="slider-track" style="position: absolute; height: 4px; border-radius: 4px; background: #EAE6DF; left: 0; right: 0; top: 50%; transform: translateY(-50%); z-index: 1;"></div>
           </div>
           <div class="price-inputs-row">
             <div class="price-input-box">
               <label>Min</label>
-              <input type="number" id="priceMinInput" value="699" min="699" max="3299">
+              <input type="number" id="priceMinInput" value="{{ min_price or global_min }}" min="{{ global_min }}" max="{{ global_max }}">
             </div>
             <div class="price-range-sep">—</div>
             <div class="price-input-box">
               <label>Max</label>
-              <input type="number" id="priceMaxInput" value="3299" min="699" max="3299">
+              <input type="number" id="priceMaxInput" value="{{ max_price or global_max }}" min="{{ global_min }}" max="{{ global_max }}">
             </div>
           </div>
         </div>
 
-        <!-- Mobile Sort select options list -->
-        <div class="filter-group">
-          <h4 class="filter-group-title">Sort By</h4>
-          <ul class="sort-list" id="mobileSortList">
-            <li class="sort-item active" data-sort="default">Recommended</li>
-            <li class="sort-item" data-sort="price-asc">Price: Low → High</li>
-            <li class="sort-item" data-sort="price-desc">Price: High → Low</li>
-            <li class="sort-item" data-sort="name-asc">Name: A → Z</li>
-          </ul>
-        </div>
+
 
         <button class="apply-filters-btn" id="applyFiltersBtn">Apply Filters</button>
       </div>
@@ -129,20 +131,9 @@
       <!-- Active chips indicators -->
       <div class="active-filter-chips" id="activeFilterChips"></div>
 
-      <!-- Results stats -->
-      <p class="results-count" id="resultsCount"></p>
-
-      <!-- Products Grid -->
-      <div class="shop-grid" id="shopGrid">
-        <!-- Rendered Dynamically in JS -->
-      </div>
-
-      <!-- Empty state layout -->
-      <div class="shop-empty" id="shopEmpty" style="display:none;">
-        <i class="fas fa-search"></i>
-        <h3>No products found</h3>
-        <p>Try adjusting your filters or search term.</p>
-        <button class="btn" id="shopEmptyReset">Reset Filters</button>
+      <!-- Dynamic Products Grid Wrapper -->
+      <div id="shopGridContainer" style="position: relative; transition: opacity 0.25s ease;">
+        {% include "partials/product_grid.html" %}
       </div>
     </main>
   </div>
@@ -151,8 +142,8 @@
 
 {% block scripts %}
 <script>
-  window.DB_PRODUCTS = {{ products | tojson | safe }};
-  window.DB_CATEGORIES = {{ categories | tojson | safe }};
+  window.GLOBAL_MIN = {{ global_min }};
+  window.GLOBAL_MAX = {{ global_max }};
 </script>
-<script src="/static/js/shop.js"></script>
+<script src="/static/js/shop.js?v=2.2"></script>
 {% endblock %}

@@ -140,3 +140,4 @@ if __name__ == "__main__":
     port  = int(os.getenv("PORT", 5001))
     debug = os.getenv("FLASK_ENV", "development") != "production"
     app.run(debug=debug, port=port, host="0.0.0.0")
+# Triggering auto-reload for template and CSS changes - v3.4

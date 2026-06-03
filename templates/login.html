@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — Khushi Decors Admin</title>
+  <title>Login — Khushi Decors {% if 'admin' in request.args.get('next', '') or 'admin' in request.path %}Admin{% else %}Secure Portal{% endif %}</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -265,7 +265,7 @@
 <div class="login-container">
   <div class="brand-logo">
     <h1>Khushi<span>Decors</span></h1>
-    <p>Admin Console</p>
+    <p>{% if 'admin' in request.args.get('next', '') or 'admin' in request.path %}Admin Console{% else %}Secure Portal{% endif %}</p>
   </div>
 
   <div class="login-card">

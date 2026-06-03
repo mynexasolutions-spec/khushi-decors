@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 import json
 import uuid
 from extensions import db_sql
-from helpers import resolve_image
+from helpers import resolve_image, get_cached_store_settings
 from queries import (
     get_products, get_categories, get_brands,
     get_product_detail, get_related_products,
@@ -71,15 +71,32 @@ def shop():
     featured        = bool(request.args.get("featured", ""))
     min_price       = request.args.get("min_price", "").strip()
     max_price       = request.args.get("max_price", "").strip()
+    ajax            = request.args.get("ajax", "").strip() == "1" or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
     try:
         min_price_val = float(min_price) if min_price else None
         max_price_val = float(max_price) if max_price else None
     except ValueError:
         min_price_val = max_price_val = None
+
     try:
+        # Dynamically query global pricing boundaries for the filter sliders
+        prices_list = []
+        p_prices = db_sql.session.query(Product.price, Product.sale_price).filter(Product.is_active == 1).all()
+        for p_pr, s_pr in p_prices:
+            if p_pr: prices_list.append(p_pr)
+            if s_pr: prices_list.append(s_pr)
+        var_prices = db_sql.session.query(ProductVariation.price, ProductVariation.sale_price).join(Product, Product.id == ProductVariation.product_id).filter(Product.is_active == 1).all()
+        for v_pr, vs_pr in var_prices:
+            if v_pr: prices_list.append(v_pr)
+            if vs_pr: prices_list.append(vs_pr)
+
+        global_min = int(min(prices_list)) if prices_list else 100
+        global_max = int(max(prices_list)) if prices_list else 10000
+
         products, total, total_pages = get_products(
             search=search, categories=selected_cats, brands=selected_brands,
-            sort=sort, page=page, per_page=18, on_sale=on_sale,
+            sort=sort, page=page, per_page=16, on_sale=on_sale,
             featured=featured, min_price=min_price_val, max_price=max_price_val,
             attribute_values=selected_attrs,
         )
@@ -103,6 +120,7 @@ def shop():
         products, total, total_pages = [], 0, 1
         all_categories = all_brands = []
         flavor_vals = []
+        global_min, global_max = 100, 10000
         flash(f"Database error: {e}", "error")
 
     # Build parent → children tree for the sidebar accordion
@@ -112,6 +130,13 @@ def shop():
         pid = c.get("parent_id")
         if pid:
             children_map.setdefault(str(pid), []).append(c)
+
+    if ajax:
+        return render_template(
+            "partials/product_grid.html",
+            products=products, total_count=total, total_pages=total_pages,
+            current_page=page, categories=all_categories,
+        )
 
     return render_template(
         "shop.html",
@@ -127,6 +152,7 @@ def shop():
         current_sort=sort,
         on_sale=on_sale,
         min_price=min_price, max_price=max_price,
+        global_min=global_min, global_max=global_max,
     )
 
 
@@ -155,11 +181,25 @@ def product_detail(product_id):
         related = get_related_products(product.get("category_slug", ""), product_id)
     except Exception:
         related = []
+
+    # Compute dynamic rating metrics
+    num_reviews = len(reviews)
+    avg_rating = round(sum(r["rating"] for r in reviews) / num_reviews, 1) if num_reviews > 0 else 0.0
+    full_stars = int(avg_rating)
+    half_star = 1 if (avg_rating - full_stars) >= 0.5 else 0
+    empty_stars = 5 - full_stars - half_star
+
+    settings = get_cached_store_settings()
+    free_shipping_threshold = float(settings.get("free_shipping_threshold") or 999)
+
     return render_template(
         "product_detail.html",
         product=product, images=images, gallery_images=gallery_images, variations=variations,
-        reviews=reviews, attributes=attributes, related=related,
+        reviews=reviews, attributes=attributes, related=related, related_products=related,
         variation_json=variation_json, vars_json=vars_json,
+        avg_rating=avg_rating, num_reviews=num_reviews,
+        full_stars=full_stars, half_star=half_star, empty_stars=empty_stars,
+        free_shipping_threshold=free_shipping_threshold
     )
 
 

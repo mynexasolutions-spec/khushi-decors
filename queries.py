@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy import or_, and_, func, desc, case
 from sqlalchemy.orm import aliased
 from extensions import db_sql
-from helpers import ttl_cache
+from helpers import ttl_cache, resolve_image
 from models import (
     Product, Category, Brand, ProductImage, ProductVariation, 
     VariationAttributeValue, ProductAttribute, ProductAttributeValue,
@@ -44,6 +44,7 @@ def _get_products_query(minimal=False):
     if minimal:
         q = db_sql.session.query(
             Product.id, Product.name, Product.slug, Product.sku, Product.type,
+            Product.short_description, Product.description,
             price_coalesce.label("price"),
             Product.sale_price, Product.stock_status, Product.is_featured, Product.created_at,
             Category.name.label("category_name"), Category.slug.label("category_slug"),
@@ -70,78 +71,106 @@ def _get_products_query(minimal=False):
 def _get_variation_cards():
     """
     Returns a lookup: { product_id: [ expanded_row_dict, ... ] }
-    where EVERY variation of a variable product becomes its own listing card.
-    Each card has its own name, image, price, stock, SKU, and description.
+    where variations are grouped by their primary attribute (e.g. Shape),
+    displaying one clean catalog card per Shape instead of duplicate cards for sizes.
     """
     variable_products = Product.query.filter_by(is_active=1, type="variable").all()
     if not variable_products:
         return {}
 
     product_ids = [str(p.id) for p in variable_products]
-    product_names = {str(p.id): p.name for p in variable_products}
+    product_parents = {str(p.id): p for p in variable_products}
 
-    # Subquery for var_image
-    var_image_sub = (db_sql.session.query(Media.file_url)
-                     .join(VariationImage, VariationImage.media_id == Media.id)
-                     .filter(VariationImage.variation_id == ProductVariation.id, VariationImage.is_primary == 1)
-                     .limit(1)
-                     .scalar_subquery())
-                     
-    # Subquery for product_image
-    product_image_sub = (db_sql.session.query(Media.file_url)
-                         .join(ProductImage, ProductImage.media_id == Media.id)
-                         .filter(ProductImage.product_id == ProductVariation.product_id, ProductImage.is_primary == 1)
-                         .limit(1)
-                         .scalar_subquery())
-
-    # Query variations and concatenate attribute values (grouped by variation id)
-    rows = (db_sql.session.query(
-                ProductVariation.product_id,
-                ProductVariation.id.label("var_id"),
-                ProductVariation.sku,
-                ProductVariation.price,
-                ProductVariation.sale_price,
-                ProductVariation.stock_quantity,
-                ProductVariation.stock_status,
-                ProductVariation.name.label("var_name"),
-                ProductVariation.description.label("var_desc"),
-                ProductVariation.short_description.label("var_short_desc"),
-                func.string_agg(AttributeValue.value, ', ').label("label"),
-                var_image_sub.label("var_image"),
-                product_image_sub.label("product_image")
-            )
-            .outerjoin(VariationAttributeValue, VariationAttributeValue.variation_id == ProductVariation.id)
-            .outerjoin(AttributeValue, AttributeValue.id == VariationAttributeValue.attribute_value_id)
-            .filter(ProductVariation.product_id.in_(product_ids))
-            .group_by(ProductVariation.id, ProductVariation.product_id, ProductVariation.sku, 
-                      ProductVariation.price, ProductVariation.sale_price, ProductVariation.stock_quantity,
-                      ProductVariation.stock_status, ProductVariation.name, ProductVariation.description,
-                      ProductVariation.short_description)
-            .order_by(ProductVariation.product_id, ProductVariation.price)
-            .all())
+    # Fetch all variation attribute values in a single high-efficiency query
+    vav_rows = (db_sql.session.query(
+                    VariationAttributeValue.variation_id,
+                    AttributeValue.value,
+                    Attribute.variation_type
+                )
+                .join(AttributeValue, AttributeValue.id == VariationAttributeValue.attribute_value_id)
+                .join(Attribute, Attribute.id == AttributeValue.attribute_id)
+                .join(ProductVariation, ProductVariation.id == VariationAttributeValue.variation_id)
+                .filter(ProductVariation.product_id.in_(product_ids))
+                .all())
+                
+    vav_map = {}
+    for r in vav_rows:
+        vav_map.setdefault(str(r.variation_id), []).append({
+            "value": r.value,
+            "variation_type": r.variation_type
+        })
+        
+    # Fetch primary variation image lookup map
+    vi_rows = (db_sql.session.query(VariationImage.variation_id, Media.file_url)
+               .join(Media, Media.id == VariationImage.media_id)
+               .filter(VariationImage.is_primary == 1)
+               .all())
+    var_image_lookup = {str(r.variation_id): r.file_url for r in vi_rows}
+    
+    # Fetch parent product image lookup map
+    pi_rows = (db_sql.session.query(ProductImage.product_id, Media.file_url)
+               .join(Media, Media.id == ProductImage.media_id)
+               .filter(ProductImage.is_primary == 1)
+               .all())
+    product_image_lookup = {str(r.product_id): r.file_url for r in pi_rows}
 
     result = {}
-    for r in rows:
-        pid = str(r.product_id)
-        if pid not in result:
-            result[pid] = []
-
-        label = r.label or ""
-        base_name = product_names.get(pid, "")
-
-        result[pid].append({
-            "var_id":         r.var_id,
-            "sku":            r.sku,
-            "price":          float(r.sale_price or r.price or 0),
-            "stock_quantity": int(r.stock_quantity or 0),
-            "stock_status":   r.stock_status or "in_stock",
-            "name_override":  r.var_name or (f"{base_name} – {label}" if label else base_name),
-            "image_url":      r.var_image or r.product_image or "",
-            "description":    r.var_desc or "",
-            "short_description": r.var_short_desc or "",
-            "label":          label,
-            "_preselect_label": label
-        })
+    for pid in product_ids:
+        parent = product_parents.get(pid)
+        if not parent:
+            continue
+            
+        p_vars = ProductVariation.query.filter_by(product_id=parent.id).all()
+        
+        # Group variations of this product by primary values (e.g. Shape)
+        groups = {}
+        for v in p_vars:
+            vid = str(v.id)
+            vals = vav_map.get(vid, [])
+            
+            primary_vals = sorted([r["value"] for r in vals if r["variation_type"] == 'primary'])
+            secondary_vals = sorted([r["value"] for r in vals if r["variation_type"] != 'primary'])
+            
+            if primary_vals:
+                group_key = ", ".join(primary_vals)
+            else:
+                group_key = ", ".join(secondary_vals) if secondary_vals else ""
+                
+            groups.setdefault(group_key, []).append(v)
+            
+        result[pid] = []
+        for group_key, vars_list in groups.items():
+            # Pick lowest price variation to represent the group
+            best_var = min(vars_list, key=lambda v: float(v.sale_price or v.price or 999999))
+            
+            # Resolve prices & stocks with parent fallbacks
+            original_price = float(best_var.price or 0)
+            sale_price = float(best_var.sale_price) if best_var.sale_price else None
+            if original_price <= 0:
+                original_price = float(parent.price or 0)
+                sale_price = float(parent.sale_price) if parent.sale_price else None
+                
+            stock_val = int(best_var.stock_quantity or 0)
+            if stock_val <= 0:
+                stock_val = int(parent.stock_quantity or 0)
+                
+            stock_status_val = best_var.stock_status or parent.stock_status
+            var_img = var_image_lookup.get(str(best_var.id)) or product_image_lookup.get(pid) or ""
+            
+            result[pid].append({
+                "var_id":         str(best_var.id),
+                "sku":            best_var.sku,
+                "price":          original_price,
+                "sale_price":     sale_price,
+                "stock_quantity": stock_val,
+                "stock_status":   stock_status_val,
+                "name_override":  f"{parent.name} – {group_key}" if group_key else parent.name,
+                "image_url":      resolve_image(var_img),
+                "description":    best_var.description or "",
+                "short_description": best_var.short_description or "",
+                "label":          group_key,
+                "_preselect_label": group_key
+            })
 
     return result
 
@@ -149,25 +178,67 @@ def _expand_product_list(products):
     """Expand every variation into a separate listing card."""
     var_map = _get_variation_cards()
     expanded = []
+
+    # Perform performant bulk fetches to load all images for slideshows
+    prod_ids = [str(p["id"]) for p in (products or [])]
+
+    # 1. Bulk Query all ProductImages for active products
+    p_images_map = {}
+    if prod_ids:
+        from models import ProductImage
+        p_img_rows = (db_sql.session.query(ProductImage.product_id, Media.file_url)
+                      .join(Media, Media.id == ProductImage.media_id)
+                      .filter(ProductImage.product_id.in_(prod_ids))
+                      .order_by(ProductImage.display_order.asc())
+                      .all())
+        for p_id, f_url in p_img_rows:
+            p_images_map.setdefault(str(p_id), []).append(resolve_image(f_url))
+
+    # 2. Bulk Query all VariationImages in database
+    v_images_map = {}
+    v_img_rows = (db_sql.session.query(VariationImage.variation_id, Media.file_url)
+                  .join(Media, Media.id == VariationImage.media_id)
+                  .order_by(VariationImage.display_order.asc())
+                  .all())
+    for v_id, f_url in v_img_rows:
+        v_images_map.setdefault(str(v_id), []).append(resolve_image(f_url))
+
     for p in (products or []):
         pid = str(p["id"])
+
+        # Sourced product default images array
+        default_images = p_images_map.get(pid, [])
+        if not default_images:
+            default_images = [resolve_image(p.get("image_url") or "")]
+
         if pid in var_map:
             for r in var_map[pid]:
                 row = dict(p)
                 row["id"]             = pid
                 row["name"]           = r["name_override"]
                 row["price"]          = r["price"]
-                row["sale_price"]     = None
+                row["sale_price"]     = r["sale_price"]
                 row["stock_quantity"] = r["stock_quantity"]
                 row["stock_status"]   = r["stock_status"]
                 row["sku"]            = r["sku"]
-                row["image_url"]      = r["image_url"] or p.get("image_url") or ""
+                row["image_url"]      = resolve_image(r["image_url"] or p.get("image_url") or "")
                 row["description"]    = r.get("description") or row.get("description") or ""
                 row["short_description"] = r.get("short_description") or row.get("short_description") or ""
                 row["_preselect_label"] = r.get("label", "")
+
+                # Assign slideshow images (variation images falling back to parent default images)
+                var_imgs = v_images_map.get(str(r["var_id"]), [])
+                row["images"]         = var_imgs if var_imgs else default_images
                 expanded.append(row)
         else:
-            expanded.append(p)
+            p_copy = dict(p)
+            p_copy.setdefault("description", "")
+            p_copy.setdefault("short_description", "")
+            p_copy["image_url"] = resolve_image(p_copy.get("image_url") or "")
+
+            # Assign slideshow parent default images
+            p_copy["images"]    = default_images
+            expanded.append(p_copy)
     return expanded
 
 @ttl_cache(ttl_seconds=60)
@@ -391,10 +462,9 @@ def get_product_detail(product_id, preselect=None):
         for row in all_vav:
             vav_map.setdefault(str(row.variation_id), []).append(row.attribute_value_id)
         for v in variations:
-            if preselect_match and str(v["id"]) == str(preselect_match["id"]):
-                pass
-            else:
-                v["price"]          = base_price
+            if not v.get("price") or float(v["price"]) <= 0:
+                v["price"] = base_price
+            if not v.get("stock_quantity") or int(v["stock_quantity"]) <= 0:
                 v["stock_quantity"] = base_stock
             v["attribute_value_ids"] = vav_map.get(str(v["id"]), [])
     else:
@@ -520,31 +590,48 @@ def get_related_products(category_slug, exclude_id, limit=4):
 
 @ttl_cache(ttl_seconds=120)
 def get_categories():
-    child_cat = aliased(Category)
-    sub_count = (db_sql.session.query(func.count(Product.id))
-                 .filter(Product.is_active == 1)
-                 .filter(
-                     or_(
-                         Product.category_id == Category.id,
-                         Product.category_id.in_(
-                             db_sql.session.query(child_cat.id).filter(child_cat.parent_id == Category.id).scalar_subquery()
-                         )
-                     )
-                 )
-                 .correlate(Category)
-                 .scalar_subquery())
-                 
-    parent_alias = aliased(Category)
-    rows = (db_sql.session.query(
-                Category.id, Category.name, Category.slug, Category.parent_id,
-                parent_alias.name.label("parent_name"), Category.image_url.label("img"),
-                sub_count.label("product_count")
-            )
-            .outerjoin(parent_alias, parent_alias.id == Category.parent_id)
-            .order_by(Category.name.asc())
-            .all())
-            
-    return [_row_to_dict(r) for r in rows]
+    """Fetch all categories and calculate product counts, supporting parent inheritance."""
+    # 1. Fetch all categories ordered by name
+    cats = Category.query.order_by(Category.name.asc()).all()
+    if not cats:
+        return []
+
+    # Create a parent name lookup map
+    cat_map = {str(c.id): c for c in cats}
+    
+    # 2. Fetch active products' category IDs to compute counts
+    products = db_sql.session.query(Product.category_id).filter(Product.is_active == 1).all()
+    active_cat_ids = [str(p.category_id) for p in products if p.category_id]
+
+    # 3. Compute direct and subcategory-inherited product counts
+    results = []
+    for c in cats:
+        cid = str(c.id)
+        # Find all direct child category IDs
+        child_ids = [str(sub.id) for sub in cats if str(sub.parent_id) == cid]
+        
+        # Count active products directly in this category or in its subcategories
+        direct_count = active_cat_ids.count(cid)
+        child_count = sum(active_cat_ids.count(sub_id) for sub_id in child_ids)
+        total_count = direct_count + child_count
+        
+        parent_name = None
+        if c.parent_id:
+            parent = cat_map.get(str(c.parent_id))
+            if parent:
+                parent_name = parent.name
+
+        results.append({
+            "id":            cid,
+            "name":          c.name,
+            "slug":          c.slug,
+            "parent_id":     str(c.parent_id) if c.parent_id else None,
+            "parent_name":   parent_name,
+            "img":           c.image_url,
+            "product_count": total_count
+        })
+        
+    return results
 
 @ttl_cache(ttl_seconds=120)
 def get_brands():

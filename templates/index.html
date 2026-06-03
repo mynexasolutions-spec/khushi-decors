@@ -3,7 +3,7 @@
 {% block title %}Khushi Decors | Premium Home Decor & Interior Styling{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="/static/css/index.css">
+<link rel="stylesheet" href="/static/css/index.css?v=3.4">
 {% endblock %}
 
 {% block content %}
@@ -46,10 +46,13 @@
   <div class="catalog-section" id="catalogSection">
     <h2 class="section-title">Shop by Category</h2>
     <div class="catalog-grid">
-      <div class="catalog-card" data-page="allProducts"><img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=2158&auto=format" alt="All"><div class="card-label">All Products</div></div>
-      {% for cat in featured_categories %}
+      {% for cat in featured_categories[:8] %}
       <div class="catalog-card" data-page="{{ cat.slug }}"><img src="{{ resolve_image(cat.img) }}" alt="{{ cat.label }}" onerror="this.onerror=null; this.src='/static/images/placeholder.png'"><div class="card-label">{{ cat.label }}</div></div>
       {% endfor %}
+    </div>
+    <!-- Centered Explore All Products Button -->
+    <div class="explore-all-container" style="display: flex; justify-content: center; margin-top: 2.5rem;">
+      <button class="scroll-btn explore-btn" onclick="window.location.href='/shop'" style="margin-top: 0; border-radius: 0px; padding: 1rem 2.8rem; font-weight: 700;">Explore All Products</button>
     </div>
   </div>
 
@@ -59,31 +62,52 @@
     <p class="section-subtitle">Handpicked masterworks loved by interior designers</p>
     <div class="featured-grid">
       {% for p in featured[:4] %}
-      <div class="featured-card">
-        {% if p.is_featured %}
-        <span class="card-badge bestseller-badge">Bestseller</span>
-        {% elif p.sale_price and p.sale_price < p.price %}
-        <span class="card-badge sale-badge">Sale</span>
-        {% else %}
-        <span class="card-badge new-badge">New</span>
-        {% endif %}
-        <img src="{{ resolve_image(p.image_url) }}" alt="{{ p.name }}" onerror="this.onerror=null; this.src='/static/images/placeholder.png'">
-        <div class="featured-card-content">
-          <h4>{{ p.name }}</h4>
-          <p class="featured-card-desc">{{ p.short_description or p.description[:90] or 'Premium handcrafted interior decor.' }}</p>
-          <p class="price">
+      <div class="shop-product-card featured-card" data-id="{{ p.id }}" data-preselect="{{ p._preselect_label or '' }}" style="background: white; border-radius: 0px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid #F0EDE8; transition: all 0.3s cubic-bezier(0.2,0,0,1); display: flex; flex-direction: column; position: relative;">
+        
+        <!-- Image Viewport (No hover slideshow) -->
+        <div class="shop-card-img-wrap" style="cursor: pointer; position: relative; overflow: hidden; width: 100%; display: block;" onclick="window.location.href='/product/{{ p.id }}{% if p._preselect_label %}?preselect={{ p._preselect_label|urlencode }}{% endif %}'">
+          {% if p.is_featured %}
+          <span class="card-badge bestseller-badge" style="position: absolute; top: 16px; left: 16px; padding: 0.4rem 0.9rem; border-radius: 0px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background: var(--primary); color: white;">Bestseller</span>
+          {% elif p.sale_price and p.sale_price < p.price %}
+          <span class="card-badge sale-badge" style="position: absolute; top: 16px; left: 16px; padding: 0.4rem 0.9rem; border-radius: 0px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background: #D94638; color: white;">Sale</span>
+          {% else %}
+          <span class="card-badge new-badge" style="position: absolute; top: 16px; left: 16px; padding: 0.4rem 0.9rem; border-radius: 0px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background: var(--secondary); color: white;">New</span>
+          {% endif %}
+          
+          <img src="{{ resolve_image(p.image_url) }}" alt="{{ p.name }}" onerror="this.onerror=null; this.src='/static/images/placeholder.png'" style="width: 100%; height: 250px; object-fit: cover; display: block; pointer-events: none;">
+          
+          <!-- Slide-up Add to Bag button on hover (Overlay Myntra-style) -->
+          <button class="btn add-to-cart hover-add-btn" data-name="{{ p.name }}" data-price="{{ '%.0f'|format(p.sale_price or p.price) }}" style="position: absolute; bottom: 0; left: 0; right: 0; background: #ffffff; color: var(--dark-charcoal); border-radius: 0px; font-weight: 700; border: 1.5px solid #dcd8d0; margin: 12px; padding: 0.65rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.8px; transform: translateY(120%); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 10; display: flex; align-items: center; justify-content: center; gap: 6px; white-shadow: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; pointer-events: auto;">
+            <i class="fas fa-bag-shopping"></i> Add to Bag
+          </button>
+        </div>
+
+        <!-- Card Body Block -->
+        <div class="shop-card-body" style="padding: 0.75rem 1.1rem 1.3rem; display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+          
+          <!-- Spacer to keep layout balanced -->
+          <div style="height: 6px; margin-bottom: 4px;"></div>
+
+          <span class="shop-card-cat-label" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; color: #8C877D; margin-bottom: 0.05rem; display: block;">
+            {{ p.category_name or 'Decor' }}
+          </span>
+          <h4 class="shop-card-name" style="cursor: pointer; font-size: 0.92rem; font-weight: 700; color: var(--dark-charcoal); line-height: 1.35; margin: 0; flex-grow: 1;" onclick="window.location.href='/product/{{ p.id }}{% if p._preselect_label %}?preselect={{ p._preselect_label|urlencode }}{% endif %}'">
+            {{ p.name }}
+          </h4>
+          
+          <!-- Pricing Row: Current Price | Strikethrough Original Price | Red savings badge -->
+          <div class="shop-card-price-row" style="margin-top: 0.2rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-family: 'Plus Jakarta Sans', sans-serif;">
             {% if p.sale_price and p.sale_price < p.price %}
-            <span style="text-decoration: line-through; opacity: 0.6; font-size: 0.85em; margin-right: 0.5rem;">₹{{ "%.0f"|format(p.price) }}</span>
-            ₹{{ "%.0f"|format(p.sale_price) }}
+              {% set savings = (((p.price - p.sale_price) / p.price) * 100) | round | int %}
+              <span class="current-price" style="color: var(--dark-charcoal); font-weight: 800; font-size: 1.05rem;">₹{{ "%.0f"|format(p.sale_price) }}</span>
+              <span class="original-price" style="text-decoration: line-through; color: #A09A90; font-size: 0.88rem; font-weight: 500;">₹{{ "%.0f"|format(p.price) }}</span>
+              <span class="shop-card-discount-tag" style="background-color: #D94638; color: #ffffff; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; border-radius: 0px;">Save {{ savings }}%</span>
             {% else %}
-            ₹{{ "%.0f"|format(p.price) }}
+              <span class="current-price" style="color: var(--dark-charcoal); font-weight: 800; font-size: 1.05rem;">₹{{ "%.0f"|format(p.price) }}</span>
             {% endif %}
-          </p>
-          <div class="btn-group">
-            <button class="btn add-to-cart" data-name="{{ p.name }}" data-price="{{ '%.0f'|format(p.sale_price or p.price) }}">Add to Bag</button>
-            <button class="btn btn-outline buy-now" data-name="{{ p.name }}" data-price="{{ '%.0f'|format(p.sale_price or p.price) }}">Buy Now</button>
           </div>
         </div>
+
       </div>
       {% endfor %}
     </div>

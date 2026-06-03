@@ -1,0 +1,114 @@
+<!-- Results Stats -->
+{% if total_count and total_count > 0 %}
+  <p class="results-count" id="resultsCount" style="font-size: 0.82rem; color: #8C877D; font-weight: 500; margin-bottom: 1.25rem;">
+    Showing {{ products|length }} of {{ total_count }} product{{ 's' if total_count != 1 else '' }} found
+  </p>
+{% endif %}
+
+{% if not products %}
+  <!-- Empty State Layout -->
+  <div class="shop-empty" id="shopEmpty" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 5rem 2rem; gap: 1rem; color: #8C877D;">
+    <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3;"></i>
+    <h3>No products found</h3>
+    <p>Try adjusting your filters or search term.</p>
+    <button class="btn" id="shopEmptyReset" style="border-radius: 50px; padding: 0.6rem 1.8rem; font-weight: 700; font-size: 0.85rem;">Reset Filters</button>
+  </div>
+{% else %}
+  <!-- Products Grid -->
+  <div class="shop-grid" id="shopGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.75rem;">
+    {% for item in products %}
+      <div class="shop-product-card" data-name="{{ item.name }}" style="background: white; border-radius: 0px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid #F0EDE8; transition: all 0.3s cubic-bezier(0.2,0,0,1); display: flex; flex-direction: column; position: relative;">
+        
+        <!-- Sliding Image Viewport area -->
+        <div class="shop-card-img-wrap" data-images='{{ item.images | tojson | safe }}' style="cursor: pointer; position: relative; overflow: hidden; width: 100%; display: block;" onclick="window.location.href='/product/{{ item.id }}{% if item._preselect_label %}?preselect={{ item._preselect_label|urlencode }}{% endif %}'">
+          
+          <!-- Hardware-accelerated sliding images track -->
+          <div class="card-images-slider-track" style="display: flex; width: 100%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);">
+            {% for img in item.images %}
+              <img class="card-slider-img" src="{{ resolve_image(img) }}" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='/static/images/placeholder.png'" style="width: 100%; height: 220px; object-fit: cover; flex-shrink: 0; display: block; pointer-events: none;">
+            {% endfor %}
+          </div>
+
+          <!-- Slide-up Add to Bag button on hover (Overlay Myntra-style) -->
+          <button class="btn add-to-cart hover-add-btn" data-name="{{ item.name }}" data-price="{{ '%.0f'|format(item.sale_price or item.price) }}" style="position: absolute; bottom: 0; left: 0; right: 0; background: #ffffff; color: var(--dark-charcoal); border-radius: 0px; font-weight: 700; border: 1.5px solid #dcd8d0; margin: 12px; padding: 0.65rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.8px; transform: translateY(120%); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 10; display: flex; align-items: center; justify-content: center; gap: 6px; white-shadow: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; pointer-events: auto;">
+            <i class="fas fa-bag-shopping"></i> Add to Bag
+          </button>
+        </div>
+
+        <!-- Card Body Info Block (Clean Minimalist styling) -->
+        <div class="shop-card-body" style="padding: 0.75rem 1.1rem 1.3rem; display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+          
+          <!-- Dots Indicator, centered just above category/subcategory name (fades in on hover) -->
+          {% if item.images and item.images|length > 1 %}
+            <div class="card-slideshow-dots" style="display: flex; gap: 5px; justify-content: center; align-items: center; margin-bottom: 4px; opacity: 0; transition: opacity 0.25s ease; height: 6px; z-index: 5;">
+              {% for img in item.images %}
+                <span class="slideshow-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" style="width: 5px; height: 5px; border-radius: 50%; background: #EDEAE5; transition: all 0.25s ease;"></span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <!-- Placeholder to keep exact vertical layout alignment if product has only 1 image -->
+            <div style="height: 6px; margin-bottom: 4px;"></div>
+          {% endif %}
+
+          <span class="shop-card-cat-label" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; color: #8C877D; margin-bottom: 0.05rem; display: block;">
+            {{ item.category_name or 'Decor' }}
+          </span>
+          <h4 class="shop-card-name" style="cursor: pointer; font-size: 0.92rem; font-weight: 700; color: var(--dark-charcoal); line-height: 1.35; margin: 0; flex-grow: 1;" onclick="window.location.href='/product/{{ item.id }}{% if item._preselect_label %}?preselect={{ item._preselect_label|urlencode }}{% endif %}'">
+            {{ item.name }}
+          </h4>
+          
+          <!-- Pricing Row: Current Price | Strikethrough Original Price | Red savings badge -->
+          <div class="shop-card-price-row" style="margin-top: 0.2rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-family: 'Plus Jakarta Sans', sans-serif;">
+            {% if item.sale_price and item.sale_price < item.price %}
+              {% set savings = (((item.price - item.sale_price) / item.price) * 100) | round | int %}
+              <span class="current-price" style="color: var(--dark-charcoal); font-weight: 800; font-size: 1.05rem;">₹{{ "%.0f"|format(item.sale_price) }}</span>
+              <span class="original-price" style="text-decoration: line-through; color: #A09A90; font-size: 0.88rem; font-weight: 500;">₹{{ "%.0f"|format(item.price) }}</span>
+              <span class="shop-card-discount-tag" style="background-color: #D94638; color: #ffffff; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; border-radius: 0px;">Save {{ savings }}%</span>
+            {% else %}
+              <span class="current-price" style="color: var(--dark-charcoal); font-weight: 800; font-size: 1.05rem;">₹{{ "%.0f"|format(item.price) }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Crawlable SEO-friendly Pagination Panel -->
+  {% if total_pages and total_pages > 1 %}
+    <div class="shop-pagination" style="display: flex; justify-content: center; align-items: center; gap: 0.6rem; margin-top: 4rem;">
+      
+      {# Previous Page Link #}
+      {% if current_page > 1 %}
+        <a href="?page={{ current_page - 1 }}" class="pagination-btn" data-page="{{ current_page - 1 }}" aria-label="Previous page">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+      {% else %}
+        <span class="pagination-btn disabled" aria-disabled="true">
+          <i class="fas fa-chevron-left"></i>
+        </span>
+      {% endif %}
+
+      {# Page Number Links #}
+      {% for p in range(1, total_pages + 1) %}
+        {% if p == current_page %}
+          <span class="pagination-btn active">{{ p }}</span>
+        {% else %}
+          <a href="?page={{ p }}" class="pagination-btn" data-page="{{ p }}">{{ p }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {# Next Page Link #}
+      {% if current_page < total_pages %}
+        <a href="?page={{ current_page + 1 }}" class="pagination-btn" data-page="{{ current_page + 1 }}" aria-label="Next page">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      {% else %}
+        <span class="pagination-btn disabled" aria-disabled="true">
+          <i class="fas fa-chevron-right"></i>
+        </span>
+      {% endif %}
+
+    </div>
+  {% endif %}
+{% endif %}

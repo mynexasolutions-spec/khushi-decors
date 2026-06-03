@@ -37,14 +37,17 @@ def login():
             "role":  user.role or "customer",
         }
         flash(f"Welcome back, {full_name}!", "success")
-        next_url = request.args.get("next") or request.form.get("next")
-        if next_url:
-            return redirect(next_url)
         if user.role in ("admin", "manager"):
+            next_url = request.args.get("next") or request.form.get("next")
+            if next_url and ("/admin" in next_url or "admin_" in next_url):
+                return redirect(next_url)
             try:
                 return redirect(url_for("admin_dashboard"))
             except Exception:
                 return redirect("/admin")
+        next_url = request.args.get("next") or request.form.get("next")
+        if next_url:
+            return redirect(next_url)
         return redirect(url_for("public.index"))
     return render_template("login.html")
 
@@ -113,6 +116,8 @@ def account():
     if "user" not in session:
         flash("Please log in to continue.", "error")
         return redirect(url_for("auth.login", next=request.url))
+    if session["user"].get("role") in ("admin", "manager"):
+        return redirect("/admin")
     uid = session["user"]["id"]
     if request.method == "POST":
         action = request.form.get("action", "")

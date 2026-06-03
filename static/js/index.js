@@ -56,14 +56,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Card thumbnail clicks -> navigate to product detail
     const img = card.querySelector('img');
     const title = card.querySelector('h4');
-    const productName = title ? title.innerText.trim() : null;
+    const pId = card.dataset.id;
+    const preselect = card.dataset.preselect;
 
-    if (productName) {
+    if (pId) {
       [img, title].forEach(el => {
         if (el) {
           el.style.cursor = 'pointer';
           el.addEventListener('click', () => {
-            window.location.href = `/product/${encodeURIComponent(productName)}`;
+            let url = `/product/${pId}`;
+            if (preselect) {
+              url += `?preselect=${encodeURIComponent(preselect)}`;
+            }
+            window.location.href = url;
           });
         }
       });

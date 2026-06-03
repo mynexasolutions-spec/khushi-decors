@@ -1,107 +1,25 @@
-// ---------- SHOP PAGE FRONTEND LOGIC ----------
+// ---------- SHOP PAGE FRONTEND AJAX & HISTORY CONTROLLER ----------
 document.addEventListener('DOMContentLoaded', () => {
   const KD = window.KhushiDecors;
+  if (!KD) return;
 
-  // ---------- PRODUCT DATABASE ----------
-  const mockProducts = {
-    wallDecor: [
-      { name: "Macrame Wall Hanging", price: 899, img: "/static/images/WD1.jpg" },
-      { name: "Abstract Canvas", price: 1499, img: "/static/images/WD2.jpg" },
-      { name: "Jute Wall Art", price: 2199, img: "/static/images/WD3.jpg" },
-      { name: "Floating Set", price: 1299, img: "/static/images/WD4.jpg" },
-      { name: "Boho Tapestry", price: 749, img: "/static/images/WD5.jpg" },
-      { name: "Mirror Decor", price: 1899, img: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=400&auto=format" }
-    ],
-    artificialPlants: [
-      { name: "Fiddle lavender Leaf", price: 1599, img: "/static/images/AP.jpg" },
-      { name: "Succulent Trio", price: 699, img: "/static/images/AP1.jpg" },
-      { name: "Hanging Ivy", price: 849, img: "/static/images/AP2.jpg" },
-      { name: "Monstera Plant", price: 1899, img: "/static/images/AP3.jpg" },
-      { name: "Orchid Stem", price: 1199, img: "/static/images/AP4.jpg" },
-      { name: "Pink Tree", price: 1349, img: "/static/images/APFIVE.jpg" }
-    ],
-    lamps: [
-      { name: "Street Lamp", price: 1799, img: "/static/images/LAMP.jpg" },
-      { name: "Table Lamp", price: 3299, img: "/static/images/LAMP1.jpg" },
-      { name: "Rattan Lamp", price: 2499, img: "/static/images/LAMP2.jpg" },
-      { name: "Wall Sconce Pair", price: 1399, img: "/static/images/LAMP3.jpg" },
-      { name: "Arc Floor Lamp", price: 899, img: "/static/images/LAMP4.jpg" },
-      { name: "Ceramic Table Lamp", price: 2099, img: "/static/images/LAMP5.jpg" }
-    ],
-    vases: [
-      { name: "Terracotta Set", price: 1099, img: "/static/images/VASE1.jpg" },
-      { name: "Ribbed Vase", price: 1899, img: "/static/images/VASE2.jpg" },
-      { name: "Handcrafted Ceramic", price: 1649, img: "/static/images/VASE3.jpg" },
-      { name: "Minimalist Marble", price: 1299, img: "/static/images/VASE4.jpg" },
-      { name: "Bud Vase Duo", price: 2399, img: "/static/images/VASEFIVR.jpg" },
-      { name: "Ceramic Vase", price: 799, img: "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=400&auto=format" }
-    ],
-    clocks: [
-      { name: "LongMountainic Clock", price: 2799, img: "/static/images/CLOCK1.jpg" },
-      { name: "Vintage Wall Clock", price: 1499, img: "/static/images/CLCOK2.jpg" },
-      { name: "Modern Minimalist", price: 1199, img: "/static/images/CLCOK3.jpg" },
-      { name: "Digital Smart Clock", price: 2199, img: "/static/images/CLCOK4.jpg" }
-    ]
-  };
+  // Initialize absolute bounds from script variables
+  const globalMin = window.GLOBAL_MIN || 100;
+  const globalMax = window.GLOBAL_MAX || 10000;
 
-  const categoryMeta = {
-    wallDecor: { label: 'Wall Decor', icon: 'fa-image' },
-    artificialPlants: { label: 'Artificial Plants', icon: 'fa-seedling' },
-    lamps: { label: 'Designer Lamps', icon: 'fa-lightbulb' },
-    vases: { label: 'Vases & Vessels', icon: 'fa-flask' },
-    clocks: { label: 'Statement Clocks', icon: 'fa-clock' }
-  };
-
-  // Build the list of all tagged products dynamically
-  const allTagged = [];
-  if (window.DB_PRODUCTS && window.DB_PRODUCTS.length > 0) {
-    window.DB_PRODUCTS.forEach(p => {
-      allTagged.push({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        img: p.image_url || "/static/images/placeholder.png",
-        category: p.category_slug || "wallDecor"
-      });
-    });
-    // Populate dynamic categories
-    if (window.DB_CATEGORIES) {
-      window.DB_CATEGORIES.forEach(c => {
-        categoryMeta[c.slug] = { label: c.name, icon: 'fa-tag' };
-      });
-    }
-  } else {
-    Object.entries(mockProducts).forEach(([cat, items]) => {
-      items.forEach(item => allTagged.push({ ...item, category: cat }));
-    });
-  }
-
-  // Calculate pricing bounds
-  const prices = allTagged.map(p => p.price);
-  const globalMin = prices.length > 0 ? Math.min(...prices) : 100;
-  const globalMax = prices.length > 0 ? Math.max(...prices) : 10000;
-
-  // Check URL query parameters for initial filters
+  // 1. Centralized Filter State (sourced initially from URL query parameters)
   const urlParams = new URLSearchParams(window.location.search);
-  const initialCategory = urlParams.get('category') || 'all';
-
-  // Filters State
   let state = {
-    activeCategory: initialCategory,
-    sort: 'default',
-    priceMin: globalMin,
-    priceMax: globalMax,
-    search: ''
+    category: urlParams.get('category') || 'all',
+    sort: urlParams.get('sort') || 'default',
+    min_price: parseInt(urlParams.get('min_price')) || globalMin,
+    max_price: parseInt(urlParams.get('max_price')) || globalMax,
+    search: urlParams.get('search') || '',
+    page: parseInt(urlParams.get('page')) || 1
   };
 
-  // DOM Elements
-  const shopGrid = document.getElementById('shopGrid');
-  const shopEmpty = document.getElementById('shopEmpty');
-  const resultsCount = document.getElementById('resultsCount');
-  const shopBreadcrumb = document.getElementById('shopBreadcrumb');
-  
-  // Filter sidebar controls
-  const filterCatItems = document.querySelectorAll('.filter-cat-item');
+  // DOM Elements Selector Cache
+  const shopGridContainer = document.getElementById('shopGridContainer');
   const priceMinSlider = document.getElementById('priceMinSlider');
   const priceMaxSlider = document.getElementById('priceMaxSlider');
   const priceMinInput = document.getElementById('priceMinInput');
@@ -112,187 +30,282 @@ document.addEventListener('DOMContentLoaded', () => {
   const shopSearchInput = document.getElementById('shopSearchInput');
   const shopSortSelect = document.getElementById('shopSortSelect');
   const mobileSortList = document.querySelectorAll('#mobileSortList .sort-item');
-  const activeFilterChips = document.getElementById('activeFilterChips');
+  const filterCatItems = document.querySelectorAll('.filter-cat-list .filter-cat-item');
   
-  // Mobile drawer controls
+  // Mobile Drawer elements
   const filterToggleBtn = document.getElementById('filterToggleBtn');
   const shopSidebar = document.getElementById('shopSidebar');
   const filterOverlay = document.getElementById('filterOverlay');
   const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
   const applyFiltersBtn = document.getElementById('applyFiltersBtn');
   const clearAllFilters = document.getElementById('clearAllFilters');
-  const shopEmptyReset = document.getElementById('shopEmptyReset');
 
-  // ---------- FILTER FUNCTIONS ----------
-  function getFiltered() {
-    let list = state.activeCategory === 'all'
-      ? allTagged
-      : allTagged.filter(p => p.category === state.activeCategory);
+  // ---------- SIDEBAR ACCORDION CONTROLLER ----------
+  function initAccordionUI() {
+    // Automatically expand the parent folder display if one of its children subcategory items is active
+    document.querySelectorAll('.filter-subcat-list').forEach(list => {
+      const activeItem = list.querySelector('.filter-cat-item.active');
+      if (activeItem) {
+        list.style.display = 'flex';
+        const parentToggle = list.previousElementSibling.querySelector('.accordion-toggle');
+        if (parentToggle) parentToggle.style.transform = 'rotate(180deg)';
+      }
+    });
 
-    // Price Filter
-    list = list.filter(p => p.price >= state.priceMin && p.price <= state.priceMax);
-
-    // Search query match
-    if (state.search) {
-      const q = state.search.toLowerCase();
-      list = list.filter(p => p.name.toLowerCase().includes(q));
-    }
-
-    // Sort order
-    switch (state.sort) {
-      case 'price-asc':
-        list = [...list].sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        list = [...list].sort((a, b) => b.price - a.price);
-        break;
-      case 'name-asc':
-        list = [...list].sort((a, b) => a.name.localeCompare(b.name));
-        break;
-    }
-    return list;
+    // Wire up expand/collapse accordion chevron toggle actions
+    document.querySelectorAll('.accordion-toggle').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const targetId = btn.dataset.toggle;
+        const list = document.getElementById(targetId);
+        if (list) {
+          const isOpen = list.style.display === 'flex';
+          list.style.display = isOpen ? 'none' : 'flex';
+          btn.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+      });
+    });
   }
 
-  // Bind Add to Bag / Buy Now buttons in grid
-  function attachCartEvents() {
-    if (!shopGrid) return;
-    
-    shopGrid.querySelectorAll('.add-to-cart').forEach(btn => {
+  // ---------- AJAX QUERY & DATA OVER-THE-WIRE ENGINE ----------
+  let fetchController = null;
+
+  function applyFilters(resetPage = true) {
+    if (resetPage) {
+      state.page = 1;
+    }
+
+    // Cancel any active in-flight fetches to prevent race conditions
+    if (fetchController) {
+      fetchController.abort();
+    }
+    fetchController = new AbortController();
+
+    // 1. Compile search parameters
+    const params = new URLSearchParams();
+    if (state.category && state.category !== 'all') {
+      params.set('category', state.category);
+    }
+    if (state.sort && state.sort !== 'default') {
+      params.set('sort', state.sort);
+    }
+    if (state.min_price !== globalMin) {
+      params.set('min_price', state.min_price);
+    }
+    if (state.max_price !== globalMax) {
+      params.set('max_price', state.max_price);
+    }
+    if (state.search) {
+      params.set('search', state.search);
+    }
+    if (state.page && state.page > 1) {
+      params.set('page', state.page);
+    }
+
+    // 2. Sync parameters cleanly to browser Address Bar history
+    const queryStr = params.toString();
+    const newUrl = queryStr ? `/shop?${queryStr}` : '/shop';
+    history.pushState(null, '', newUrl);
+
+    // 3. Render premium Shimmer overlay loaders on grid swapping
+    if (shopGridContainer) {
+      shopGridContainer.style.opacity = '0.55';
+      shopGridContainer.style.pointerEvents = 'none';
+    }
+
+    // 4. Fetch HTML Partial from route
+    params.set('ajax', '1');
+    fetch(`/shop?${params.toString()}`, { signal: fetchController.signal })
+      .then(response => {
+        if (!response.ok) throw new Error('Query error');
+        return response.text();
+      })
+      .then(htmlPartial => {
+        if (shopGridContainer) {
+          shopGridContainer.innerHTML = htmlPartial;
+          shopGridContainer.style.opacity = '1';
+          shopGridContainer.style.pointerEvents = '';
+          
+          // Re-initialize interactive list triggers inside new partial
+          attachGridCartCTAEvents();
+          attachPaginationEvents();
+          initAccordionUI();
+          initActiveChips();
+          syncSortUI();
+          initCardSlideshows();
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('AJAX Load Failed:', err);
+          if (shopGridContainer) {
+            shopGridContainer.style.opacity = '1';
+            shopGridContainer.style.pointerEvents = '';
+          }
+        }
+      });
+  }
+
+  // Debouncing timer for price range sliders & keyups
+  let filterDebounceTimer;
+  function triggerDebouncedApplyFilters(resetPage = true) {
+    clearTimeout(filterDebounceTimer);
+    filterDebounceTimer = setTimeout(() => {
+      applyFilters(resetPage);
+    }, 280);
+  }
+
+  // ---------- INTERACTIVE EVENT BINDINGS & HANDLERS ----------
+
+  // Intercept category link clicks to provide seamless AJAX swaps
+  function attachCategoryClickListeners() {
+    document.querySelectorAll('.filter-cat-list .cat-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const parentLi = link.closest('.filter-cat-item');
+        const catSlug = parentLi.dataset.cat;
+        
+        state.category = catSlug;
+
+        // Visual active selector highlight adjustment
+        document.querySelectorAll('.filter-cat-list .filter-cat-item').forEach(li => {
+          li.classList.remove('active');
+        });
+        parentLi.classList.add('active');
+
+        // Automatically expand its subcategory accordion if it has one
+        const accordionList = parentLi.querySelector('.filter-subcat-list');
+        if (accordionList) {
+          accordionList.style.display = 'flex';
+          const toggleChevron = parentLi.querySelector('.accordion-toggle');
+          if (toggleChevron) toggleChevron.style.transform = 'rotate(180deg)';
+        }
+
+        applyFilters(true);
+        closeMobileDrawer();
+      });
+    });
+  }
+
+  // Intercept pagination buttons clicks
+  function attachPaginationEvents() {
+    document.querySelectorAll('.shop-pagination .pagination-btn').forEach(btn => {
+      if (btn.classList.contains('active') || btn.classList.contains('disabled')) return;
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetPage = parseInt(btn.dataset.page);
+        if (targetPage) {
+          state.page = targetPage;
+          applyFilters(false); // Do NOT reset active page index!
+          
+          // Smooth scroll results to top
+          const topbar = document.querySelector('.shop-topbar');
+          if (topbar) {
+            topbar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    });
+  }
+
+  // Bind Cart CTA actions (Add to Bag / Buy Now)
+  function attachGridCartCTAEvents() {
+    if (!shopGridContainer) return;
+
+    // Add to Bag CTA
+    shopGridContainer.querySelectorAll('.add-to-cart').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const name = btn.dataset.name;
         const price = parseInt(btn.dataset.price);
+        const sku = btn.dataset.sku || '';
         const cart = KD.getCart();
-        cart.push({ name, price });
+
+        cart.push({ name, price, sku });
         KD.saveCart(cart);
-        KD.showToast(`${name} added ✨`, "#C17A5A");
+        KD.showToast(`${name} added to Bag ✨`, "#C17A5A");
       });
     });
 
-    shopGrid.querySelectorAll('.buy-now').forEach(btn => {
+    // Buy Now CTA
+    shopGridContainer.querySelectorAll('.buy-now').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const name = btn.dataset.name;
         const price = parseInt(btn.dataset.price);
+        const sku = btn.dataset.sku || '';
         const cart = KD.getCart();
-        cart.push({ name, price });
+
+        cart.push({ name, price, sku });
         KD.saveCart(cart);
         window.location.href = '/cart';
       });
     });
-  }
 
-  // Render cards grid
-  function renderCards() {
-    if (!shopGrid) return;
-
-    const items = getFiltered();
-    shopGrid.innerHTML = '';
-
-    if (items.length === 0) {
-      shopGrid.style.display = 'none';
-      if (shopEmpty) shopEmpty.style.display = 'flex';
-      if (resultsCount) resultsCount.textContent = '';
-      return;
-    }
-
-    shopGrid.style.display = '';
-    if (shopEmpty) shopEmpty.style.display = 'none';
-    if (resultsCount) {
-      resultsCount.textContent = `${items.length} product${items.length !== 1 ? 's' : ''} found`;
-    }
-
-    items.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'shop-product-card';
-      const catLabel = categoryMeta[item.category]?.label || item.category;
-      
-      card.innerHTML = `
-        <div class="shop-card-img-wrap" style="cursor: pointer;">
-          <img src="${item.img}" alt="${item.name}" loading="lazy">
-          <span class="shop-card-cat-tag">${catLabel}</span>
-        </div>
-        <div class="shop-card-body">
-          <h4 class="shop-card-name" style="cursor: pointer;">${item.name}</h4>
-          <p class="shop-card-price">₹${item.price.toLocaleString('en-IN')}</p>
-          <div class="shop-card-actions">
-            <button class="btn add-to-cart" data-name="${item.name}" data-price="${item.price}">
-              <i class="fas fa-bag-shopping"></i> Add
-            </button>
-            <button class="btn btn-outline buy-now" data-name="${item.name}" data-price="${item.price}">
-              Buy Now
-            </button>
-          </div>
-        </div>
-      `;
-
-      // Click card details redirect
-      card.querySelectorAll('.shop-card-img-wrap, .shop-card-name').forEach(el => {
-        el.addEventListener('click', () => {
-          window.location.href = `/product/${encodeURIComponent(item.name)}`;
-        });
-      });
-
-      shopGrid.appendChild(card);
-    });
-
-    attachCartEvents();
-  }
-
-  // Sync UI state elements
-  function updateBreadcrumb() {
-    if (!shopBreadcrumb) return;
-    if (state.activeCategory === 'all') {
-      shopBreadcrumb.textContent = 'All Products';
-    } else {
-      shopBreadcrumb.textContent = categoryMeta[state.activeCategory]?.label || state.activeCategory;
+    // Reset button in empty state partial block
+    const shopEmptyReset = document.getElementById('shopEmptyReset');
+    if (shopEmptyReset) {
+      shopEmptyReset.addEventListener('click', resetAllFilters);
     }
   }
 
-  function updateActiveCatUI() {
-    filterCatItems.forEach(li => {
-      li.classList.toggle('active', li.dataset.cat === state.activeCategory);
-    });
+  // Sync dual slider visual tracks and value elements
+  function syncSlidersUI() {
+    if (priceMinSlider) priceMinSlider.value = state.min_price;
+    if (priceMaxSlider) priceMaxSlider.value = state.max_price;
+    if (priceMinInput) priceMinInput.value = state.min_price;
+    if (priceMaxInput) priceMaxInput.value = state.max_price;
+    if (priceMinLabel) priceMinLabel.textContent = `₹${state.min_price}`;
+    if (priceMaxLabel) priceMaxLabel.textContent = `₹${state.max_price}`;
+
+    // Compute range percentage tracks for dynamic dual styling fills
+    const minPercent = ((state.min_price - globalMin) / (globalMax - globalMin)) * 100;
+    const maxPercent = ((state.max_price - globalMin) / (globalMax - globalMin)) * 100;
+    const track = document.querySelector('.slider-track');
+    if (track) {
+      track.style.background = `linear-gradient(to right, #EAE6DF ${minPercent}%, var(--primary) ${minPercent}%, var(--primary) ${maxPercent}%, #EAE6DF ${maxPercent}%)`;
+    }
   }
 
-  function updateSortUI() {
-    mobileSortList.forEach(li => {
-      li.classList.toggle('active', li.dataset.sort === state.sort);
-    });
+  // Sync and update active search, categorization and pagination parameters sort dropdown elements
+  function syncSortUI() {
     if (shopSortSelect) {
       shopSortSelect.value = state.sort;
     }
+    mobileSortList.forEach(li => {
+      li.classList.toggle('active', li.dataset.sort === state.sort);
+    });
   }
 
-  function syncSliders() {
-    if (priceMinSlider) priceMinSlider.value = state.priceMin;
-    if (priceMaxSlider) priceMaxSlider.value = state.priceMax;
-    if (priceMinInput) priceMinInput.value = state.priceMin;
-    if (priceMaxInput) priceMaxInput.value = state.priceMax;
-    if (priceMinLabel) priceMinLabel.textContent = `₹${state.priceMin}`;
-    if (priceMaxLabel) priceMaxLabel.textContent = `₹${state.priceMax}`;
-  }
-
-  // Update active chips lists
-  function updateChips() {
+  // Draw active filter chips
+  function initActiveChips() {
+    const activeFilterChips = document.getElementById('activeFilterChips');
     if (!activeFilterChips) return;
     activeFilterChips.innerHTML = '';
 
-    if (state.activeCategory !== 'all') {
-      const label = categoryMeta[state.activeCategory]?.label || state.activeCategory;
+    // Active Category chip
+    if (state.category && state.category !== 'all') {
+      // Find category title from sidebar li links
+      const matchedCatLi = document.querySelector(`.filter-cat-item[data-cat="${state.category}"]`);
+      const catLabel = matchedCatLi ? matchedCatLi.querySelector('.cat-link').innerText.trim() : state.category;
       activeFilterChips.innerHTML += `
         <span class="filter-chip" data-clear="cat">
-          <i class="fas fa-tag"></i> ${label} <i class="fas fa-times"></i>
+          <i class="fas fa-tag"></i> ${catLabel} <i class="fas fa-times"></i>
         </span>`;
     }
 
-    if (state.priceMin !== globalMin || state.priceMax !== globalMax) {
+    // Active Price Boundary chip
+    if (state.min_price !== globalMin || state.max_price !== globalMax) {
       activeFilterChips.innerHTML += `
         <span class="filter-chip" data-clear="price">
-          <i class="fas fa-rupee-sign"></i> ₹${state.priceMin} – ₹${state.priceMax} <i class="fas fa-times"></i>
+          <i class="fas fa-rupee-sign"></i> ₹${state.min_price} – ₹${state.max_price} <i class="fas fa-times"></i>
         </span>`;
     }
 
+    // Active Search Keyword chip
     if (state.search) {
       activeFilterChips.innerHTML += `
         <span class="filter-chip" data-clear="search">
@@ -300,46 +313,108 @@ document.addEventListener('DOMContentLoaded', () => {
         </span>`;
     }
 
+    // Handle Chip click clears
     activeFilterChips.querySelectorAll('.filter-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         const type = chip.dataset.clear;
         if (type === 'cat') {
-          state.activeCategory = 'all';
-          updateActiveCatUI();
+          state.category = 'all';
+          // Revert visual highlights
+          document.querySelectorAll('.filter-cat-list .filter-cat-item').forEach(li => {
+            li.classList.toggle('active', li.dataset.cat === 'all');
+          });
         } else if (type === 'price') {
-          state.priceMin = globalMin;
-          state.priceMax = globalMax;
-          syncSliders();
+          state.min_price = globalMin;
+          state.max_price = globalMax;
+          syncSlidersUI();
         } else if (type === 'search') {
           state.search = '';
           if (shopSearchInput) shopSearchInput.value = '';
         }
-        updateChips();
-        updateBreadcrumb();
-        renderCards();
+        applyFilters(true);
       });
     });
   }
 
+  // ---------- DUAL SLIDER INPUT BINDINGS ----------
+  if (priceMinSlider && priceMaxSlider) {
+    priceMinSlider.addEventListener('input', (e) => {
+      // Prevent handles from overlapping (enforcing minimum 50 difference)
+      const val = Math.min(parseInt(e.target.value), state.max_price - 50);
+      priceMinSlider.value = val;
+      state.min_price = val;
+      syncSlidersUI();
+      triggerDebouncedApplyFilters(true);
+    });
+
+    priceMaxSlider.addEventListener('input', (e) => {
+      const val = Math.max(parseInt(e.target.value), state.min_price + 50);
+      priceMaxSlider.value = val;
+      state.max_price = val;
+      syncSlidersUI();
+      triggerDebouncedApplyFilters(true);
+    });
+  }
+
+  // Text inputs bindings
+  if (priceMinInput) {
+    priceMinInput.addEventListener('change', (e) => {
+      const val = Math.max(globalMin, Math.min(parseInt(e.target.value) || globalMin, state.max_price - 50));
+      state.min_price = val;
+      syncSlidersUI();
+      applyFilters(true);
+    });
+  }
+
+  if (priceMaxInput) {
+    priceMaxInput.addEventListener('change', (e) => {
+      const val = Math.min(globalMax, Math.max(parseInt(e.target.value) || globalMax, state.min_price + 50));
+      state.max_price = val;
+      syncSlidersUI();
+      applyFilters(true);
+    });
+  }
+
+  // Sort Dropdown binding (desktop)
+  if (shopSortSelect) {
+    shopSortSelect.addEventListener('change', (e) => {
+      state.sort = e.target.value;
+      applyFilters(true);
+    });
+  }
+
+  // Sort clicking binding (mobile list)
+  mobileSortList.forEach(li => {
+    li.addEventListener('click', () => {
+      state.sort = li.dataset.sort;
+      syncSortUI();
+      applyFilters(true);
+      closeMobileDrawer();
+    });
+  });
+
+  // Search input change debouncing bindings
+  let searchDebounce;
+  if (shopSearchInput) {
+    // Sourced search on load
+    shopSearchInput.value = state.search;
+    
+    shopSearchInput.addEventListener('input', (e) => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => {
+        state.search = e.target.value.trim();
+        applyFilters(true);
+      }, 350);
+    });
+  }
+
+  // ---------- MOBILE DRAWER SLIDER CONTROLLER ----------
   function closeMobileDrawer() {
     if (shopSidebar) shopSidebar.classList.remove('drawer-open');
     if (filterOverlay) filterOverlay.classList.remove('active');
     document.body.style.overflow = '';
   }
 
-  // Initialize display
-  if (shopGrid) {
-    updateBreadcrumb();
-    updateActiveCatUI();
-    updateSortUI();
-    syncSliders();
-    updateChips();
-    renderCards();
-  }
-
-  // ---------- EVENT BINDINGS ----------
-  
-  // Mobile drawer trigger
   if (filterToggleBtn && shopSidebar && filterOverlay) {
     filterToggleBtn.addEventListener('click', () => {
       shopSidebar.classList.add('drawer-open');
@@ -350,113 +425,129 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (filterOverlay) filterOverlay.addEventListener('click', closeMobileDrawer);
   if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeMobileDrawer);
+
   if (applyFiltersBtn) {
     applyFiltersBtn.addEventListener('click', () => {
-      updateChips();
-      updateBreadcrumb();
-      renderCards();
+      applyFilters(true);
       closeMobileDrawer();
     });
   }
 
-  // Category select filter items
-  filterCatItems.forEach(li => {
-    li.addEventListener('click', () => {
-      state.activeCategory = li.dataset.cat;
-      updateActiveCatUI();
-      updateChips();
-      updateBreadcrumb();
-      renderCards();
-    });
-  });
-
-  // Mobile list sort clicking
-  mobileSortList.forEach(li => {
-    li.addEventListener('click', () => {
-      state.sort = li.dataset.sort;
-      updateSortUI();
-      renderCards();
-    });
-  });
-
-  // Desktop select sort selector dropdown
-  if (shopSortSelect) {
-    shopSortSelect.addEventListener('change', (e) => {
-      state.sort = e.target.value;
-      updateSortUI();
-      renderCards();
-    });
-  }
-
-  // Price range dual sliders updates
-  if (priceMinSlider) {
-    priceMinSlider.addEventListener('input', (e) => {
-      state.priceMin = Math.min(parseInt(e.target.value), state.priceMax - 50);
-      syncSliders();
-      renderCards();
-      updateChips();
-    });
-  }
-
-  if (priceMaxSlider) {
-    priceMaxSlider.addEventListener('input', (e) => {
-      state.priceMax = Math.max(parseInt(e.target.value), state.priceMin + 50);
-      syncSliders();
-      renderCards();
-      updateChips();
-    });
-  }
-
-  // Price text box inputs
-  if (priceMinInput) {
-    priceMinInput.addEventListener('change', (e) => {
-      state.priceMin = Math.max(globalMin, Math.min(parseInt(e.target.value) || globalMin, state.priceMax - 50));
-      syncSliders();
-      renderCards();
-      updateChips();
-    });
-  }
-
-  if (priceMaxInput) {
-    priceMaxInput.addEventListener('change', (e) => {
-      state.priceMax = Math.min(globalMax, Math.max(parseInt(e.target.value) || globalMax, state.priceMin + 50));
-      syncSliders();
-      renderCards();
-      updateChips();
-    });
-  }
-
-  // Search filter matching
-  let searchDebounce;
-  if (shopSearchInput) {
-    shopSearchInput.addEventListener('input', (e) => {
-      clearTimeout(searchDebounce);
-      searchDebounce = setTimeout(() => {
-        state.search = e.target.value.trim();
-        updateChips();
-        renderCards();
-      }, 280);
-    });
-  }
-
   // Reset Filters logic
-  function resetAll() {
+  function resetAllFilters() {
     state = {
-      activeCategory: 'all',
+      category: 'all',
       sort: 'default',
-      priceMin: globalMin,
-      priceMax: globalMax,
-      search: ''
+      min_price: globalMin,
+      max_price: globalMax,
+      search: '',
+      page: 1
     };
+
     if (shopSearchInput) shopSearchInput.value = '';
-    syncSliders();
-    updateActiveCatUI();
-    updateSortUI();
-    updateChips();
-    updateBreadcrumb();
-    renderCards();
+    
+    // Highlight category All in sidebar
+    document.querySelectorAll('.filter-cat-list .filter-cat-item').forEach(li => {
+      li.classList.toggle('active', li.dataset.cat === 'all');
+    });
+
+    // Close all open subcategory lists
+    document.querySelectorAll('.filter-subcat-list').forEach(list => {
+      list.style.display = 'none';
+      const toggler = list.previousElementSibling.querySelector('.accordion-toggle');
+      if (toggler) toggler.style.transform = 'rotate(0deg)';
+    });
+
+    syncSlidersUI();
+    syncSortUI();
+    applyFilters(true);
   }
 
-  if (clearAllFilters) clearAllFilters.addEventListener('click', resetAll);
-  if (shopEmptyReset) shopEmptyReset.addEventListener('click', resetAll);
+  if (clearAllFilters) {
+    clearAllFilters.addEventListener('click', resetAllFilters);
+  }
+
+  // ---------- MODERN PRODUCT CARD HOVER IMAGES SLIDESHOW ----------
+  function initCardSlideshows() {
+    const cards = document.querySelectorAll('.shop-product-card');
+    cards.forEach(card => {
+      const imgWrap = card.querySelector('.shop-card-img-wrap');
+      if (!imgWrap) return;
+
+      const track = imgWrap.querySelector('.card-images-slider-track');
+      const dotsContainer = card.querySelector('.card-slideshow-dots');
+      if (!track) return;
+
+      let images = [];
+      try {
+        images = JSON.parse(imgWrap.dataset.images || '[]');
+      } catch (e) {
+        images = [];
+      }
+
+      if (images.length <= 1) return;
+
+      let intervalId = null;
+      let hoverTimeout = null;
+      let currentIndex = 0;
+
+      function updateSliderPosition() {
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+        if (dotsContainer) {
+          const dots = dotsContainer.querySelectorAll('.slideshow-dot');
+          dots.forEach((dot, idx) => {
+            dot.classList.toggle('active', idx === currentIndex);
+          });
+        }
+      }
+
+      card.addEventListener('mouseenter', () => {
+        if (dotsContainer) dotsContainer.style.opacity = '1';
+
+        // Clear any old interval/timeout just in case
+        if (intervalId) clearInterval(intervalId);
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+
+        // Start cycling images after a short initial delay of 400ms
+        hoverTimeout = setTimeout(() => {
+          // Slide to the next image immediately
+          currentIndex = (currentIndex + 1) % images.length;
+          updateSliderPosition();
+
+          // Then keep sliding every 1500ms
+          intervalId = setInterval(() => {
+            currentIndex = (currentIndex + 1) % images.length;
+            updateSliderPosition();
+          }, 1500);
+        }, 400);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        if (hoverTimeout) {
+          clearTimeout(hoverTimeout);
+          hoverTimeout = null;
+        }
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+
+        if (dotsContainer) dotsContainer.style.opacity = '0';
+
+        currentIndex = 0;
+        updateSliderPosition();
+      });
+    });
+  }
+
+  // Initialize and run on initial page load
+  attachCategoryClickListeners();
+  attachGridCartCTAEvents();
+  attachPaginationEvents();
+  initAccordionUI();
+  initActiveChips();
+  syncSlidersUI();
+  syncSortUI();
+  initCardSlideshows();
 });

@@ -159,7 +159,7 @@ CLOUDINARY_MAPPING = {
 }
 
 def resolve_image(image_url):
-    from flask import url_for
+    from flask import url_for, has_request_context
     # Default Cloudinary Placeholder
     PLACEHOLDER = CLOUDINARY_MAPPING.get("placeholder.png", "https://res.cloudinary.com/dljlnkh6x/image/upload/v1777410770/talbeena-gallery/static/we9iq7o3zsg4axrtkwbi.png")
     
@@ -168,6 +168,9 @@ def resolve_image(image_url):
     
     if image_url.startswith("http"):
         return image_url
+        
+    if image_url.startswith("/static/") or image_url.startswith("static/"):
+        return "/" + image_url.lstrip("/")
         
     # Check mapping first
     clean_url = image_url.lstrip("/")
@@ -179,14 +182,23 @@ def resolve_image(image_url):
         
     # If it's a relative path, we check if it's meant to be a static asset
     if image_url.startswith("/uploads/") or image_url.startswith("uploads/"):
-        return url_for("static", filename=image_url.lstrip("/"))
+        filename = image_url.lstrip("/")
+        if has_request_context():
+            return url_for("static", filename=filename)
+        return f"/static/{filename}"
         
     # Already a valid static path (images/ or css/ etc.)
     if "/" in image_url.lstrip("/"):
-        return url_for("static", filename=image_url.lstrip("/"))
+        filename = image_url.lstrip("/")
+        if has_request_context():
+            return url_for("static", filename=filename)
+        return f"/static/{filename}"
         
     # Fallback to static images folder for bare filenames
-    return url_for("static", filename=f"images/{image_url.lstrip('/')}")
+    filename = f"images/{image_url.lstrip('/')}"
+    if has_request_context():
+        return url_for("static", filename=filename)
+    return f"/static/{filename}"
 
 
 def _strip_html(text):

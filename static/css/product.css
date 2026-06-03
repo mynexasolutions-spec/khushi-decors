@@ -2,7 +2,7 @@
 .product-detail-wrapper {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem 4rem;
+  padding: 1.2rem 1.5rem 3rem;
 }
 
 .product-detail-grid {
@@ -10,7 +10,7 @@
   grid-template-columns: 1.15fr 0.85fr;
   gap: 3.5rem;
   align-items: flex-start;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 /* Left side gallery styling */
@@ -28,7 +28,7 @@
 .gallery-thumb-item {
   width: 78px;
   height: 78px;
-  border-radius: 14px;
+  border-radius: 0;
   object-fit: cover;
   cursor: pointer;
   border: 2px solid transparent;
@@ -48,7 +48,7 @@
 
 .product-gallery-main {
   flex: 1;
-  border-radius: 24px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
   height: 480px;
@@ -144,7 +144,7 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--soft-gray);
-  border-radius: 40px;
+  border-radius: 0;
   width: fit-content;
   padding: 0.2rem;
 }
@@ -154,7 +154,7 @@
   height: 28px;
   border: none;
   background: white;
-  border-radius: 50%;
+  border-radius: 0;
   cursor: pointer;
   font-weight: bold;
 }
@@ -274,3 +274,137 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --- PREMIUM VARIATION SELECTORS & INTERACTIVE REVIEW STYLES --- */
+
+/* Swatches styling */
+.swatch-btn:hover {
+  border-color: var(--primary) !important;
+  color: var(--dark-charcoal) !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  transform: translateY(-1px);
+}
+
+.swatch-btn.active {
+  border-color: var(--primary) !important;
+  background-color: #fcf6f3 !important;
+  color: var(--primary) !important;
+  box-shadow: 0 0 0 1px var(--primary), 0 4px 12px rgba(193, 122, 90, 0.15);
+}
+
+/* Dropdown select custom styling */
+.variation-select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(193, 122, 90, 0.15);
+}
+
+/* Stock Badges */
+.stock-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.stock-badge.in-stock {
+  background-color: #e8f6ed;
+  color: #1f8546;
+  border: 1px solid #cceade;
+}
+
+.stock-badge.out-of-stock {
+  background-color: #fae9e8;
+  color: #c7362b;
+  border: 1px solid #f6d1cf;
+}
+
+/* Table specs styling */
+.specs-table tr {
+  transition: background-color 0.2s ease;
+}
+
+.specs-table tr:hover {
+  background-color: #faf9f6;
+}
+
+/* Disabled Action Buttons */
+.btn-primary:disabled,
+.btn-outline:disabled {
+  background-color: #eae6df !important;
+  border-color: #eae6df !important;
+  color: #8a857a !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Review layout tweaks */
+.reviews-summary-block {
+  box-shadow: 0 4px 15px rgba(193, 122, 90, 0.04);
+}
+
+.review-item-card {
+  transition: all 0.2s ease;
+}
+
+.review-item-card:hover {
+  background-color: #faf9f6;
+  border-radius: 12px;
+  padding-left: 0.75rem;
+  margin-left: -0.75rem;
+  padding-right: 0.75rem;
+  margin-right: -0.75rem;
+}
+
+/* Responsive adjustments for reviews */
+@media (max-width: 600px) {
+  .reviews-summary-block {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+  .summary-score-column {
+    border-right: none !important;
+    border-bottom: 1px solid #f0ede8;
+    padding-right: 0 !important;
+    padding-bottom: 1.5rem;
+  }
+}
+
+/* --- PREMIUM GALLERY ARROW NAVIGATION & SWIPE EFFECT --- */
+
+.gallery-nav-btn {
+  opacity: 0;
+  transition: opacity 0.3s ease, background-color 0.25s ease, transform 0.25s ease, color 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+.product-gallery-main:hover .gallery-nav-btn {
+  opacity: 1;
+}
+
+.gallery-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.85) !important;
+  transform: translateY(-50%) scale(1.08) !important;
+  color: var(--primary) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Touchscreens and mobile responsiveness: keep arrows active and visible */
+@media (max-width: 900px) {
+  .gallery-nav-btn {
+    opacity: 0.75;
+    background: rgba(255, 255, 255, 0.6) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery-nav-btn {
+    width: 36px !important;
+    height: 36px !important;
+    left: 8px !important;
+  }
+  #galleryNextBtn {
+    right: 8px !important;
+  }
+}
+
+

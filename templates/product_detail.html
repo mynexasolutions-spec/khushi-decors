@@ -3,121 +3,388 @@
 {% block title %}{{ product.name }} | Khushi Decors{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="/static/css/product.css">
+<link rel="stylesheet" href="/static/css/shop.css?v=2.2">
+<link rel="stylesheet" href="/static/css/product.css?v=2.2">
 {% endblock %}
 
 {% block content %}
 <div class="product-detail-wrapper">
-  <!-- Back Button navigation -->
-  <button class="btn btn-outline" onclick="window.history.back()" style="border-radius: 50px; padding: 0.6rem 1.5rem; margin-bottom: 1.5rem;">
-    <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Back to Shop
-  </button>
+  <!-- Premium Breadcrumbs Navigation -->
+  <nav class="product-breadcrumbs" style="font-size: 0.82rem; color: #8C877D; margin-bottom: 1rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 500;">
+    <a href="/" style="text-decoration: none; color: #8C877D; transition: color 0.2s;">Home</a>
+    <span style="margin: 0 8px; opacity: 0.6;">/</span>
+    <a href="/shop" style="text-decoration: none; color: #8C877D; transition: color 0.2s;">Shop</a>
+    <span style="margin: 0 8px; opacity: 0.6;">/</span>
+    <a href="/shop?category={{ product.category_slug or 'decor' }}" style="text-decoration: none; color: #8C877D; transition: color 0.2s;">{{ product.category_name or 'Decor' }}</a>
+    <span style="margin: 0 8px; opacity: 0.6;">/</span>
+    <span style="color: var(--dark-charcoal); font-weight: 600;">{{ product.name }}</span>
+  </nav>
 
   <div class="product-detail-grid">
     <!-- Left Column: Thumbnail Switcher Gallery -->
     <div class="product-gallery-container">
-      <div class="product-gallery-thumbs">
+      <div class="product-gallery-thumbs" id="productGalleryThumbs">
         {% for url in gallery_images %}
           <img src="{{ url }}" alt="Thumbnail {{ loop.index }}" class="gallery-thumb-item {% if loop.first %}active{% endif %}" data-idx="{{ loop.index0 }}">
         {% endfor %}
       </div>
-      <div class="product-gallery-main">
+      <div class="product-gallery-main" style="position: relative;">
+        <!-- Left Arrow Button -->
+        <button id="galleryPrevBtn" class="gallery-nav-btn" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--dark-charcoal); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all 0.25s ease; outline: none; border-style: solid;" aria-label="Previous image">
+          <i class="fas fa-chevron-left" style="font-size: 0.95rem;"></i>
+        </button>
+
         <img src="{{ gallery_images[0] }}" alt="{{ product.name }}" id="mainProductImg">
+
+        <!-- Right Arrow Button -->
+        <button id="galleryNextBtn" class="gallery-nav-btn" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--dark-charcoal); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all 0.25s ease; outline: none; border-style: solid;" aria-label="Next image">
+          <i class="fas fa-chevron-right" style="font-size: 0.95rem;"></i>
+        </button>
       </div>
     </div>
 
     <!-- Right Column: Details & Actions -->
-    <div class="product-info-panel">
-      <span class="product-info-cat">{{ category_label }}</span>
-      <h2 class="product-info-title">{{ product.name }}</h2>
+    <div class="product-info-panel" style="display: flex; flex-direction: column; gap: 1.2rem;">
       
-      <div class="product-info-rating">
-        <div class="stars">
-          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+      <!-- Top Meta Block: Category + SKU + Stock Badge in one elegant row -->
+      <div class="product-meta-header" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1.5px solid #f0ede8; padding-bottom: 0.85rem;">
+        <span class="product-info-cat" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; color: var(--primary);">
+          {{ product.category_name or 'Decor' }}
+        </span>
+        <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.82rem; color: #8c877d;">
+          <span id="detailProductSku" style="font-family: monospace;">SKU: {{ product.sku or 'N/A' }}</span>
+          <span style="color: #dcd8d0;">|</span>
+          <span id="detailProductStock" class="stock-badge {% if product.stock_status == 'out_of_stock' %}out-of-stock{% else %}in-stock{% endif %}" style="padding: 2px 8px; border-radius: 0px; font-weight: 700; font-size: 0.7rem; border-width: 1px; border-style: solid;">
+            {% if product.stock_status == 'out_of_stock' %}
+              Out of Stock
+            {% else %}
+              In Stock {% if product.stock_quantity and product.stock_quantity > 0 %}({{ product.stock_quantity }} left){% endif %}
+            {% endif %}
+          </span>
         </div>
-        <span class="reviews-count">(18 Verified Reviews)</span>
       </div>
 
-      <div class="product-info-price">₹{{ product.price }}</div>
-      
-      <p class="product-info-desc">
-        Artisan crafted from premium biodegradable materials. This statement masterpiece brings elegant styling accents and soft organic texture to bedrooms, hallways, or living spaces. Designed carefully to harmonize with modern minimalist and rich bohemian decors alike.
-      </p>
-
-      <div class="product-info-actions">
-        <div class="qty-control-wrapper">
-          <span class="qty-control-label">Quantity:</span>
-          <div class="quantity-selector">
-            <button id="detailQtyDec">-</button>
-            <span id="detailQtyVal">1</span>
-            <button id="detailQtyInc">+</button>
+      <!-- Main Title Block -->
+      <div style="margin-top: 0.15rem;">
+        <h2 class="product-info-title" id="detailProductTitle" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--dark-charcoal); line-height: 1.2; margin: 0 0 0.5rem 0;">{{ product.name }}</h2>
+        
+        <!-- Ratings & Reviews Block -->
+        <div class="product-info-rating" style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem;">
+          <div class="stars" style="color: #FFB020; display: flex; gap: 2px;">
+            {% for i in range(full_stars) %}
+              <i class="fas fa-star"></i>
+            {% endfor %}
+            {% if half_star %}
+              <i class="fas fa-star-half-alt"></i>
+            {% endif %}
+            {% for i in range(empty_stars) %}
+              <i class="far fa-star"></i>
+            {% endfor %}
           </div>
-        </div>
-        <div class="btn-group" style="justify-content: flex-start; margin-top: 1rem; gap: 1.25rem;">
-          <button class="btn btn-primary" id="detailAddToCart" data-name="{{ product.name }}" data-price="{{ product.price }}" style="padding: 0.9rem 2.5rem; font-size: 0.95rem; font-weight: 700; border-radius: 50px;">
-            <i class="fas fa-bag-shopping" style="margin-right: 8px;"></i> Add to Bag
-          </button>
-          <button class="btn btn-outline" id="detailBuyNow" data-name="{{ product.name }}" data-price="{{ product.price }}" style="padding: 0.9rem 2.5rem; font-size: 0.95rem; font-weight: 700; border-radius: 50px; border-width: 2px;">
-            Buy Now
-          </button>
+          <span class="reviews-count" style="color: #7E7970; font-weight: 500;">
+            {% if num_reviews > 0 %}
+              ({{ avg_rating }} / 5 from {{ num_reviews }} Verified {% if num_reviews == 1 %}Review{% else %}Reviews{% endif %})
+            {% else %}
+              (No reviews yet)
+            {% endif %}
+          </span>
         </div>
       </div>
 
-      <div class="product-detail-badges">
-        <div class="detail-badge-item"><i class="fas fa-truck"></i> Free Shipping on ₹2000+</div>
-        <div class="detail-badge-item"><i class="fas fa-rupee-sign"></i> Cash on Delivery</div>
-        <div class="detail-badge-item"><i class="fas fa-shield-halved"></i> 100% Handcrafted</div>
-        <div class="detail-badge-item"><i class="fas fa-seedling"></i> Eco-friendly Materials</div>
+      <!-- Price & Short Description Block in one elegant card -->
+      <div class="price-desc-card" style="background: #faf9f6; border: 1.5px solid #f2e1d9; border-radius: 0px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; box-shadow: 0 4px 15px rgba(193, 122, 90, 0.02);">
+        <div class="product-info-price" id="detailProductPrice" style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 0; padding: 0; border: none;">
+          {% if product.sale_price and product.sale_price < product.price %}
+            <span class="original-price" style="text-decoration: line-through; color: #8a857a; font-size: 1.1rem; margin-right: 8px;">₹{{ "%.0f"|format(product.price) }}</span>
+            <span class="current-price" style="color: var(--primary); font-weight: 800;">₹{{ "%.0f"|format(product.sale_price) }}</span>
+          {% else %}
+            <span class="current-price" style="color: var(--dark-charcoal); font-weight: 800;">₹{{ "%.0f"|format(product.price) }}</span>
+          {% endif %}
+        </div>
+        <p class="product-info-desc" id="detailProductShortDesc" style="color: #5C5850; line-height: 1.6; font-size: 0.9rem; margin: 0; border-top: 1.5px dashed #f2e1d9; padding-top: 0.75rem;">
+          {{ product.short_description or 'Artisan crafted premium masterwork. Uniquely styled statement accent designed to bring timeless aesthetic sophistication and exquisite craftsmanship to modern home spaces.' }}
+        </p>
+      </div>
+
+      <!-- Dynamic Variation Selectors -->
+      {% if product.type == 'variable' and attributes %}
+        <div class="product-variations-wrapper" style="margin-top: 0.5rem; margin-bottom: 0.5rem; border-top: 1px solid #f0ede8; border-bottom: 1px solid #f0ede8; padding: 1rem 0;">
+          {% for attr in attributes %}
+            {% if attr.variation_type == 'primary' %}
+              <!-- Primary Swatch Selector for Shape -->
+              <div class="variation-group" data-attr-id="{{ attr.id }}" data-attr-slug="{{ attr.slug }}" style="margin-bottom: 1rem;">
+                <label class="variation-label" style="display: block; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 0.5rem; color: var(--dark-charcoal);">
+                  Select {{ attr.name }}: <span class="selected-val-label" id="label-{{ attr.slug }}" style="color: var(--primary); font-weight: 600; text-transform: none; margin-left: 4px;"></span>
+                </label>
+                <div class="swatches-container" style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                  {% for val in attr['values'] %}
+                    <button class="swatch-btn" data-value-id="{{ val.id }}" data-value="{{ val.value }}" title="{{ val.value }}" style="position: relative; overflow: hidden; background: #fff; border: 1.5px solid #dcd8d0; padding: 0.6rem 1.25rem; border-radius: 0px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #5c5850; transition: all 0.25s ease; display: flex; align-items: center; gap: 8px;">
+                      {% if val.image_url %}
+                        <img src="{{ val.image_url }}" alt="{{ val.value }}" style="width: 20px; height: 20px; border-radius: 0px; object-fit: cover;">
+                      {% endif %}
+                      <span>{{ val.value }}</span>
+                    </button>
+                  {% endfor %}
+                </div>
+              </div>
+            {% else %}
+              <!-- Secondary Select Dropdown for Size -->
+              <div class="variation-group" data-attr-id="{{ attr.id }}" data-attr-slug="{{ attr.slug }}" style="margin-bottom: 0.75rem;">
+                <label class="variation-label" style="display: block; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 0.5rem; color: var(--dark-charcoal);">
+                  Choose {{ attr.name }}:
+                </label>
+                <div class="select-dropdown-wrapper" style="position: relative; max-width: 300px;">
+                  <select class="variation-select" style="width: 100%; border: 1.5px solid #dcd8d0; padding: 0.75rem 1.25rem; border-radius: 0px; font-size: 0.9rem; font-weight: 600; color: #5c5850; background: #fff; cursor: pointer; outline: none; transition: all 0.25s ease;">
+                    {% for val in attr['values'] %}
+                      <option value="{{ val.value }}" data-value-id="{{ val.id }}">{{ val.value }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Actions Block: Quantity and buttons inline flex -->
+      <div class="product-info-actions" style="margin-top: 0.5rem; border-top: none; padding-top: 0; border-bottom: 1px solid #f0ede8; padding-bottom: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;">
+          
+          <!-- Compact Pill Quantity Selector -->
+          <div class="quantity-selector" style="display: flex; align-items: center; gap: 0.5rem; background: #faf9f6; border: 1.5px solid #dcd8d0; border-radius: 0px; padding: 0.25rem; width: fit-content; height: 48px; box-sizing: border-box;">
+            <button id="detailQtyDec" style="width: 32px; height: 32px; border: none; background: white; border-radius: 0px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background 0.2s;">-</button>
+            <span id="detailQtyVal" style="padding: 0 10px; font-weight: 700; font-size: 0.95rem; min-width: 24px; text-align: center;">1</span>
+            <button id="detailQtyInc" style="width: 32px; height: 32px; border: none; background: white; border-radius: 0px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background 0.2s;">+</button>
+          </div>
+          
+          <!-- CTA Action Buttons Flex -->
+          <div class="btn-group" style="display: flex; flex: 1; min-width: 240px; gap: 0.75rem; margin: 0;">
+            <button class="btn btn-primary" id="detailAddToCart" data-name="{{ product.name }}" data-price="{{ product.price }}" style="flex: 1.2; height: 48px; border-radius: 0px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s ease;">
+              <i class="fas fa-bag-shopping"></i> Add to Bag
+            </button>
+            <button class="btn btn-outline" id="detailBuyNow" data-name="{{ product.name }}" data-price="{{ product.price }}" style="flex: 0.8; height: 48px; border-radius: 0px; font-weight: 700; font-size: 0.9rem; border-width: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.25s ease;">
+              Buy Now
+            </button>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Badges Block: Elegant Horizontal Inline Badges -->
+      <div class="product-detail-badges" style="display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; justify-content: flex-start; margin-top: 0.25rem;">
+        <div class="detail-badge-item" style="font-size: 0.8rem; color: #5C5850; font-weight: 600; display: flex; align-items: center; gap: 6px;"><i class="fas fa-truck" style="color: var(--primary); font-size: 0.85rem;"></i> Free Shipping on ₹{{ "%.0f"|format(free_shipping_threshold) }}+</div>
+        <div class="detail-badge-item" style="font-size: 0.8rem; color: #5C5850; font-weight: 600; display: flex; align-items: center; gap: 6px;"><i class="fas fa-rupee-sign" style="color: var(--primary); font-size: 0.85rem;"></i> Cash on Delivery</div>
+        <div class="detail-badge-item" style="font-size: 0.8rem; color: #5C5850; font-weight: 600; display: flex; align-items: center; gap: 6px;"><i class="fas fa-shield-halved" style="color: var(--primary); font-size: 0.85rem;"></i> 100% Handcrafted</div>
+        <div class="detail-badge-item" style="font-size: 0.8rem; color: #5C5850; font-weight: 600; display: flex; align-items: center; gap: 6px;"><i class="fas fa-seedling" style="color: var(--primary); font-size: 0.85rem;"></i> Eco-friendly Materials</div>
       </div>
     </div>
   </div>
 
-  <!-- Long Description Specs/Accordions -->
+  <!-- Dynamic Long Description & Specifications Tabs -->
   <div class="product-description-tabs" style="margin-top: 3.5rem; border-top: 1px solid #f0ede8; padding-top: 3rem;">
     <div class="tabs-header" style="display:flex; gap: 2rem; border-bottom: 2.5px solid #f7f5f0; margin-bottom: 1.5rem;">
-      <h3 class="tab-title active" style="font-family:'Playfair Display', serif; font-size:1.4rem; padding-bottom: 0.75rem; border-bottom: 2.5px solid var(--primary); margin-bottom: -2.5px; color: var(--dark-charcoal);">Detailed Craftsmanship & Styling Guidelines</h3>
+      <h3 class="tab-title active" id="tabBtnDesc" style="font-family:'Playfair Display', serif; font-size:1.3rem; padding-bottom: 0.75rem; border-bottom: 2.5px solid var(--primary); margin-bottom: -2.5px; color: var(--dark-charcoal); cursor: pointer; transition: all 0.2s ease;">Detailed Craftsmanship</h3>
+      <h3 class="tab-title" id="tabBtnSpecs" style="font-family:'Playfair Display', serif; font-size:1.3rem; padding-bottom: 0.75rem; border-bottom: 2.5px solid transparent; margin-bottom: -2.5px; color: #8a857a; cursor: pointer; transition: all 0.2s ease;">Specifications</h3>
     </div>
-    <div class="tab-content" style="color:#5C5850; line-height: 1.8; font-size: 0.95rem; display: flex; flex-direction: column; gap: 1rem;">
-      <p>
-        This hand-selected piece represents the pinnacle of sustainable luxury. Individually woven or structured by multi-generational Indian craftspeople, it features carefully processed natural raw materials (organic cotton fibers, seasoned teak wood, or hand-fired ceramic clay) sourced directly from local eco-farms.
-      </p>
-      <p>
-        <strong>Design Styling Recommendations:</strong> For the ultimate designer look, display this piece in high-visibility areas such as entryway consoles, bedroom nightstands, or central living space gallery walls. Pair it with soft warm-tone accent lighting and dry organic botanical sprigs to capture an inviting, cohesive, and magazine-worthy aesthetic.
-      </p>
-      <ul style="padding-left: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; list-style-type: square; color: #5C5850;">
-        <li><strong>Materials:</strong> 100% natural organic cotton, seasoned pine support, clay components</li>
-        <li><strong>Dimensions:</strong> Standard Size: 32" H x 18" W x 2" D</li>
-        <li><strong>Origin:</strong> Proudly designed and hand-woven in Maharashtra, India</li>
-        <li><strong>Care:</strong> Gentle dry dusting or light vacuum clean; avoid direct exposure to moisture</li>
-      </ul>
+    
+    <!-- Tab content: Detailed Craftsmanship Description -->
+    <div class="tab-content" id="tabContentDesc" style="color:#5C5850; line-height: 1.8; font-size: 0.95rem; display: flex; flex-direction: column; gap: 1rem;">
+      {{ product.description|safe }}
+    </div>
+
+    <!-- Tab content: Specifications list -->
+    <div class="tab-content" id="tabContentSpecs" style="color:#5C5850; line-height: 1.8; font-size: 0.95rem; display: none;">
+      <table class="specs-table" style="width: 100%; border-collapse: collapse; margin-top: 0.5rem;">
+        <tbody>
+          <tr style="border-bottom: 1px solid #f0ede8;">
+            <td style="padding: 0.8rem 1rem; font-weight: 700; width: 30%; color: var(--dark-charcoal);">Category</td>
+            <td style="padding: 0.8rem 1rem; color: #5c5850;">{{ product.category_name or 'Decor' }}</td>
+          </tr>
+          {% if product.brand_name %}
+          <tr style="border-bottom: 1px solid #f0ede8;">
+            <td style="padding: 0.8rem 1rem; font-weight: 700; color: var(--dark-charcoal);">Brand</td>
+            <td style="padding: 0.8rem 1rem; color: #5c5850;">{{ product.brand_name }}</td>
+          </tr>
+          {% endif %}
+          <tr style="border-bottom: 1px solid #f0ede8;">
+            <td style="padding: 0.8rem 1rem; font-weight: 700; color: var(--dark-charcoal);">Base SKU</td>
+            <td style="padding: 0.8rem 1rem; color: #5c5850; font-family: monospace;">{{ product.sku or 'N/A' }}</td>
+          </tr>
+          {% for attr in attributes %}
+          <tr style="border-bottom: 1px solid #f0ede8;">
+            <td style="padding: 0.8rem 1rem; font-weight: 700; color: var(--dark-charcoal);">{{ attr.name }} Options</td>
+            <td style="padding: 0.8rem 1rem; color: #5c5850;">
+              {% for val in attr['values'] %}{{ val.value }}{% if not loop.last %}, {% endif %}{% endfor %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Dynamic Reviews Section -->
+  <div class="product-reviews-container" style="margin-top: 4rem; border-top: 1px solid #f0ede8; padding-top: 3.5rem;">
+    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--dark-charcoal); margin-bottom: 1.5rem;">Customer Reviews</h3>
+    
+    <div class="reviews-summary-block" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem; margin-bottom: 3rem; background: #faf9f6; border-radius: 16px; padding: 2rem; border: 1px solid #f2e1d9;">
+      <!-- Aggregate Rating Metrics -->
+      <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-right: 1px solid #f0ede8; padding-right: 2rem;" class="summary-score-column">
+        <span style="font-size: 3.2rem; font-weight: 800; color: var(--primary); line-height: 1;">{{ avg_rating }}</span>
+        <div class="stars" style="color: #E6A15C; margin: 0.5rem 0; font-size: 1.25rem;">
+          {% for i in range(full_stars) %}
+            <i class="fas fa-star"></i>
+          {% endfor %}
+          {% if half_star %}
+            <i class="fas fa-star-half-alt"></i>
+          {% endif %}
+          {% for i in range(empty_stars) %}
+            <i class="far fa-star"></i>
+          {% endfor %}
+        </div>
+        <span style="font-size: 0.9rem; color: #8a857a;">Based on {{ num_reviews }} {% if num_reviews == 1 %}review{% else %}reviews{% endif %}</span>
+      </div>
+
+      <!-- Review Actions CTA -->
+      <div style="display: flex; flex-direction: column; justify-content: center;" class="summary-actions-column">
+        {% if session.get('user') %}
+          <h4 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--dark-charcoal); margin-bottom: 0.5rem;">Share your feedback</h4>
+          <p style="font-size: 0.9rem; color: #5c5850; margin-bottom: 1rem;">Bought this product? Tell others about your styling experience!</p>
+          <button class="btn btn-outline" id="toggleReviewFormBtn" style="align-self: flex-start; padding: 0.6rem 1.5rem; border-radius: 50px; font-weight: 600; font-size: 0.85rem;">
+            Write a Review
+          </button>
+        {% else %}
+          <h4 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--dark-charcoal); margin-bottom: 0.5rem;">Write a review</h4>
+          <p style="font-size: 0.9rem; color: #5c5850; margin-bottom: 1.2rem;">Please log in to share your rating and review for this product.</p>
+          <a href="{{ url_for('auth.login', next=request.url) }}" class="btn btn-primary" style="align-self: flex-start; padding: 0.6rem 1.8rem; border-radius: 50px; font-weight: 600; font-size: 0.85rem; text-decoration: none; text-align: center;">
+            Log In to Review
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Collapsible Submission Form -->
+    {% if session.get('user') %}
+      <div class="review-submission-form-wrapper" id="reviewFormWrapper" style="display: none; background: #fff; border: 1.5px solid #f2e1d9; border-radius: 16px; padding: 2rem; margin-bottom: 3rem; transition: all 0.3s ease;">
+        <h4 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--dark-charcoal);">Submit Your Review</h4>
+        <form action="/product/{{ product.id }}/review" method="POST" id="productReviewForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          
+          <!-- Interactive Star Selector -->
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; color: var(--dark-charcoal); margin-bottom: 0.5rem;">
+              Your Rating:
+            </label>
+            <div class="interactive-star-selector" style="display: flex; gap: 8px; font-size: 1.8rem; color: #dcd8d0; cursor: pointer;">
+              <i class="far fa-star star-select-icon" data-rating="1"></i>
+              <i class="far fa-star star-select-icon" data-rating="2"></i>
+              <i class="far fa-star star-select-icon" data-rating="3"></i>
+              <i class="far fa-star star-select-icon" data-rating="4"></i>
+              <i class="far fa-star star-select-icon" data-rating="5"></i>
+            </div>
+            <input type="hidden" name="rating" id="reviewFormRatingInput" value="" required>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <label for="reviewComment" style="display: block; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; color: var(--dark-charcoal); margin-bottom: 0.5rem;">
+              Your Review Comment:
+            </label>
+            <textarea name="comment" id="reviewComment" rows="4" placeholder="Share your experience (minimum 10 characters)..." style="width: 100%; border: 1.5px solid #dcd8d0; border-radius: 12px; padding: 1rem; font-size: 0.95rem; resize: vertical; outline: none; transition: all 0.25s ease;" required></textarea>
+          </div>
+
+          <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; border-radius: 50px; font-weight: 700; font-size: 0.9rem;">
+              Submit Review
+            </button>
+            <button type="button" class="btn btn-outline" id="cancelReviewFormBtn" style="padding: 0.75rem 2rem; border-radius: 50px; font-weight: 700; font-size: 0.9rem;">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    {% endif %}
+
+    <!-- Individual Reviews List -->
+    <div class="reviews-list-block" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      {% if reviews %}
+        {% for rev in reviews %}
+          <div class="review-item-card" style="border-bottom: 1px solid #f0ede8; padding-bottom: 1.5rem; display: flex; gap: 1.5rem;">
+            <div style="flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; background: #eae6df; display: flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 700; font-size: 1.2rem;">
+              {{ rev.reviewer_name[0]|upper }}
+            </div>
+            <div style="flex-grow: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                <h5 style="font-weight: 700; font-size: 0.95rem; color: var(--dark-charcoal); margin: 0;">{{ rev.reviewer_name }}</h5>
+                <span style="font-size: 0.8rem; color: #8a857a;">{{ rev.created_at.strftime('%d %b %Y') if rev.created_at else 'Verified Buyer' }}</span>
+              </div>
+              <div class="stars" style="color: #E6A15C; font-size: 0.85rem; margin-bottom: 0.6rem;">
+                {% for i in range(rev.rating) %}
+                  <i class="fas fa-star"></i>
+                {% endfor %}
+                {% for i in range(5 - rev.rating) %}
+                  <i class="far fa-star"></i>
+                {% endfor %}
+              </div>
+              <p style="color: #5c5850; font-size: 0.95rem; line-height: 1.6; margin: 0;">
+                {{ rev.body }}
+              </p>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p style="text-align: center; color: #8a857a; padding: 2rem 0; font-style: italic;">
+          No reviews yet. Be the first to share your thoughts!
+        </p>
+      {% endif %}
     </div>
   </div>
 
   <!-- Related Products Grid section -->
   {% if related_products %}
-    <div class="related-products-section">
+    <div class="related-products-section" style="margin-top: 4rem; border-top: 1px solid #f0ede8; padding-top: 3.5rem;">
       <h3 class="related-products-title">Complete the Styling Look</h3>
       <p class="related-products-subtitle">Handpicked masterworks to pair perfectly in your room spaces</p>
       
       <div class="related-grid">
         {% for item in related_products %}
-          <div class="shop-product-card related-product-card" data-name="{{ item.name }}" onclick="window.location.href='/product/{{ item.id }}'">
-            <div class="shop-card-img-wrap" style="cursor: pointer;">
-              <img src="{{ resolve_image(item.image_url) }}" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='/static/images/placeholder.png'">
-              <span class="shop-card-cat-tag">{{ category_label }}</span>
+          <div class="shop-product-card related-product-card" data-name="{{ item.name }}" style="background: white; border-radius: 0px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid #F0EDE8; transition: all 0.3s cubic-bezier(0.2,0,0,1); display: flex; flex-direction: column; position: relative;">
+            
+            <!-- Image Area (Sourced directly from primary URL, no hover slideshow) -->
+            <div class="shop-card-img-wrap" style="cursor: pointer; position: relative; overflow: hidden; width: 100%; display: block;" onclick="window.location.href='/product/{{ item.id }}'">
+              <img src="{{ resolve_image(item.image_url) }}" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='/static/images/placeholder.png'" style="width: 100%; height: 220px; object-fit: cover; display: block; pointer-events: none;">
+              
+              <!-- Slide-up Add to Bag button on hover (Overlay Myntra-style) -->
+              <button class="btn add-to-cart hover-add-btn" data-name="{{ item.name }}" data-price="{{ '%.0f'|format(item.sale_price or item.price) }}" style="position: absolute; bottom: 0; left: 0; right: 0; background: #ffffff; color: var(--dark-charcoal); border-radius: 0px; font-weight: 700; border: 1.5px solid #dcd8d0; margin: 12px; padding: 0.65rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.8px; transform: translateY(120%); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 10; display: flex; align-items: center; justify-content: center; gap: 6px; white-shadow: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; pointer-events: auto;">
+                <i class="fas fa-bag-shopping"></i> Add to Bag
+              </button>
             </div>
-            <div class="shop-card-body">
-              <h4 class="shop-card-name" style="cursor: pointer;">{{ item.name }}</h4>
-              <p class="shop-card-price">₹{{ "%.0f"|format(item.price) }}</p>
-              <div class="shop-card-actions">
-                <button class="btn add-to-cart" data-name="{{ item.name }}" data-price="{{ '%.0f'|format(item.sale_price or item.price) }}">
-                  <i class="fas fa-bag-shopping"></i> Add
-                </button>
-                <button class="btn btn-outline buy-now" data-name="{{ item.name }}" data-price="{{ '%.0f'|format(item.sale_price or item.price) }}">
-                  Buy Now
-                </button>
+
+            <!-- Card Body Info Block (Clean Minimalist styling) -->
+            <div class="shop-card-body" style="padding: 0.75rem 1.1rem 1.3rem; display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+              
+              <!-- Placeholder to match shop page cards vertical layout alignment since no slideshow dots -->
+              <div style="height: 6px; margin-bottom: 4px;"></div>
+
+              <span class="shop-card-cat-label" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; color: #8C877D; margin-bottom: 0.05rem; display: block;">
+                {{ product.category_name or 'Decor' }}
+              </span>
+              <h4 class="shop-card-name" style="cursor: pointer; font-size: 0.92rem; font-weight: 700; color: var(--dark-charcoal); line-height: 1.35; margin: 0; flex-grow: 1;" onclick="window.location.href='/product/{{ item.id }}'">
+                {{ item.name }}
+              </h4>
+              
+              <!-- Pricing Row: Current Price | Strikethrough Original Price | Red savings badge -->
+              <div class="shop-card-price-row" style="margin-top: 0.2rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-family: 'Plus Jakarta Sans', sans-serif;">
+                {% if item.sale_price and item.sale_price < item.price %}
+                  {% set savings = (((item.price - item.sale_price) / item.price) * 100) | round | int %}
+                  <span class="current-price" style="color: var(--dark-charcoal); font-weight: 800; font-size: 1.05rem;">₹{{ "%.0f"|format(item.sale_price) }}</span>
+                  <span class="original-price" style="text-decoration: line-through; color: #A09A90; font-size: 0.88rem; font-weight: 500;">₹{{ "%.0f"|format(item.price) }}</span>
+                  <span class="shop-card-discount-tag" style="background-color: #D94638; color: #ffffff; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; border-radius: 0px;">Save {{ savings }}%</span>
+                {% else %}
+                  <span class="current-price" style="color: var(--dark-charcoal); font-weight: 800; font-size: 1.05rem;">₹{{ "%.0f"|format(item.price) }}</span>
+                {% endif %}
               </div>
             </div>
+
           </div>
         {% endfor %}
       </div>
@@ -127,5 +394,10 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/product.js"></script>
+<script>
+  window.PRODUCT_ATTRIBUTES = {{ variation_json|safe }};
+  window.PRODUCT_VARIATIONS = {{ vars_json|safe }};
+  window.PRESELECT_VALUE = "{{ request.args.get('preselect', '') }}";
+</script>
+<script src="/static/js/product.js?v=2.2"></script>
 {% endblock %}

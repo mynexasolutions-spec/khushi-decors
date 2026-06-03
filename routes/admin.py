@@ -204,18 +204,31 @@ def register(app):
 
         try:
             seven_days_ago = datetime.utcnow() - timedelta(days=7)
-            chart_rows = (db_sql.session.query(
-                              func.to_char(Order.created_at, 'DD Mon').label("day"),
-                              func.sum(Order.total_amount).label("amount")
-                          )
-                          .filter(Order.created_at >= seven_days_ago)
-                          .filter(Order.status != 'cancelled')
-                          .group_by(func.to_char(Order.created_at, 'DD Mon'), func.date_trunc('day', Order.created_at))
-                          .order_by(func.date_trunc('day', Order.created_at))
-                          .all())
+            orders = (db_sql.session.query(Order.created_at, Order.total_amount)
+                      .filter(Order.created_at >= seven_days_ago)
+                      .filter(Order.status != 'cancelled')
+                      .all())
+            
+            from collections import defaultdict
+            grouped = defaultdict(float)
+            
+            today = datetime.utcnow()
+            days = [(today - timedelta(days=i)) for i in range(7)]
+            days.reverse()
+            day_labels = [d.strftime('%d %b') for d in days]
+            
+            for d_label in day_labels:
+                grouped[d_label] = 0.0
+                
+            for o_created, o_amount in orders:
+                if o_created:
+                    d_label = o_created.strftime('%d %b')
+                    if d_label in grouped:
+                        grouped[d_label] += float(o_amount or 0)
+            
             chart_data = {
-                "labels": [r[0] for r in chart_rows],
-                "values": [float(r[1] or 0) for r in chart_rows],
+                "labels": day_labels,
+                "values": [grouped[lbl] for lbl in day_labels]
             }
         except Exception:
             chart_data = {"labels": [], "values": []}

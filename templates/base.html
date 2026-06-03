@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Global base styles -->
-  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/base.css?v=2.2">
   
   <!-- Page-specific styles placeholder -->
   {% block styles %}{% endblock %}
@@ -183,7 +183,33 @@
   </div>
 
   <!-- Shared main layout javascript -->
-  <script src="/static/js/main.js"></script>
+  <script src="/static/js/main.js?v=2.2"></script>
+  
+  <script>
+    // Synchronize Flask server session auth state to client-side localStorage
+    (function() {
+      {% if current_user %}
+        const stored = localStorage.getItem('vividUser_pro');
+        const backendUser = {
+          firstName: "{{ current_user.name.split(' ')[0] if current_user.name else 'Admin' }}",
+          lastName: "{{ current_user.name.split(' ')[1:]|join(' ') if current_user.name else 'User' }}",
+          email: "{{ current_user.email }}",
+          phone: "+91 98765 43210",
+          address: "123 Premium Design Avenue",
+          city: "Mumbai",
+          pincode: "400001",
+          state: "Maharashtra"
+        };
+        // Update localStorage if empty or values changed
+        if (!stored || JSON.parse(stored).email !== backendUser.email) {
+          localStorage.setItem('vividUser_pro', JSON.stringify(backendUser));
+        }
+      {% else %}
+        // If not logged in on the server, clear localStorage credentials
+        localStorage.removeItem('vividUser_pro');
+      {% endif %}
+    })();
+  </script>
   
   <!-- Page-specific scripts placeholder -->
   {% block scripts %}{% endblock %}
