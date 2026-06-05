@@ -1,0 +1,15 @@
+[Unit]
+Description=Khushi Decors Flask App
+After=network.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/ec2-user/khushi-decors
+Environment="PATH=/home/ec2-user/khushi-decors/venv/bin"
+EnvironmentFile=/home/ec2-user/khushi-decors/.env
+ExecStart=/home/ec2-user/khushi-decors/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8015 wsgi:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
