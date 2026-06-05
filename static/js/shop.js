@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const priceMinLabel = document.getElementById('priceMinLabel');
   const priceMaxLabel = document.getElementById('priceMaxLabel');
   
-  const shopSearchInput = document.getElementById('shopSearchInput');
+  const shopSearchInput = document.getElementById('searchInput');
   const shopSortSelect = document.getElementById('shopSortSelect');
   const mobileSortList = document.querySelectorAll('#mobileSortList .sort-item');
   const filterCatItems = document.querySelectorAll('.filter-cat-list .filter-cat-item');
@@ -406,6 +406,17 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFilters(true);
       }, 350);
     });
+
+    // Prevent navbar form submission on shop page to keep it dynamic/AJAX
+    const searchForm = shopSearchInput.closest('form');
+    if (searchForm) {
+      searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearTimeout(searchDebounce);
+        state.search = shopSearchInput.value.trim();
+        applyFilters(true);
+      });
+    }
   }
 
   // ---------- MOBILE DRAWER SLIDER CONTROLLER ----------

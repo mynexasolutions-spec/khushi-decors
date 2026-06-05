@@ -27,11 +27,11 @@
     <nav>
       <a href="/">Home</a>
       <a href="/shop">Shop All</a>
-      <a href="/shop?category=wallDecor">Wall Art</a>
-      <a href="/shop?category=artificialPlants">Artificial Plants</a>
-      <a href="/shop?category=lamps">Designer Lamps</a>
-      <a href="/shop?category=vases">Vases & Vessels</a>
-      <a href="/shop?category=clocks">Statement Clocks</a>
+      <a href="/shop?category=led-mirrors">LED Mirrors</a>
+      <a href="/shop?category=decorative-mirrors">Decorative Mirrors</a>
+      <a href="/shop?category=wall-art">Wall Art</a>
+      <a href="/shop?category=home-decor-items">Home Decor Items</a>
+      <a href="/shop?category=wall-clocks">Wall Clocks</a>
       <a href="/about">About Us</a>
       <a href="/contact">Contact Us</a>
       <a href="/account">My Account</a>
@@ -51,31 +51,20 @@
       <a class="desktop-nav-link" href="/about">About</a>
       <a class="desktop-nav-link" href="/contact">Contact</a>
     </nav>
-    <div class="header-right-side">
-      <!-- Header Search Input with options -->
-      <div class="search-container">
-        <div class="search-wrapper">
-          <i class="fas fa-search search-icon"></i>
-          <div class="search-dropdown">
-            <input type="text" id="searchInput" placeholder="Search categories..." readonly>
-            <div class="search-options" id="searchOptions">
-              <div class="search-option" data-page="allProducts"><i class="fas fa-th-large"></i> All Products</div>
-              <div class="search-option" data-page="wallDecor"><i class="fas fa-image"></i> Wall Art</div>
-              <div class="search-option" data-page="artificialPlants"><i class="fas fa-seedling"></i> Artificial Plants</div>
-              <div class="search-option" data-page="lamps"><i class="fas fa-lightbulb"></i> Designer Lamps</div>
-              <div class="search-option" data-page="vases"><i class="fas fa-flask"></i> Vases & Vessels</div>
-              <div class="search-option" data-page="clocks"><i class="fas fa-clock"></i> Statement Clocks</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- User profile & shopping bag controls -->
-      <div class="header-actions">
-        <a href="/account" title="Account"><i class="fas fa-user-circle" id="loginIcon"></i></a>
-        <div class="cart-icon" id="cartIcon" onclick="window.location.href='/cart'" style="cursor: pointer;">
-          <i class="fas fa-bag-shopping"></i>
-          <span class="cart-count" id="cartCount">0</span>
-        </div>
+    <!-- Header Search Input -->
+    <div class="search-container">
+      <form action="/shop" method="GET" class="search-wrapper">
+        <i class="fas fa-search search-icon" style="color: #8a857a; pointer-events: none;"></i>
+        <input type="text" name="search" id="searchInput" placeholder="Search products..." value="{{ request.args.get('search', '') }}">
+      </form>
+    </div>
+
+    <!-- User profile & shopping bag controls -->
+    <div class="header-actions">
+      <a href="/account" title="Account"><i class="fas fa-user-circle" id="loginIcon"></i></a>
+      <div class="cart-icon" id="cartIcon" onclick="window.location.href='/cart'" style="cursor: pointer;">
+        <i class="fas fa-bag-shopping"></i>
+        <span class="cart-count" id="cartCount">0</span>
       </div>
     </div>
   </header>

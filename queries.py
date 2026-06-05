@@ -530,7 +530,7 @@ def get_product_detail(product_id, preselect=None):
 
     if not attributes:
         attributes_rows = (db_sql.session.query(Attribute.id, Attribute.name, Attribute.slug)
-                           .distinct(Attribute.id)
+                           .distinct()
                            .join(AttributeValue, AttributeValue.attribute_id == Attribute.id)
                            .join(VariationAttributeValue, VariationAttributeValue.attribute_value_id == AttributeValue.id)
                            .join(ProductVariation, ProductVariation.id == VariationAttributeValue.variation_id)
@@ -543,7 +543,7 @@ def get_product_detail(product_id, preselect=None):
 
         # Priority 1: values checked by admin
         pav_rows = (db_sql.session.query(AttributeValue.attribute_id, AttributeValue.id, AttributeValue.value)
-                    .distinct(AttributeValue.id)
+                    .distinct()
                     .join(ProductAttributeValue, ProductAttributeValue.attribute_value_id == AttributeValue.id)
                     .filter(AttributeValue.attribute_id.in_(attr_ids), ProductAttributeValue.product_id == product_id)
                     .order_by(AttributeValue.value.asc())
@@ -554,7 +554,7 @@ def get_product_detail(product_id, preselect=None):
 
         # Priority 2: values linked through variations
         var_rows = (db_sql.session.query(AttributeValue.attribute_id, AttributeValue.id, AttributeValue.value)
-                    .distinct(AttributeValue.id)
+                    .distinct()
                     .join(VariationAttributeValue, VariationAttributeValue.attribute_value_id == AttributeValue.id)
                     .join(ProductVariation, ProductVariation.id == VariationAttributeValue.variation_id)
                     .filter(AttributeValue.attribute_id.in_(attr_ids), ProductVariation.product_id == product_id)

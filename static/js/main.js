@@ -93,39 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeSidebar) closeSidebar.addEventListener('click', hideMenu);
   if (overlay) overlay.addEventListener('click', hideMenu);
 
-  // Search dropdown trigger
-  const searchInput = document.getElementById('searchInput');
-  const searchWrapper = document.querySelector('.search-dropdown');
-  const searchOptions = document.querySelectorAll('.search-option');
 
-  if (searchInput && searchWrapper) {
-    searchInput.addEventListener('click', (e) => {
-      e.stopPropagation();
-      searchWrapper.classList.toggle('active');
-    });
-
-    searchOptions.forEach(option => {
-      option.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const page = option.dataset.page;
-        searchInput.value = option.innerText.trim();
-        searchWrapper.classList.remove('active');
-        
-        // Navigation: Go to shop page with selected category filter parameter
-        if (page === 'allProducts') {
-          window.location.href = '/shop';
-        } else if (page) {
-          window.location.href = `/shop?category=${page}`;
-        }
-      });
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!searchWrapper.contains(e.target) && e.target !== searchInput) {
-        searchWrapper.classList.remove('active');
-      }
-    });
-  }
 
   // Newsletter Subscriptions
   const newsletterBtn = document.getElementById('newsletterBtn');

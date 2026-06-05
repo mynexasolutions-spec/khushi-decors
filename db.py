@@ -67,11 +67,25 @@ def migrate():
         """CREATE OR REPLACE FUNCTION trg_sync_variation_pricing_fn()
            RETURNS TRIGGER AS $$
            BEGIN
-               UPDATE product_variations
-                  SET price = (SELECT COALESCE(price, 0) FROM products WHERE id = NEW.product_id),
-                      sale_price = (SELECT sale_price FROM products WHERE id = NEW.product_id),
-                      stock_quantity = (SELECT COALESCE(stock_quantity, 0) FROM products WHERE id = NEW.product_id)
-                WHERE id = NEW.id;
+               IF (SELECT type FROM products WHERE id = NEW.product_id) <> 'variable' THEN
+                   UPDATE product_variations
+                      SET price = (SELECT COALESCE(price, 0) FROM products WHERE id = NEW.product_id),
+                          sale_price = (SELECT sale_price FROM products WHERE id = NEW.product_id),
+                          stock_quantity = (SELECT COALESCE(stock_quantity, 0) FROM products WHERE id = NEW.product_id)
+                    WHERE id = NEW.id;
+               ELSE
+                   IF NEW.price IS NULL OR NEW.price = 0 THEN
+                       UPDATE product_variations
+                          SET price = (SELECT COALESCE(price, 0) FROM products WHERE id = NEW.product_id),
+                              sale_price = (SELECT sale_price FROM products WHERE id = NEW.product_id)
+                        WHERE id = NEW.id;
+                   END IF;
+                   IF NEW.stock_quantity IS NULL OR NEW.stock_quantity = 0 THEN
+                       UPDATE product_variations
+                          SET stock_quantity = (SELECT COALESCE(stock_quantity, 0) FROM products WHERE id = NEW.product_id)
+                        WHERE id = NEW.id;
+                   END IF;
+               END IF;
                RETURN NEW;
            END;
            $$ LANGUAGE plpgsql;""",
@@ -87,11 +101,13 @@ def migrate():
         """CREATE OR REPLACE FUNCTION trg_sync_variations_from_product_fn()
            RETURNS TRIGGER AS $$
            BEGIN
-               UPDATE product_variations
-                  SET price = COALESCE(NEW.price, 0),
-                      sale_price = NEW.sale_price,
-                      stock_quantity = COALESCE(NEW.stock_quantity, 0)
-                WHERE product_id = NEW.id;
+               IF NEW.type <> 'variable' THEN
+                   UPDATE product_variations
+                      SET price = COALESCE(NEW.price, 0),
+                          sale_price = NEW.sale_price,
+                          stock_quantity = COALESCE(NEW.stock_quantity, 0)
+                    WHERE product_id = NEW.id;
+               END IF;
                RETURN NEW;
            END;
            $$ LANGUAGE plpgsql;""",

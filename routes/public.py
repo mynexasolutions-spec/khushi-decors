@@ -555,7 +555,9 @@ def _get_variation_data(product_id):
             var_data.append({
                 "id":             vid,
                 "sku":            v.sku,
-                "price":          float(v.sale_price or v.price or 0),
+                "price":          float(v.price or 0),
+
+                "sale_price":     float(v.sale_price) if v.sale_price else None,
                 "stock_quantity": int(v.stock_quantity or 0),
                 "stock_status":   v.stock_status,
                 "images":         var_image_map.get(vid, []),
