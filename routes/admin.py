@@ -15,7 +15,7 @@ from models import (
     Product, Category, Brand, Attribute, AttributeValue, Media, ProductImage,
     ProductVariation, VariationAttributeValue, ProductAttribute, ProductAttributeValue,
     VariationImage, Order, OrderItem, Coupon, CouponUsage, BlogPost, StoreSetting,
-    NewsletterSubscriber, ProductReview, User
+    NewsletterSubscriber, ProductReview, User, ContactMessage
 )
 
 
@@ -1554,3 +1554,28 @@ def register(app):
         else:
             flash("Blog post not found.", "error")
         return redirect(url_for("admin_blog"))
+
+    # ── Inquiries / Messages ──────────────────────────────────────────────────
+
+    @app.route("/admin/messages")
+    @require_admin
+    def admin_messages():
+        messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+        return render_template("admin/messages.html", messages=messages)
+
+    @app.route("/admin/messages/<msg_id>/delete", methods=["POST"])
+    @require_admin
+    def admin_message_delete(msg_id):
+        msg = db_sql.session.get(ContactMessage, msg_id)
+        if msg:
+            try:
+                db_sql.session.delete(msg)
+                db_sql.session.commit()
+                flash("Message deleted.", "success")
+            except Exception as e:
+                db_sql.session.rollback()
+                flash(f"Error: {e}", "error")
+        else:
+            flash("Message not found.", "error")
+        return redirect(url_for("admin_messages"))
+
