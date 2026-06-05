@@ -10,22 +10,18 @@
 <div id="mainPage" class="page active-page">
   <!-- Hero Banner Slider -->
   <div class="hero-slider" id="heroSlider">
-    <div class="slide active-slide" style="background-image: linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.1)), url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1932&auto=format');">
-      <div class="slide-content">
-        <h2>Elevate Everyday Living</h2>
-        <button class="scroll-btn" id="scrollToCatalog">Shop Bestsellers</button>
-      </div>
-    </div>
-    <div class="slide" style="background-image: linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=1858&auto=format');">
-      <div class="slide-content">
-        <h2>Artisan Crafted</h2>
-        <button class="scroll-btn explore-btn" onclick="window.location.href='/shop'">Discover Now</button>
-      </div>
-    </div>
-    <div class="slide" style="background-image: linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('/static/images/WD5.jpg');">
-      <div class="slide-content">
-        <h2>Curated Interiors</h2>
-        <button class="scroll-btn explore-btn" onclick="window.location.href='/shop'">View Collection</button>
+    <div class="slide active-slide" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.45)), url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1932&auto=format');"></div>
+    <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.45)), url('https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=1858&auto=format');"></div>
+    <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.45)), url('/static/images/hero-banner.webp');"></div>
+    
+    <!-- Fixed Hero Content Overlay -->
+    <div class="hero-content-fixed">
+      <span class="hero-pretitle">Premium Home Decor</span>
+      <h1>Elevate Everyday Living</h1>
+      <p>Discover handpicked Indian artisan crafts and premium backlit LED mirrors tailored to style your sanctuary.</p>
+      <div class="hero-actions-row">
+        <button class="scroll-btn hero-primary-btn" id="scrollToCatalog">Shop Bestsellers</button>
+        <button class="scroll-btn hero-secondary-btn" onclick="document.getElementById('consultationForm').scrollIntoView({ behavior: 'smooth' })">Book Consultation</button>
       </div>
     </div>
   </div>
@@ -117,7 +113,7 @@
   <div class="brand-story-section">
     <div class="story-container">
       <div class="story-image">
-        <img src="https://images.unsplash.com/photo-1616486038856-74749f7004d7?q=80&w=1200&auto=format" alt="Artisan Crafting Interior">
+        <img src="/static/images/artisan-craft.webp" alt="Artisan Crafting Interior">
         <div class="story-floating-badge">
           <span class="badge-number">100%</span>
           <span class="badge-label">Handcrafted in India</span>
@@ -165,7 +161,7 @@
       </div>
 
       <div class="planner-visualizer" id="plannerVisualizer">
-        <div class="visualizer-image-side" id="visualizerImage" style="background-image: url('/static/images/WD1.jpg');">
+        <div class="visualizer-image-side" id="visualizerImage" style="background-image: url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=1000');">
           <div class="visualizer-overlay">
             <h3 id="visualizerTitle">Wall Art Collection</h3>
             <p id="visualizerStylingTip"><strong>Styling Tip:</strong> Combine rich textures like organic cotton macrame and boho tapestries with minimalist clocks to create an inviting, artistic focal wall.</p>
@@ -187,43 +183,85 @@
   <div class="testimonials-section">
     <h2 class="section-title">Voices of Khushi Decors Homes</h2>
     <p class="section-subtitle">Real feedback from homes we've had the pleasure of transforming</p>
-    <div class="testimonials-grid">
-      <!-- Testimonial 1 -->
-      <div class="testimonial-card">
-        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-        <p class="review-text">"The Macrame Wall Hanging completely changed the vibe of our bedroom. It looks extremely high-quality and expensive, and the texture is so soft and thick. Delivery was surprisingly fast too!"</p>
-        <div class="client-profile">
-          <div class="client-initials">AS</div>
-          <div class="client-info">
-            <h5>Aishwarya Sharma</h5>
-            <span>Mumbai, India</span>
+    
+    <div class="testimonials-slider-container">
+      <button class="slider-nav-btn prev-btn" id="prevReview" aria-label="Previous reviews"><i class="fas fa-chevron-left"></i></button>
+      
+      <div class="testimonials-track" id="testimonialsTrack">
+        <!-- Testimonial 1 -->
+        <div class="testimonial-card">
+          <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="review-text">"The designer backlit LED mirror is the crown jewel of our master bathroom! The touch sensor is super responsive and the defogger is an absolute lifesaver. Beautiful craftsmanship."</p>
+          <div class="client-profile">
+            <div class="client-info">
+              <h5>Priya Sharma</h5>
+              <span>Delhi, India</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Testimonial 2 -->
+        <div class="testimonial-card">
+          <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="review-text">"Absolutely in love with the MDF Wall Art panel set! It adds such a premium texture to our living room. It's lightweight, easy to mount, and the finish is completely flawless."</p>
+          <div class="client-profile">
+            <div class="client-info">
+              <h5>Amit Verma</h5>
+              <span>Mumbai, India</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Testimonial 3 -->
+        <div class="testimonial-card">
+          <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="review-text">"The silent wall clock is a masterpiece. It fits our study room decor beautifully, runs completely silent, and the walnut wood finish matches our desk setup."</p>
+          <div class="client-profile">
+            <div class="client-info">
+              <h5>Karan Malhotra</h5>
+              <span>Bengaluru, India</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Testimonial 4 -->
+        <div class="testimonial-card">
+          <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="review-text">"Ordered the Rajasthani Tukdi mosaic mirror set for our entryway. The light reflections make the space look twice as large. Packaging was secure, no damage at all."</p>
+          <div class="client-profile">
+            <div class="client-info">
+              <h5>Anjali Rao</h5>
+              <span>Hyderabad, India</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Testimonial 5 -->
+        <div class="testimonial-card">
+          <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="review-text">"Excellent customer support and fast delivery. The wooden sofa arm tray and shelves are highly sturdy and have a rich, warm polish that feels incredibly luxurious."</p>
+          <div class="client-profile">
+            <div class="client-info">
+              <h5>Vikram Singh</h5>
+              <span>Jaipur, India</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Testimonial 6 -->
+        <div class="testimonial-card">
+          <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="review-text">"We got the LED backlit dressing mirror and the name plate. The name plate is clean, modern, and weather-proof. The mirror lighting is beautiful and casts a gorgeous halo."</p>
+          <div class="client-profile">
+            <div class="client-info">
+              <h5>Sneha Patel</h5>
+              <span>Ahmedabad, India</span>
+            </div>
           </div>
         </div>
       </div>
-      <!-- Testimonial 2 -->
-      <div class="testimonial-card">
-        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-        <p class="review-text">"I ordered two of the Fiddle Leaf plants and the Ribbed Vases for our new apartment. They look incredibly realistic! My guests couldn't believe they were artificial plants. Will definitely shop again."</p>
-        <div class="client-profile">
-          <div class="client-initials">RN</div>
-          <div class="client-info">
-            <h5>Rohan Nair</h5>
-            <span>Bengaluru, India</span>
-          </div>
-        </div>
-      </div>
-      <!-- Testimonial 3 -->
-      <div class="testimonial-card">
-        <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-        <p class="review-text">"The Rattan Lamp is a work of art. The warm patterns it casts on my wall in the evening are so soothing. It's the perfect statement piece for my bedside table. Customer support was very helpful!"</p>
-        <div class="client-profile">
-          <div class="client-initials">PK</div>
-          <div class="client-info">
-            <h5>Pooja K.</h5>
-            <span>Delhi, India</span>
-          </div>
-        </div>
-      </div>
+      
+      <button class="slider-nav-btn next-btn" id="nextReview" aria-label="Next reviews"><i class="fas fa-chevron-right"></i></button>
     </div>
   </div>
 

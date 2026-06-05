@@ -215,4 +215,29 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // 5. Testimonials Horizontal Slider Navigation
+  const track = document.getElementById('testimonialsTrack');
+  const prevBtn = document.getElementById('prevReview');
+  const nextBtn = document.getElementById('nextReview');
+
+  if (track && prevBtn && nextBtn) {
+    const getScrollAmount = () => {
+      const card = track.querySelector('.testimonial-card');
+      if (card) {
+        const cardWidth = card.getBoundingClientRect().width;
+        const gap = parseFloat(window.getComputedStyle(track).gap) || 28;
+        return cardWidth + gap;
+      }
+      return 350;
+    };
+
+    nextBtn.addEventListener('click', () => {
+      track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+    });
+
+    prevBtn.addEventListener('click', () => {
+      track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+    });
+  }
 });
