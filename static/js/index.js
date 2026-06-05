@@ -97,43 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 3. Interactive Style Planner System
-  const plannerData = {
-    wallDecor: {
-      title: "Wall Art Collection",
-      tip: "Combine rich textures like organic cotton macrame and boho tapestries with minimalist clocks to create an inviting, artistic focal wall.",
-      img: "/static/images/WD1.jpg",
-      page: "wallDecor",
-      items: [
-        { name: "Macrame Wall Hanging", price: 899, img: "/static/images/WD1.jpg" },
-        { name: "Boho Tapestry", price: 749, img: "/static/images/WD5.jpg" },
-        { name: "Modern Minimalist", price: 1199, img: "/static/images/CLCOK3.jpg" }
-      ]
-    },
-    lamps: {
-      title: "Cozy Lighting Collection",
-      tip: "Layer warm glow effects using hand-woven rattan materials, street-style modern setups, and artistic table sconces to design cozy, comfortable rooms.",
-      img: "/static/images/LAMP2.jpg",
-      page: "lamps",
-      items: [
-        { name: "Rattan Lamp", price: 2499, img: "/static/images/LAMP2.jpg" },
-        { name: "Street Lamp", price: 1799, img: "/static/images/LAMP.jpg" },
-        { name: "Ceramic Table Lamp", price: 2099, img: "/static/images/LAMP5.jpg" }
-      ]
-    },
-    vases: {
-      title: "Vase & Vessel Collection",
-      tip: "Accentuate shelves and dressers with handcrafted ribbed vessels, natural terracotta structures, and bud vase pairs to support fresh or dried botanicals.",
-      img: "/static/images/VASE3.jpg",
-      page: "vases",
-      items: [
-        { name: "Terracotta Set", price: 1099, img: "/static/images/VASE1.jpg" },
-        { name: "Ribbed Vase", price: 1899, img: "/static/images/VASE2.jpg" },
-        { name: "Bud Vase Duo", price: 2399, img: "/static/images/VASEFIVR.jpg" }
-      ]
-    }
-  };
+  const plannerData = window.PLANNER_DATA || {};
 
-  let activeCollection = 'wallDecor';
+  let activeCollection = 'wallArt';
 
   function updatePlannerDisplay() {
     const data = plannerData[activeCollection];
@@ -154,14 +120,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Populate recommendation pills list
     const listEl = document.getElementById('recommendationsList');
     if (listEl) {
-      listEl.innerHTML = data.items.map(item => `
+      listEl.innerHTML = (data.items || []).map(item => `
         <div class="rec-pill">
-          <img src="${item.img}" alt="${item.name}">
+          <img src="${item.image_url}" alt="${item.name}">
           <div class="rec-info">
             <h5>${item.name}</h5>
             <p>₹${item.price}</p>
           </div>
-          <button class="rec-action add-to-planner-cart" data-name="${item.name}" data-price="${item.price}" title="Add to Bag">
+          <button class="rec-action add-to-planner-cart" data-name="${item.name}" data-price="${item.price}" data-sku="${item.sku || ''}" title="Add to Bag">
             <i class="fas fa-plus"></i>
           </button>
         </div>
@@ -173,8 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
           e.stopPropagation();
           const name = btn.dataset.name;
           const price = parseInt(btn.dataset.price);
+          const sku = btn.dataset.sku || '';
           const cart = KD.getCart();
-          cart.push({ name, price });
+          cart.push({ name, price, sku });
           KD.saveCart(cart);
           KD.showToast(`${name} added ✨`, "#C17A5A");
         });
@@ -213,12 +180,39 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const name = document.getElementById('consultName').value.trim();
       const phone = document.getElementById('consultPhone').value.trim();
-      if (name && phone) {
-        KD.showToast(`Thank you ${name}! Our styling designer will contact you shortly. 📞`, "#4A6552");
-        consultForm.reset();
-      } else {
+      const csrfToken = document.getElementById('consultCsrf').value;
+
+      if (!name || !phone) {
         KD.showToast("Please fill in all fields", "#c7362b");
+        return;
       }
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('email', 'consultation@khushidecors.com');
+      formData.append('phone', phone);
+      formData.append('message', 'Virtual Styling Consultation Request');
+      formData.append('csrf_token', csrfToken);
+
+      fetch('/contact', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          KD.showToast(`Thank you ${name}! Our styling designer will contact you shortly. 📞`, "#4A6552");
+          consultForm.reset();
+        } else {
+          KD.showToast(data.error || "Submission failed", "#c7362b");
+        }
+      })
+      .catch(err => {
+        KD.showToast("Connection error, please try again", "#c7362b");
+      });
     });
   }
 });

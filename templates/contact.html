@@ -3,7 +3,7 @@
 {% block title %}Get in Touch | Khushi Decors{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="/static/css/contact.css">
+<link rel="stylesheet" href="/static/css/contact.css?v=3.5">
 {% endblock %}
 
 {% block content %}
@@ -55,11 +55,15 @@
       
       <!-- Concierge Form -->
       <form class="contact-form-premium" id="conciergeContactForm">
+        <input type="hidden" name="csrf_token" id="contactCsrf" value="{{ csrf_token() }}">
         <h3>Drop Us a Message</h3>
         <p style="color: #6E695F; font-size: 0.9rem; margin-bottom: 0.5rem;">Send a query and get a designer callback within 24 hours.</p>
         
         <div class="edit-input-group">
           <input type="text" id="contactName" placeholder="Full Name" required style="border-radius: 12px; padding: 0.8rem 1rem;">
+        </div>
+        <div class="edit-input-group">
+          <input type="email" id="contactEmail" placeholder="Email Address" required style="border-radius: 12px; padding: 0.8rem 1rem;">
         </div>
         <div class="edit-input-group">
           <input type="tel" id="contactPhone" placeholder="Phone Number" required style="border-radius: 12px; padding: 0.8rem 1rem;">
@@ -81,9 +85,38 @@
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('conciergeContactForm')?.addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = document.getElementById('contactName').value;
-      window.KhushiDecors.showToast(`Thank you ${name}! Callback registered successfully! 📨`, "#4A6552");
-      e.target.reset();
+      const name = document.getElementById('contactName').value.trim();
+      const email = document.getElementById('contactEmail').value.trim();
+      const phone = document.getElementById('contactPhone').value.trim();
+      const message = document.getElementById('contactMsg').value.trim();
+      const csrfToken = document.getElementById('contactCsrf').value;
+      
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('phone', phone);
+      formData.append('message', message);
+      formData.append('csrf_token', csrfToken);
+      
+      fetch('/contact', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          window.KhushiDecors.showToast(`Thank you ${name}! Callback registered successfully! 📨`, "#4A6552");
+          e.target.reset();
+        } else {
+          window.KhushiDecors.showToast(data.error || "Submission failed", "#c7362b");
+        }
+      })
+      .catch(err => {
+        window.KhushiDecors.showToast("Connection error, please try again", "#c7362b");
+      });
     });
   });
 </script>

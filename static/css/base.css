@@ -593,3 +593,51 @@ footer {
     display: none;
   }
 }
+
+/* Global Page Banner Styles */
+.page-banner {
+  position: relative;
+  height: 300px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  border-radius: 0px !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.page-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.45) !important;
+  z-index: 1;
+}
+
+.page-banner .banner-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #ffffff !important;
+  padding: 0 1rem;
+}
+
+.page-banner h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+  color: #ffffff !important;
+}
+
+.page-banner p {
+  font-size: 1rem;
+  opacity: 0.9;
+  letter-spacing: 0.5px;
+  color: #ffffff !important;
+  margin: 0;
+}

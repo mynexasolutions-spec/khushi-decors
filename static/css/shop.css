@@ -5,50 +5,7 @@
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Page Banner */
-.page-banner {
-  position: relative;
-  height: 180px;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2rem;
-  border-radius: 0 0 32px 32px;
-  overflow: hidden;
-  box-shadow: var(--shadow-soft);
-}
 
-.page-banner::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(180deg, rgba(30, 30, 42, 0.5) 0%, rgba(30, 30, 42, 0.75) 100%);
-  z-index: 1;
-}
-
-.page-banner .banner-content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  color: white;
-  padding: 0 1rem;
-}
-
-.page-banner h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-bottom: 0.4rem;
-  letter-spacing: -0.01em;
-}
-
-.page-banner p {
-  font-size: 0.9rem;
-  opacity: 0.85;
-  letter-spacing: 0.5px;
-}
 
 /* Mobile sticky header bar */
 .shop-mobile-bar {

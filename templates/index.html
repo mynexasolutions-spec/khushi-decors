@@ -3,7 +3,7 @@
 {% block title %}Khushi Decors | Premium Home Decor & Interior Styling{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="/static/css/index.css?v=3.4">
+<link rel="stylesheet" href="/static/css/index.css?v=3.5">
 {% endblock %}
 
 {% block content %}
@@ -157,9 +157,9 @@
         <div class="control-group" style="align-items: center;">
           <span class="control-label"><i class="fas fa-filter"></i> Choose Collection Style</span>
           <div class="planner-buttons" id="collectionSelector" style="justify-content: center; margin-top: 0.5rem;">
-            <button class="planner-btn active" data-collection="wallDecor">Wall Art Sets</button>
-            <button class="planner-btn" data-collection="lamps">Cozy Lighting Sets</button>
-            <button class="planner-btn" data-collection="vases">Vase & Vessel Sets</button>
+            <button class="planner-btn active" data-collection="wallArt">Wall Art Sets</button>
+            <button class="planner-btn" data-collection="wallClocks">Statement Clocks</button>
+            <button class="planner-btn" data-collection="mirrors">Decorative Mirrors</button>
           </div>
         </div>
       </div>
@@ -235,6 +235,7 @@
         <h2>Struggling to style your space? Let us help you.</h2>
         <p>Book a complimentary 15-minute virtual session with our elite interior styling experts. Get personalized suggestions, color matching advice, and a bespoke product checklist tailored exactly to your home's layout.</p>
         <form class="consultation-form" id="consultationForm">
+          <input type="hidden" id="consultCsrf" value="{{ csrf_token() }}">
           <input type="text" placeholder="Your Name" id="consultName" required>
           <input type="tel" placeholder="Your Phone Number" id="consultPhone" required>
           <button type="submit" class="consult-submit-btn">Get Free Consultation</button>
@@ -258,5 +259,8 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/index.js"></script>
+<script>
+  window.PLANNER_DATA = {{ planner_data | tojson | safe }};
+</script>
+<script src="/static/js/index.js?v=3.5"></script>
 {% endblock %}

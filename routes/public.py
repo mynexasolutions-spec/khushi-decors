@@ -18,6 +18,46 @@ from models import (
 bp = Blueprint("public", __name__)
 
 
+def _get_planner_collection(parent_slug, limit=3):
+    try:
+        # Find parent category
+        parent = Category.query.filter_by(slug=parent_slug).first()
+        if not parent:
+            return []
+        # Find all subcategories under this parent
+        subcat_ids = [c.id for c in Category.query.filter_by(parent_id=parent.id).all()]
+        if not subcat_ids:
+            subcat_ids = [parent.id]
+        # Query products
+        products = Product.query.filter(
+            Product.category_id.in_(subcat_ids),
+            Product.is_active == 1
+        ).limit(limit).all()
+        
+        result = []
+        for p in products:
+            # Find primary image if any
+            primary_img = ""
+            p_img = p.images.filter_by(is_primary=1).first()
+            if not p_img:
+                p_img = p.images.first()
+            if p_img and p_img.media:
+                primary_img = p_img.media.file_url
+                
+            result.append({
+                "id": p.id,
+                "name": p.name,
+                "sku": p.sku or "",
+                "price": float(p.price or 0),
+                "sale_price": float(p.sale_price) if p.sale_price else None,
+                "image_url": resolve_image(primary_img)
+            })
+        return result
+    except Exception as e:
+        print(f"Error getting planner collection for {parent_slug}: {e}")
+        return []
+
+
 @bp.route("/")
 def index():
     try:
@@ -50,12 +90,42 @@ def index():
     except Exception:
         blog_posts = []
 
+    # Populate dynamic Room Style Planner data
+    planner_data = {}
+    try:
+        planner_data = {
+            "wallArt": {
+                "title": "Artistic Wall Gallery",
+                "tip": "Combine rich textures like organic wood carvings and elegant MDF wall art panels to design an inviting, artistic focal space.",
+                "img": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=1000",
+                "page": "wall-art",
+                "items": _get_planner_collection("wall-art")
+            },
+            "wallClocks": {
+                "title": "Statement Wall Clocks",
+                "tip": "Layer your styling space with premium laminated MDF silent clocks or antique brass clocks to establish timeless room aesthetics.",
+                "img": "https://images.unsplash.com/photo-1563861826100-9cb868fdcd1d?q=80&w=1000",
+                "page": "wall-clocks",
+                "items": _get_planner_collection("wall-clocks")
+            },
+            "mirrors": {
+                "title": "Decorative Mirror Collage",
+                "tip": "Incorporate Rajasthani Tukdi mosaic mirror pieces and fancy asymmetrical frames to maximize light reflections and room depth.",
+                "img": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1000",
+                "page": "decorative-mirrors",
+                "items": _get_planner_collection("decorative-mirrors")
+            }
+        }
+    except Exception as e:
+        print(f"Error populating planner data: {e}")
+
     return render_template(
         "index.html",
         featured=featured, latest=latest, popular=popular,
         promo1=promo1, promo2=promo2,
         featured_categories=featured_categories,
         blog_posts=blog_posts,
+        planner_data=planner_data,
     )
 
 
@@ -223,10 +293,18 @@ def contact():
     if request.method == "POST":
         name    = request.form.get("name", "").strip()
         email   = request.form.get("email", "").strip().lower()
+        phone   = request.form.get("phone", "").strip()
         message = request.form.get("message", "").strip()
+        
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.is_json
+        
         if not all([name, email, message]):
+            if is_ajax:
+                return jsonify({"success": False, "error": "Please fill in all required fields."}), 400
             flash("Please fill in all required fields.", "error")
         else:
+            if phone:
+                message = f"Phone: {phone}\n\n{message}"
             try:
                 msg = ContactMessage(
                     id=str(uuid.uuid4()),
@@ -236,11 +314,17 @@ def contact():
                 )
                 db_sql.session.add(msg)
                 db_sql.session.commit()
+                if is_ajax:
+                    return jsonify({"success": True, "message": "Thank you! Message sent successfully."})
                 flash("Thank you for your message! We'll get back to you soon.", "success")
             except Exception as e:
                 db_sql.session.rollback()
+                if is_ajax:
+                    return jsonify({"success": False, "error": "Something went wrong. Please try again later."}), 500
                 flash("Something went wrong. Please try again later.", "error")
-            return redirect(url_for("public.contact"))
+            
+            if not is_ajax:
+                return redirect(url_for("public.contact"))
     return render_template("contact.html")
 
 
