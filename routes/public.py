@@ -111,14 +111,14 @@ def index():
             "wallClocks": {
                 "title": "Statement Wall Clocks",
                 "tip": "Layer your styling space with premium laminated MDF silent clocks or antique brass clocks to establish timeless room aesthetics.",
-                "img": "https://images.unsplash.com/photo-1563861826100-9cb868fdcd1d?q=80&w=1000",
+                "img": "/static/images/statement-clock.webp",
                 "page": "wall-clocks",
                 "items": _get_planner_collection("wall-clocks")
             },
             "mirrors": {
                 "title": "Decorative Mirror Collage",
                 "tip": "Incorporate Rajasthani Tukdi mosaic mirror pieces and fancy asymmetrical frames to maximize light reflections and room depth.",
-                "img": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1000",
+                "img": "/static/images/decorated-mirror-collage.webp",
                 "page": "decorative-mirrors",
                 "items": _get_planner_collection("decorative-mirrors")
             }

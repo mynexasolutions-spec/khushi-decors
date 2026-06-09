@@ -115,29 +115,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const listEl = document.getElementById('recommendationsList');
     if (listEl) {
       listEl.innerHTML = (data.items || []).map(item => `
-        <div class="rec-pill">
+        <div class="rec-pill" data-id="${item.id}" style="cursor:pointer;" title="View ${item.name}">
           <img src="${item.image_url}" alt="${item.name}">
           <div class="rec-info">
             <h5>${item.name}</h5>
-            <p>₹${item.price}</p>
+            <p>₹${item.sale_price ? item.sale_price : item.price}</p>
           </div>
-          <button class="rec-action add-to-planner-cart" data-name="${item.name}" data-price="${item.price}" data-sku="${item.sku || ''}" title="Add to Bag">
+          <button class="rec-action add-to-planner-cart" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-sku="${item.sku || ''}" title="Add to Bag">
             <i class="fas fa-plus"></i>
           </button>
         </div>
       `).join('');
 
-      // Bind add-to-cart clicks for the recommendation pills
+      // Navigate to product page on pill click (but not on button click)
+      listEl.querySelectorAll('.rec-pill').forEach(pill => {
+        pill.addEventListener('click', (e) => {
+          if (e.target.closest('.add-to-planner-cart')) return;
+          const id = pill.dataset.id;
+          if (id) window.location.href = `/product/${id}`;
+        });
+      });
+
+      // Bind add-to-cart clicks for the recommendation pills (AJAX)
       listEl.querySelectorAll('.add-to-planner-cart').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const name = btn.dataset.name;
-          const price = parseInt(btn.dataset.price);
-          const sku = btn.dataset.sku || '';
-          const cart = KD.getCart();
-          cart.push({ name, price, sku });
-          KD.saveCart(cart);
-          KD.showToast(`${name} added ✨`, "#C17A5A");
+          const productId = btn.dataset.id;
+          btn.disabled = true;
+          KD.addToCartAjax(productId, '', 1, '', (err) => {
+            btn.disabled = false;
+            if (err) {
+              KD.showToast(err, "#c7362b");
+            } else {
+              KD.showToast(`${name} added ✨`, "#C17A5A");
+            }
+          });
         });
       });
     }
