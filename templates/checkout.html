@@ -15,12 +15,12 @@
   </div>
 </div>
 
-<!-- Order confirmation grid loaded dynamically from localStorage -->
-<div class="confirm-order-wrapper">
+<!-- Confirm order wrapper -->
+<div class="confirm-order-wrapper" style="max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem;">
   <!-- Stepper -->
   <div class="checkout-stepper">
     <div class="step-item completed">
-      <div class="step-dot"><i class="fas fa-check"></i></div>
+      <div class="step-dot" onclick="window.location.href='/cart'" style="cursor:pointer;"><i class="fas fa-check"></i></div>
       <div class="step-label">Bag</div>
     </div>
     <div class="step-item active">
@@ -33,13 +33,241 @@
     </div>
   </div>
 
-  <h2 style="margin-bottom:1.5rem; font-family:'Playfair Display', serif; font-size:1.8rem;">Confirm Order</h2>
-  
-  <!-- Content loaded dynamically from localStorage by static/js/checkout.js -->
-  <p style="text-align:center; padding: 4rem 1rem; color:#8a857a; font-size:1.1rem;">Loading checkout details...</p>
+  <h2 style="margin-bottom:1.5rem; font-family:'Playfair Display', serif; font-size:1.8rem; color: var(--dark-charcoal);">Confirm Order Details</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div style="margin-bottom: 1.5rem;">
+        {% for cat, msg in messages %}
+          <div class="flash-msg status-{{ 'cancelled' if cat == 'error' else 'delivered' }}" style="padding: 1rem; margin-bottom: 0.5rem; border-radius: 0px; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <i class="fas {{ 'fa-exclamation-circle' if cat == 'error' else 'fa-check-circle' }}"></i>
+            {{ msg }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form id="checkoutForm" action="/checkout" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    
+    <!-- Hidden fields for Razorpay results -->
+    <input type="hidden" name="razorpay_payment_id" id="rzpPaymentId">
+    <input type="hidden" name="razorpay_order_id" id="rzpOrderId">
+    <input type="hidden" name="razorpay_signature" id="rzpSignature">
+
+    <div class="order-layout" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 2rem; align-items: start;">
+      
+      <!-- Left side: Items, Address forms -->
+      <div class="order-card" style="display: flex; flex-direction: column; gap: 1.75rem;">
+        
+        <!-- Order Items Section -->
+        <div class="checkout-section">
+          <div class="card-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; border-bottom: 1px solid #f0ede8; padding-bottom: 0.75rem;">
+            <i class="fas fa-bag-shopping" style="color: var(--primary); font-size: 1.25rem;"></i>
+            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.3rem;">Items in Order</h3>
+          </div>
+          <div class="checkout-summary-list" style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for key, item in cart.items() %}
+              <div class="checkout-summary-item" style="display: flex; align-items: center; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #fcfbfa;">
+                <img src="{{ resolve_image(item.image) }}" alt="{{ item.name }}" class="checkout-item-img" onerror="this.onerror=null; this.src='/static/images/placeholder.png'" style="width: 64px; height: 64px; object-fit: cover; border: 1px solid #f0ede8;">
+                <div class="checkout-item-name" style="flex-grow: 1; font-weight: 700; color: var(--dark-charcoal); font-size: 0.95rem;">
+                  {{ item.name }}
+                  <div style="font-size: 0.8rem; color: #8a857a; font-weight: 500; margin-top: 2px;">Qty: {{ item.qty }}</div>
+                </div>
+                <div class="checkout-item-price" style="font-weight: 700; color: var(--dark-charcoal); font-size: 0.95rem;">
+                  ₹{{ "%.0f"|format(item.price * item.qty) }}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Shipping Address Section -->
+        <div class="checkout-section">
+          <div class="card-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; border-bottom: 1px solid #f0ede8; padding-bottom: 0.75rem;">
+            <i class="fas fa-map-marker-alt" style="color: var(--primary); font-size: 1.25rem;"></i>
+            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.3rem;">Delivery Address</h3>
+          </div>
+
+          <!-- Saved Addresses Grid -->
+          {% if addresses %}
+            <div style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <p style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #8a857a; margin-bottom: 0.25rem;">Ship to a Saved Address</p>
+              
+              {% for addr in addresses %}
+                <label class="address-option-label" style="display: block; cursor: pointer;">
+                  <input type="radio" name="saved_address_id" value="{{ addr.id }}" {% if addr.is_default == 1 %}checked{% endif %} style="margin-right: 8px;">
+                  <span style="font-weight: 700; color: var(--dark-charcoal);">{{ addr.first_name }} {{ addr.last_name }} ({{ addr.label }})</span>
+                  <div style="margin-left: 24px; font-size: 0.88rem; color: #5c5850; margin-top: 3px;">
+                    {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }} | Phone: {{ addr.phone }}
+                  </div>
+                </label>
+              {% endfor %}
+              
+              <label class="address-option-label" style="display: block; cursor: pointer; margin-top: 0.5rem; border-top: 1px dashed #e8e5de; padding-top: 0.75rem;">
+                <input type="radio" name="saved_address_id" value="" {% if not addresses %}checked{% endif %} style="margin-right: 8px;">
+                <span style="font-weight: 700; color: var(--dark-charcoal);">Ship to a new address</span>
+              </label>
+            </div>
+          {% endif %}
+
+          <!-- New Address Inputs Container -->
+          <div id="newAddressContainer" style="display: {% if addresses %}none{% else %}block{% endif %}; flex-direction: column; gap: 1rem; background: #faf9f6; padding: 1.5rem; border: 1px solid #f0ede8;">
+            <p style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #8a857a; margin-bottom: 0.5rem;">New Delivery Details</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#5c5850;">First Name *</label>
+                <input type="text" name="addr_first_name" id="newAddrFirst" value="{{ (current_user.name or '').split(' ')[0] if current_user else '' }}" style="width:100%; border:1.5px solid #dcd8d0; padding:0.65rem; font-size:0.9rem;">
+              </div>
+              <div>
+                <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#5c5850;">Last Name *</label>
+                <input type="text" name="addr_last_name" id="newAddrLast" value="{{ (current_user.name or '').split(' ', 1)[1] if current_user and ' ' in (current_user.name or '') else '' }}" style="width:100%; border:1.5px solid #dcd8d0; padding:0.65rem; font-size:0.9rem;">
+              </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#5c5850;">Phone Number (10 digits) *</label>
+              <input type="tel" name="addr_phone" id="newAddrPhone" value="" style="width:100%; border:1.5px solid #dcd8d0; padding:0.65rem; font-size:0.9rem;">
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#5c5850;">Address Line 1 *</label>
+              <input type="text" name="addr_line1" id="newAddrLine1" value="" style="width:100%; border:1.5px solid #dcd8d0; padding:0.65rem; font-size:0.9rem;" placeholder="House/Flat No, Apartment, Street Name">
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#5c5850;">Address Line 2 (Optional)</label>
+              <input type="text" name="addr_line2" style="width:100%; border:1.5px solid #dcd8d0; padding:0.65rem; font-size:0.9rem;" placeholder="Landmark, Locality">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#5c5850;">City *</label>
+                <input type="text" name="addr_city" id="newAddrCity" value="" style="width:100%; border:1.5px solid #dcd8d0; padding:0.65rem; font-size:0.9rem;">
+              </div>
+              <div>
+                <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#5c5850;">State *</label>
+                <input type="text" name="addr_state" id="newAddrState" style="width:100%; border:1.5px solid #dcd8d0; padding:0.65rem; font-size:0.9rem;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#5c5850;">Pincode *</label>
+                <input type="text" name="addr_pincode" id="newAddrPin" value="" style="width:100%; border:1.5px solid #dcd8d0; padding:0.65rem; font-size:0.9rem;">
+              </div>
+              <div>
+                <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#5c5850;">Country *</label>
+                <input type="text" name="addr_country" value="India" readonly style="width:100%; border:1.5px solid #dcd8d0; padding:0.65rem; font-size:0.9rem; background:#eae6df; color:#6e695f; cursor:not-allowed;">
+              </div>
+            </div>
+
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; font-weight:600; color:#5c5850;">
+              <input type="checkbox" name="save_address" checked style="width:16px; height:16px;"> Save address for future purchases
+            </label>
+          </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="checkout-section">
+          <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:6px; color:#5c5850; text-transform:uppercase;">Order Notes (Optional)</label>
+          <textarea name="notes" style="width: 100%; min-height: 80px; border: 1.5px solid #dcd8d0; padding: 0.75rem; font-size: 0.9rem; resize: vertical;" placeholder="Special instructions for delivery..."></textarea>
+        </div>
+
+      </div>
+
+      <!-- Right side: Payment selection, Coupon, Summary card -->
+      <div class="order-card" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Coupon Code Box -->
+        <div class="checkout-section" style="background:#faf9f6; padding:1.25rem; border:1px solid #f0ede8;">
+          <h4 style="margin: 0 0 0.5rem 0; font-family:'Playfair Display', serif; font-size: 1.1rem; color:var(--dark-charcoal);">Have a Coupon?</h4>
+          <div style="display:flex; gap: 8px;">
+            <input type="text" name="coupon_code" id="couponInput" placeholder="Enter code" style="flex:1; border:1.5px solid #dcd8d0; padding:0.5rem 0.75rem; font-size:0.9rem; text-transform:uppercase;">
+            <button type="button" id="applyCouponBtn" style="background:var(--primary); color:white; border:none; padding:0.5rem 1.25rem; font-weight:700; font-size:0.85rem; cursor:pointer;">Apply</button>
+          </div>
+          <p id="couponFeedback" style="font-size:0.8rem; margin:6px 0 0 0; font-weight:600; display:none;"></p>
+        </div>
+
+        <!-- Payment Selection -->
+        <div class="checkout-section">
+          <div class="card-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; border-bottom: 1px solid #f0ede8; padding-bottom: 0.75rem;">
+            <i class="fas fa-credit-card" style="color: var(--primary); font-size: 1.25rem;"></i>
+            <h3 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.3rem;">Payment Method</h3>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            
+            {% if cod_enabled %}
+              <label class="payment-option-label" style="display: flex; align-items: center; gap:10px; border: 1.5px solid #dcd8d0; padding: 1rem; cursor: pointer; transition: all 0.2s;" id="paymentLabelCod">
+                <input type="radio" name="payment_method" value="cod" checked style="width:18px; height:18px;">
+                <div>
+                  <span style="font-weight: 700; color: var(--dark-charcoal);"><i class="fas fa-money-bill-wave" style="color:var(--secondary); margin-right:6px;"></i> Cash on Delivery (COD)</span>
+                  <div style="font-size: 0.8rem; color: #8a857a; margin-top: 3px;">Pay in cash upon delivery of your designer items.</div>
+                </div>
+              </label>
+            {% endif %}
+
+            {% if online_enabled %}
+              <label class="payment-option-label" style="display: flex; align-items: center; gap:10px; border: 1.5px solid #dcd8d0; padding: 1rem; cursor: pointer; transition: all 0.2s;" id="paymentLabelOnline">
+                <input type="radio" name="payment_method" value="razorpay" {% if not cod_enabled %}checked{% endif %} style="width:18px; height:18px;">
+                <div>
+                  <span style="font-weight: 700; color: var(--dark-charcoal);"><i class="fas fa-wallet" style="color:var(--primary); margin-right:6px;"></i> Pay Online Securely</span>
+                  <div style="font-size: 0.8rem; color: #8a857a; margin-top: 3px;">Pay securely via UPI, Cards, Netbanking, or Wallets (Razorpay).</div>
+                </div>
+              </label>
+            {% endif %}
+            
+          </div>
+        </div>
+
+        <!-- Totals & Place Order -->
+        <div class="summary-card" style="margin:0; width:100%; box-sizing:border-box;">
+          <h3 style="margin-bottom:1.25rem; font-family:'Playfair Display', serif; font-size:1.4rem;">Order Summary</h3>
+          <p style="display:flex; justify-content:space-between; margin-bottom: 0.8rem; font-size:0.95rem; color:#6e695f;">
+            <span>Subtotal:</span> <span>₹{{ "%.0f"|format(subtotal) }}</span>
+          </p>
+          <p id="discountRow" style="display:none; justify-content:space-between; margin-bottom: 0.8rem; font-size:0.95rem; color:#d97706; font-weight:700;">
+            <span>Coupon Discount:</span> <span>- ₹<span id="discountVal">0</span></span>
+          </p>
+          <p style="display:flex; justify-content:space-between; margin-bottom: 1.2rem; border-bottom: 1px solid #f0ede8; padding-bottom: 0.8rem; font-size:0.95rem; color:#6e695f;">
+            <span>Shipping:</span> <span>{% if shipping == 0 %}<strong style="color:var(--secondary)">FREE</strong>{% else %}₹{{ "%.0f"|format(shipping) }}{% endif %}</span>
+          </p>
+          <h4 style="display:flex; justify-content:space-between; font-size:1.25rem; margin-bottom: 1.5rem; font-weight:800; color:var(--dark-charcoal);">
+            <span>Total:</span> <span>₹<span id="summaryTotal">{{ "%.0f"|format(total) }}</span></span>
+          </h4>
+          <button type="submit" class="place-order-btn-enhanced" id="finalOrderBtn" style="margin-bottom:0.8rem; padding:1rem; font-size:0.95rem; font-weight:700;">
+            Place Order · ₹<span id="btnTotal">{{ "%.0f"|format(total) }}</span>
+          </button>
+          <button type="button" class="btn btn-outline" onclick="window.location.href='/cart'" style="width:100%; padding:0.9rem; font-size:0.85rem; border-radius:0px;">
+            Back to Cart
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </form>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<!-- Razorpay SDK -->
+{% if online_enabled %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endif %}
+<script>
+  window.CHECKOUT_DATA = {
+    subtotal: {{ subtotal }},
+    shipping: {{ shipping }},
+    total: {{ total }},
+    razorpay_key_id: "{{ settings.get('razorpay_key_id', '') }}",
+    user_email: "{{ current_user.email if current_user else '' }}",
+    user_name: "{{ current_user.name if current_user else '' }}",
+    user_phone: "",
+    online_enabled: {{ 'true' if online_enabled else 'false' }}
+  };
+</script>
 <script src="/static/js/checkout.js"></script>
 {% endblock %}

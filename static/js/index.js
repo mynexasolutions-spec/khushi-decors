@@ -33,23 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
       addBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const name = addBtn.dataset.name;
-        const price = parseInt(addBtn.dataset.price);
-        const cart = KD.getCart();
-        cart.push({ name, price });
-        KD.saveCart(cart);
-        KD.showToast(`${name} added ✨`, "#C17A5A");
-      });
-    }
+        const productId = card.dataset.id;
 
-    if (buyBtn) {
-      buyBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const name = buyBtn.dataset.name;
-        const price = parseInt(buyBtn.dataset.price);
-        const cart = KD.getCart();
-        cart.push({ name, price });
-        KD.saveCart(cart);
-        window.location.href = '/cart';
+        addBtn.disabled = true;
+        KD.addToCartAjax(productId, '', 1, '', (err, data) => {
+          addBtn.disabled = false;
+          if (err) {
+            KD.showToast(err, "#c7362b");
+          } else {
+            KD.showToast(`${name} added ✨`, "#C17A5A");
+          }
+        });
       });
     }
 

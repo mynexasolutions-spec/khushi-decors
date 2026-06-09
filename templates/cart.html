@@ -15,7 +15,7 @@
   </div>
 </div>
 
-<!-- Stepper & Bag grid, loaded dynamically from localStorage -->
+<!-- Stepper & Bag grid, rendered from server-side session -->
 <div class="cart-wrapper">
   <!-- Stepper -->
   <div class="checkout-stepper">
@@ -33,10 +33,54 @@
     </div>
   </div>
 
-  <h1 style="margin-bottom:1.5rem;"><i class="fas fa-shopping-bag"></i> Your Shopping Bag</h1>
-  
-  <!-- Content loaded dynamically from localStorage by static/js/cart.js -->
-  <p style="text-align:center; padding: 4rem 1rem; color:#8a857a; font-size:1.1rem;">Loading your items...</p>
+  {% if not cart_items %}
+    <h1 style="margin-bottom:1.5rem;"><i class="fas fa-shopping-bag"></i> Your Shopping Bag (0)</h1>
+    <p style="text-align:center; padding: 4rem 1rem; color:#8a857a; font-size:1.1rem;">
+      Your bag is empty.<br><br>
+      <button class="btn btn-primary" id="startShopping" onclick="window.location.href='/shop'" style="padding:0.9rem 2.2rem; font-size:0.9rem; border-radius: 0px;">Start Shopping</button>
+    </p>
+  {% else %}
+    <h1 style="margin-bottom:1.5rem;"><i class="fas fa-shopping-bag"></i> Your Shopping Bag ({{ cart_count }})</h1>
+    <div class="cart-layout">
+      <div class="cart-items-section">
+        {% for key, item in cart_items.items() %}
+          <div class="cart-item-card" data-key="{{ key }}">
+            <img src="{{ resolve_image(item.image) }}" alt="{{ item.name }}" class="cart-item-img" onerror="this.onerror=null; this.src='/static/images/placeholder.png'">
+            <div class="cart-item-info">
+              <div class="cart-item-title">{{ item.name }}</div>
+              {% if item.sku %}
+                <div style="font-size:0.75rem; color:#8a857a; margin-top:2px;">SKU: {{ item.sku }}</div>
+              {% endif %}
+              <div class="cart-item-price" style="margin-top:4px;">₹{{ "%.0f"|format(item.price) }}</div>
+            </div>
+            <div class="cart-item-controls">
+              <div class="quantity-selector">
+                <button class="qty-dec" data-key="{{ key }}">-</button>
+                <span id="qty-{{ key }}">{{ item.qty }}</span>
+                <button class="qty-inc" data-key="{{ key }}">+</button>
+              </div>
+            </div>
+            <div class="cart-item-total" id="item-total-{{ key }}">₹{{ "%.0f"|format(item.price * item.qty) }}</div>
+            <button class="cart-item-remove remove-item" data-key="{{ key }}"><i class="fas fa-trash"></i></button>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="summary-card">
+        <h3 style="margin-bottom:1.25rem; font-family:'Playfair Display', serif; font-size:1.4rem;">Order Summary</h3>
+        <p style="display:flex; justify-content:space-between; margin-bottom: 0.8rem; font-size:0.95rem;">
+          <span>Subtotal:</span> <span>₹<span id="summarySubtotal">{{ "%.0f"|format(subtotal) }}</span></span>
+        </p>
+        <p style="display:flex; justify-content:space-between; margin-bottom: 1.2rem; border-bottom: 1px solid #f0ede8; padding-bottom: 0.8rem; font-size:0.95rem;">
+          <span>Shipping:</span> <span id="summaryShipping">{% if shipping == 0 %}<strong style="color:var(--secondary)">FREE</strong>{% else %}₹{{ "%.0f"|format(shipping) }}{% endif %}</span>
+        </p>
+        <h4 style="display:flex; justify-content:space-between; font-size:1.25rem; margin-bottom: 1.5rem; font-weight:800; color:var(--dark-charcoal);">
+          <span>Total:</span> <span>₹<span id="summaryTotal">{{ "%.0f"|format(total) }}</span></span>
+        </h4>
+        <button class="checkout-btn" id="proceedCheckout" style="margin-bottom:0.8rem; padding:1rem; font-size:0.95rem;">Proceed to Checkout</button>
+        <button class="btn btn-outline" id="continueShopping" onclick="window.location.href='/shop'" style="width:100%; padding:0.9rem; font-size:0.85rem; border-radius:0px;">Continue Shopping</button>
+      </div>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}
 

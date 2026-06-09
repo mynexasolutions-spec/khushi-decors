@@ -1,23 +1,114 @@
 // ---------- GLOBAL FRONTEND LOGIC ----------
 window.KhushiDecors = {
-  // Retrieve cart from localStorage
+  // Retrieve cart (fallback to empty)
   getCart: function() {
-    return JSON.parse(localStorage.getItem('vividCart_pro')) || [];
+    return [];
   },
 
-  // Save cart to localStorage and update header counts
+  // Save cart (fallback mock)
   saveCart: function(cart) {
-    localStorage.setItem('vividCart_pro', JSON.stringify(cart));
-    this.updateCartCount();
+    // Session cart handles persistence on the backend
   },
 
   // Sync header cart indicators
   updateCartCount: function() {
-    const cart = this.getCart();
-    const countEl = document.getElementById('cartCount');
-    if (countEl) {
-      countEl.innerText = cart.length;
-    }
+    // Do not overwrite cartCount as it is rendered by Flask session on page load
+  },
+
+  // Add to cart via AJAX (Flask session)
+  addToCartAjax: function(productId, variationId, qty, selectedOptions, callback) {
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const tokenVal = csrfMeta ? csrfMeta.getAttribute('content') : '';
+    
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('variation_id', variationId || '');
+    formData.append('selected_options', selectedOptions || '');
+    formData.append('qty', qty || 1);
+    
+    fetch('/cart/add', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': tokenVal
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const countEl = document.getElementById('cartCount');
+        if (countEl) countEl.innerText = data.cart_count;
+        if (callback) callback(null, data);
+      } else {
+        if (callback) callback(data.message || 'Error adding to cart', null);
+      }
+    })
+    .catch(err => {
+      console.error('Error in addToCartAjax:', err);
+      if (callback) callback(err, null);
+    });
+  },
+
+  // Update cart quantity via AJAX (Flask session)
+  updateCartQtyAjax: function(key, delta, callback) {
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const tokenVal = csrfMeta ? csrfMeta.getAttribute('content') : '';
+    
+    const formData = new FormData();
+    formData.append('key', key);
+    formData.append('delta', delta);
+    
+    fetch('/cart/ajax_update', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': tokenVal
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        if (callback) callback(null, data);
+      } else {
+        if (callback) callback(data.error || 'Error updating cart', null);
+      }
+    })
+    .catch(err => {
+      console.error('Error in updateCartQtyAjax:', err);
+      if (callback) callback(err, null);
+    });
+  },
+
+  // Remove cart item via AJAX (Flask session)
+  removeCartItemAjax: function(key, callback) {
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const tokenVal = csrfMeta ? csrfMeta.getAttribute('content') : '';
+    
+    const formData = new FormData();
+    formData.append('key', key);
+    
+    fetch('/cart/ajax_remove', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': tokenVal
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        if (callback) callback(null, data);
+      } else {
+        if (callback) callback(data.error || 'Error removing item', null);
+      }
+    })
+    .catch(err => {
+      console.error('Error in removeCartItemAjax:', err);
+      if (callback) callback(err, null);
+    });
   },
 
   // Retrieve user details from localStorage

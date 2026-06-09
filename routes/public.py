@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, Response, jsonify, send_from_directory
+import os
 import json
 import uuid
 from extensions import db_sql
@@ -16,6 +17,12 @@ from models import (
 )
 
 bp = Blueprint("public", __name__)
+
+
+@bp.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(bp.root_path, '../static/images'),
+                               'favicon.png', mimetype='image/png')
 
 
 def _get_planner_collection(parent_slug, limit=3):

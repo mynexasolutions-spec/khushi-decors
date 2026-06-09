@@ -73,6 +73,10 @@ def register():
         if len(password) < 6:
             flash("Password must be at least 6 characters.", "error")
             return render_template("register.html")
+        _blocked_domains = ("@khushidecors.com", "@khushidecors.in", "@khushidecors.online")
+        if email.startswith("admin@") or any(email.endswith(d) for d in _blocked_domains):
+            flash("Registration is not allowed for administrator or company domain emails.", "error")
+            return render_template("register.html")
         try:
             if User.query.filter_by(email=email).first():
                 flash("An account with that email already exists.", "error")

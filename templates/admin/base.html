@@ -130,7 +130,7 @@
       </div>
       <div style="display:flex; align-items:center; gap:1.25rem;">
         <div style="width:36px; height:36px; border-radius:99px; background:#e2e8f0; display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--admin-text-muted);">
-          {% if current_user and current_user.first_name %}{{ current_user.first_name[0] | upper }}{% else %}A{% endif %}
+          {% if current_user and current_user.name %}{{ current_user.name[0] | upper }}{% else %}A{% endif %}
         </div>
       </div>
     </header>

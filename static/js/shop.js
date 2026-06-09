@@ -220,13 +220,18 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const name = btn.dataset.name;
-        const price = parseInt(btn.dataset.price);
-        const sku = btn.dataset.sku || '';
-        const cart = KD.getCart();
+        const card = btn.closest('.shop-product-card');
+        const productId = card ? card.dataset.id : '';
 
-        cart.push({ name, price, sku });
-        KD.saveCart(cart);
-        KD.showToast(`${name} added to Bag ✨`, "#C17A5A");
+        btn.disabled = true;
+        KD.addToCartAjax(productId, '', 1, '', (err, data) => {
+          btn.disabled = false;
+          if (err) {
+            KD.showToast(err, "#c7362b");
+          } else {
+            KD.showToast(`${name} added to Bag ✨`, "#C17A5A");
+          }
+        });
       });
     });
 
@@ -235,13 +240,18 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const name = btn.dataset.name;
-        const price = parseInt(btn.dataset.price);
-        const sku = btn.dataset.sku || '';
-        const cart = KD.getCart();
+        const card = btn.closest('.shop-product-card');
+        const productId = card ? card.dataset.id : '';
 
-        cart.push({ name, price, sku });
-        KD.saveCart(cart);
-        window.location.href = '/cart';
+        btn.disabled = true;
+        KD.addToCartAjax(productId, '', 1, '', (err, data) => {
+          btn.disabled = false;
+          if (err) {
+            KD.showToast(err, "#c7362b");
+          } else {
+            window.location.href = '/cart';
+          }
+        });
       });
     });
 
