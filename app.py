@@ -136,6 +136,31 @@ if _os.environ.get("WERKZEUG_RUN_MAIN") != "true":
         except Exception:
             pass
 
+        # ── Auto-seed Style Planner collections if table is empty ──
+        try:
+            from models import PlannerCollection
+            if PlannerCollection.query.count() == 0:
+                import uuid as _uuid
+                _defaults = [
+                    PlannerCollection(id=str(_uuid.uuid4()), title="Artistic Wall Gallery",
+                        tip="Combine rich textures like organic wood carvings and elegant MDF wall art panels to design an inviting, artistic focal space.",
+                        image_url="/static/images/wall_deco/wall_deco_1.webp",
+                        page_slug="wall-art", display_order=0, is_active=1),
+                    PlannerCollection(id=str(_uuid.uuid4()), title="Statement Wall Clocks",
+                        tip="Layer your styling space with premium laminated MDF silent clocks or antique brass clocks to establish timeless room aesthetics.",
+                        image_url="/static/images/statement-clock.webp",
+                        page_slug="wall-clocks", display_order=1, is_active=1),
+                    PlannerCollection(id=str(_uuid.uuid4()), title="Decorative Mirror Collage",
+                        tip="Incorporate Rajasthani Tukdi mosaic mirror pieces and fancy asymmetrical frames to maximize light reflections and room depth.",
+                        image_url="/static/images/decorated-mirror-collage.webp",
+                        page_slug="decorative-mirrors", display_order=2, is_active=1),
+                ]
+                for _col in _defaults:
+                    db_sql.session.add(_col)
+                db_sql.session.commit()
+        except Exception:
+            pass
+
 if __name__ == "__main__":
     port  = int(os.getenv("PORT", 5001))
     debug = os.getenv("FLASK_ENV", "development") != "production"

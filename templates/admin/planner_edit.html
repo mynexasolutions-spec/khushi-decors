@@ -1,0 +1,81 @@
+{% extends "admin/base.html" %}
+{% block title %}Edit Collection – StoreAdmin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1.5rem;">
+  <a href="{{ url_for('admin_planner') }}" style="color:var(--admin-text-muted); font-size:0.875rem; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+    ← Back to Style Planner
+  </a>
+</div>
+
+<h1 style="font-size:1.75rem; font-weight:700; color:var(--admin-text); margin-bottom:1.75rem;">Edit Collection</h1>
+
+<div class="admin-card" style="max-width:660px;">
+  <div style="padding:1.75rem;">
+    <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+
+        <div>
+          <label class="admin-label" for="edit_title">Collection Title *</label>
+          <input type="text" id="edit_title" name="title" value="{{ col.title }}"
+                 class="admin-input" required style="width:100%; box-sizing:border-box;">
+        </div>
+
+        <div>
+          <label class="admin-label" for="edit_tip">Styling Tip</label>
+          <textarea id="edit_tip" name="tip" class="admin-input" rows="4"
+                    style="width:100%; box-sizing:border-box; resize:vertical; font-family:inherit; line-height:1.5;">{{ col.tip }}</textarea>
+          <p style="font-size:0.76rem; color:var(--admin-text-muted); margin-top:4px;">Displayed below the collection title on the homepage.</p>
+        </div>
+
+        <div>
+          <label class="admin-label" for="edit_image">Image URL</label>
+          <input type="text" id="edit_image" name="image_url" value="{{ col.image_url }}"
+                 class="admin-input" placeholder="/static/images/your-image.webp"
+                 style="width:100%; box-sizing:border-box;" oninput="previewImage(this.value)">
+          <p style="font-size:0.76rem; color:var(--admin-text-muted); margin-top:4px;">Use a local <code>/static/images/…</code> path or any full URL.</p>
+          <div id="imagePreviewWrap" style="margin-top:0.75rem; {% if not col.image_url %}display:none;{% endif %}">
+            <img id="imagePreview" src="{{ col.image_url }}" alt="Preview"
+                 style="width:120px; height:90px; object-fit:cover; border-radius:0.5rem; border:1px solid var(--admin-border);">
+          </div>
+        </div>
+
+        <div>
+          <label class="admin-label" for="edit_slug">Shop Category Slug</label>
+          <input type="text" id="edit_slug" name="page_slug" value="{{ col.page_slug }}"
+                 class="admin-input" placeholder="e.g. wall-art"
+                 style="width:100%; box-sizing:border-box;">
+          <p style="font-size:0.76rem; color:var(--admin-text-muted); margin-top:4px;">
+            "Shop This Collection" links to <code>/shop?category=<strong id="slugPreview">{{ col.page_slug or 'slug' }}</strong></code>
+          </p>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem; padding-top:0.5rem; border-top:1px solid var(--admin-border); margin-top:0.5rem;">
+          <a href="{{ url_for('admin_planner') }}" class="admin-btn" style="text-decoration:none;">Cancel</a>
+          <button type="submit" class="admin-btn admin-btn-primary">Save Changes</button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewImage(url) {
+  const wrap = document.getElementById('imagePreviewWrap');
+  const img  = document.getElementById('imagePreview');
+  if (url) {
+    img.src = url;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+document.getElementById('edit_slug').addEventListener('input', function() {
+  document.getElementById('slugPreview').textContent = this.value || 'slug';
+});
+</script>
+{% endblock %}

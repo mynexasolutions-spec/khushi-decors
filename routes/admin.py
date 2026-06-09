@@ -1579,3 +1579,151 @@ def register(app):
             flash("Message not found.", "error")
         return redirect(url_for("admin_messages"))
 
+    # ── Style Planner ──────────────────────────────────────────────────────────
+
+    @app.route("/admin/planner")
+    @require_admin
+    def admin_planner():
+        from models import PlannerCollection
+        collections = PlannerCollection.query.order_by(PlannerCollection.display_order).all()
+        collection_data = []
+        for col in collections:
+            featured = []
+            for cp in col.col_products.all():
+                p = cp.product
+                if p:
+                    img = ""
+                    pi = p.images.filter_by(is_primary=1).first() or p.images.first()
+                    if pi and pi.media:
+                        img = pi.media.file_url
+                    featured.append({"cp_id": cp.id, "product": p, "image": img})
+            collection_data.append({"collection": col, "products": featured})
+        return render_template("admin/planner.html", collection_data=collection_data)
+
+    @app.route("/admin/planner/add", methods=["POST"])
+    @require_admin
+    def admin_planner_add():
+        from models import PlannerCollection
+        title = request.form.get("title", "").strip()
+        if not title:
+            flash("Title is required.", "error")
+            return redirect(url_for("admin_planner"))
+        order = PlannerCollection.query.count()
+        col = PlannerCollection(
+            title=title,
+            tip=request.form.get("tip", "").strip(),
+            image_url=request.form.get("image_url", "").strip(),
+            page_slug=request.form.get("page_slug", "").strip(),
+            display_order=order,
+            is_active=1
+        )
+        db_sql.session.add(col)
+        db_sql.session.commit()
+        flash(f"Collection '{title}' added.", "success")
+        return redirect(url_for("admin_planner"))
+
+    @app.route("/admin/planner/<col_id>/edit", methods=["GET", "POST"])
+    @require_admin
+    def admin_planner_edit(col_id):
+        from models import PlannerCollection
+        col = db_sql.session.get(PlannerCollection, col_id)
+        if not col:
+            flash("Collection not found.", "error")
+            return redirect(url_for("admin_planner"))
+        if request.method == "POST":
+            col.title     = request.form.get("title", col.title).strip()
+            col.tip       = request.form.get("tip", col.tip).strip()
+            col.image_url = request.form.get("image_url", col.image_url).strip()
+            col.page_slug = request.form.get("page_slug", col.page_slug).strip()
+            db_sql.session.commit()
+            flash("Collection updated.", "success")
+            return redirect(url_for("admin_planner"))
+        return render_template("admin/planner_edit.html", col=col)
+
+    @app.route("/admin/planner/<col_id>/toggle", methods=["POST"])
+    @require_admin
+    def admin_planner_toggle(col_id):
+        from models import PlannerCollection
+        col = db_sql.session.get(PlannerCollection, col_id)
+        if col:
+            col.is_active = 0 if col.is_active else 1
+            db_sql.session.commit()
+            flash(f"Collection {'shown' if col.is_active else 'hidden'}.", "success")
+        return redirect(url_for("admin_planner"))
+
+    @app.route("/admin/planner/<col_id>/delete", methods=["POST"])
+    @require_admin
+    def admin_planner_delete(col_id):
+        from models import PlannerCollection
+        col = db_sql.session.get(PlannerCollection, col_id)
+        if col:
+            db_sql.session.delete(col)
+            db_sql.session.commit()
+            flash("Collection deleted.", "success")
+        return redirect(url_for("admin_planner"))
+
+    @app.route("/admin/planner/<col_id>/products/add", methods=["POST"])
+    @require_admin
+    def admin_planner_product_add(col_id):
+        from models import PlannerCollection, PlannerCollectionProduct
+        col = db_sql.session.get(PlannerCollection, col_id)
+        if not col:
+            flash("Collection not found.", "error")
+            return redirect(url_for("admin_planner"))
+        product_id = request.form.get("product_id", "").strip()
+        if not product_id:
+            flash("No product selected.", "error")
+            return redirect(url_for("admin_planner"))
+        if col.col_products.count() >= 3:
+            flash("Maximum 3 products per collection.", "error")
+            return redirect(url_for("admin_planner"))
+        if PlannerCollectionProduct.query.filter_by(
+                collection_id=col_id, product_id=product_id).first():
+            flash("Product already in this collection.", "error")
+            return redirect(url_for("admin_planner"))
+        cp = PlannerCollectionProduct(
+            collection_id=col_id,
+            product_id=product_id,
+            display_order=col.col_products.count()
+        )
+        db_sql.session.add(cp)
+        db_sql.session.commit()
+        flash("Product added to collection.", "success")
+        return redirect(url_for("admin_planner"))
+
+    @app.route("/admin/planner/<col_id>/products/<cp_id>/remove", methods=["POST"])
+    @require_admin
+    def admin_planner_product_remove(col_id, cp_id):
+        from models import PlannerCollectionProduct
+        cp = PlannerCollectionProduct.query.filter_by(id=cp_id, collection_id=col_id).first()
+        if cp:
+            db_sql.session.delete(cp)
+            db_sql.session.commit()
+            flash("Product removed.", "success")
+        return redirect(url_for("admin_planner"))
+
+    @app.route("/admin/planner/search_products")
+    @require_admin
+    def admin_planner_search_products():
+        q = request.args.get("q", "").strip()
+        if len(q) < 2:
+            return jsonify([])
+        results = (Product.query
+                   .filter(Product.name.ilike(f"%{q}%"), Product.is_active == 1)
+                   .limit(10).all())
+        out = []
+        for p in results:
+            img = ""
+            pi = p.images.filter_by(is_primary=1).first() or p.images.first()
+            if pi and pi.media:
+                img = pi.media.file_url
+            out.append({
+                "id": p.id,
+                "name": p.name,
+                "price": float(p.sale_price or p.price or 0),
+                "image": img
+            })
+        return jsonify(out)
+
+
+

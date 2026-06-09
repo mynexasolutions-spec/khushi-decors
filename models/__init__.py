@@ -304,6 +304,7 @@ class ProductReview(db.Model, ORMBase):
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+
 class ContactMessage(db.Model, ORMBase):
     __tablename__ = "contact_messages"
     id         = db.Column(db.String, primary_key=True, default=gen_uuid)
@@ -311,4 +312,35 @@ class ContactMessage(db.Model, ORMBase):
     email      = db.Column(db.String, nullable=False, default="")
     message    = db.Column(db.String, nullable=False, default="")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Style Planner (Homepage "Choose Collection Style" section)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class PlannerCollection(db.Model, ORMBase):
+    __tablename__ = "planner_collections"
+    id            = db.Column(db.String, primary_key=True, default=gen_uuid)
+    title         = db.Column(db.String, nullable=False)
+    tip           = db.Column(db.String, default="")
+    image_url     = db.Column(db.String, default="")
+    page_slug     = db.Column(db.String, default="")   # used in /shop?category=<slug>
+    display_order = db.Column(db.Integer, default=0)
+    is_active     = db.Column(db.Integer, default=1)
+    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+    col_products  = db.relationship(
+        "PlannerCollectionProduct", backref="collection",
+        lazy="dynamic", cascade="all, delete-orphan",
+        order_by="PlannerCollectionProduct.display_order"
+    )
+
+
+class PlannerCollectionProduct(db.Model, ORMBase):
+    __tablename__ = "planner_collection_products"
+    id            = db.Column(db.String, primary_key=True, default=gen_uuid)
+    collection_id = db.Column(db.String, db.ForeignKey("planner_collections.id"), nullable=False)
+    product_id    = db.Column(db.String, db.ForeignKey("products.id"), nullable=False)
+    display_order = db.Column(db.Integer, default=0)
+    product       = db.relationship("Product")
+
 

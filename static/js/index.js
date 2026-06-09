@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. Interactive Style Planner System
   const plannerData = window.PLANNER_DATA || {};
 
-  let activeCollection = 'wallArt';
+  let activeCollection = Object.keys(plannerData)[0] || null;
 
   function updatePlannerDisplay() {
     const data = plannerData[activeCollection];

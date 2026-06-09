@@ -153,18 +153,19 @@
         <div class="control-group" style="align-items: center;">
           <span class="control-label"><i class="fas fa-filter"></i> Choose Collection Style</span>
           <div class="planner-buttons" id="collectionSelector" style="justify-content: center; margin-top: 0.5rem;">
-            <button class="planner-btn active" data-collection="wallArt">Wall Art Sets</button>
-            <button class="planner-btn" data-collection="wallClocks">Statement Clocks</button>
-            <button class="planner-btn" data-collection="mirrors">Decorative Mirrors</button>
+            {% for col in planner_collections %}
+            <button class="planner-btn {% if loop.first %}active{% endif %}" data-collection="{{ col.id }}">{{ col.title }}</button>
+            {% endfor %}
           </div>
         </div>
       </div>
 
       <div class="planner-visualizer" id="plannerVisualizer">
-        <div class="visualizer-image-side" id="visualizerImage" style="background-image: url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=1000');">
+        <div class="visualizer-image-side" id="visualizerImage"
+             style="background-image: url('{{ planner_collections[0].image_url if planner_collections else '' }}');">
           <div class="visualizer-overlay">
-            <h3 id="visualizerTitle">Wall Art Collection</h3>
-            <p id="visualizerStylingTip"><strong>Styling Tip:</strong> Combine rich textures like organic cotton macrame and boho tapestries with minimalist clocks to create an inviting, artistic focal wall.</p>
+            <h3 id="visualizerTitle">{{ planner_collections[0].title if planner_collections else 'Collection' }}</h3>
+            <p id="visualizerStylingTip"><strong>Styling Tip:</strong> {{ planner_collections[0].tip if planner_collections else '' }}</p>
           </div>
         </div>
         <div class="visualizer-content-side">
