@@ -93,10 +93,12 @@
 
       <!-- Price & Short Description Block in one elegant card -->
       <div class="price-desc-card" style="background: #faf9f6; border: 1.5px solid #f2e1d9; border-radius: 0px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; box-shadow: 0 4px 15px rgba(193, 122, 90, 0.02);">
-        <div class="product-info-price" id="detailProductPrice" style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 0; padding: 0; border: none;">
+        <div class="product-info-price" id="detailProductPrice" style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 0; padding: 0; border: none; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
           {% if product.sale_price and product.sale_price < product.price %}
+            {% set savings = (((product.price - product.sale_price) / product.price) * 100) | round | int %}
             <span class="original-price" style="text-decoration: line-through; color: #8a857a; font-size: 1.1rem; margin-right: 8px;">₹{{ "%.0f"|format(product.price) }}</span>
             <span class="current-price" style="color: var(--primary); font-weight: 800;">₹{{ "%.0f"|format(product.sale_price) }}</span>
+            <span class="shop-card-discount-tag" style="background-color: #D94638; color: #ffffff; padding: 2px 8px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; border-radius: 0px; margin-left: 0.5rem;">Save {{ savings }}%</span>
           {% else %}
             <span class="current-price" style="color: var(--dark-charcoal); font-weight: 800;">₹{{ "%.0f"|format(product.price) }}</span>
           {% endif %}
@@ -110,38 +112,21 @@
       {% if product.type == 'variable' and attributes %}
         <div class="product-variations-wrapper" style="margin-top: 0.5rem; margin-bottom: 0.5rem; border-top: 1px solid #f0ede8; border-bottom: 1px solid #f0ede8; padding: 1rem 0;">
           {% for attr in attributes %}
-            {% if attr.variation_type == 'primary' %}
-              <!-- Primary Swatch Selector for Shape -->
-              <div class="variation-group" data-attr-id="{{ attr.id }}" data-attr-slug="{{ attr.slug }}" style="margin-bottom: 1rem;">
-                <label class="variation-label" style="display: block; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 0.5rem; color: var(--dark-charcoal);">
-                  Select {{ attr.name }}: <span class="selected-val-label" id="label-{{ attr.slug }}" style="color: var(--primary); font-weight: 600; text-transform: none; margin-left: 4px;"></span>
-                </label>
-                <div class="swatches-container" style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-                  {% for val in attr['values'] %}
-                    <button class="swatch-btn" data-value-id="{{ val.id }}" data-value="{{ val.value }}" title="{{ val.value }}" style="position: relative; overflow: hidden; background: #fff; border: 1.5px solid #dcd8d0; padding: 0.6rem 1.25rem; border-radius: 0px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #5c5850; transition: all 0.25s ease; display: flex; align-items: center; gap: 8px;">
-                      {% if val.image_url %}
-                        <img src="{{ val.image_url }}" alt="{{ val.value }}" style="width: 20px; height: 20px; border-radius: 0px; object-fit: cover;">
-                      {% endif %}
-                      <span>{{ val.value }}</span>
-                    </button>
-                  {% endfor %}
-                </div>
+            <div class="variation-group" data-attr-id="{{ attr.id }}" data-attr-slug="{{ attr.slug }}" style="margin-bottom: 1rem;">
+              <label class="variation-label" style="display: block; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 0.5rem; color: var(--dark-charcoal);">
+                Select {{ attr.name }}: <span class="selected-val-label" id="label-{{ attr.slug }}" style="color: var(--primary); font-weight: 600; text-transform: none; margin-left: 4px;"></span>
+              </label>
+              <div class="swatches-container" style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                {% for val in attr['values'] %}
+                  <button class="swatch-btn" data-value-id="{{ val.id }}" data-value="{{ val.value }}" title="{{ val.value }}" style="position: relative; overflow: hidden; background: #fff; border: 1.5px solid #dcd8d0; padding: 0.6rem 1.25rem; border-radius: 0px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #5c5850; transition: all 0.25s ease; display: flex; align-items: center; gap: 8px;">
+                    {% if val.image_url %}
+                      <img src="{{ val.image_url }}" alt="{{ val.value }}" style="width: 20px; height: 20px; border-radius: 0px; object-fit: cover;">
+                    {% endif %}
+                    <span>{{ val.value }}</span>
+                  </button>
+                {% endfor %}
               </div>
-            {% else %}
-              <!-- Secondary Select Dropdown for Size -->
-              <div class="variation-group" data-attr-id="{{ attr.id }}" data-attr-slug="{{ attr.slug }}" style="margin-bottom: 0.75rem;">
-                <label class="variation-label" style="display: block; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 0.5rem; color: var(--dark-charcoal);">
-                  Choose {{ attr.name }}:
-                </label>
-                <div class="select-dropdown-wrapper" style="position: relative; max-width: 300px;">
-                  <select class="variation-select" style="width: 100%; border: 1.5px solid #dcd8d0; padding: 0.75rem 1.25rem; border-radius: 0px; font-size: 0.9rem; font-weight: 600; color: #5c5850; background: #fff; cursor: pointer; outline: none; transition: all 0.25s ease;">
-                    {% for val in attr['values'] %}
-                      <option value="{{ val.value }}" data-value-id="{{ val.id }}">{{ val.value }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </div>
-            {% endif %}
+            </div>
           {% endfor %}
         </div>
       {% endif %}
@@ -180,21 +165,22 @@
     </div>
   </div>
 
-  <!-- Dynamic Long Description & Specifications Tabs -->
-  <div class="product-description-tabs" style="margin-top: 3.5rem; border-top: 1px solid #f0ede8; padding-top: 3rem;">
-    <div class="tabs-header" style="display:flex; gap: 2rem; border-bottom: 2.5px solid #f7f5f0; margin-bottom: 1.5rem;">
-      <h3 class="tab-title active" id="tabBtnDesc" style="font-family:'Playfair Display', serif; font-size:1.3rem; padding-bottom: 0.75rem; border-bottom: 2.5px solid var(--primary); margin-bottom: -2.5px; color: var(--dark-charcoal); cursor: pointer; transition: all 0.2s ease;">Detailed Craftsmanship</h3>
-      <h3 class="tab-title" id="tabBtnSpecs" style="font-family:'Playfair Display', serif; font-size:1.3rem; padding-bottom: 0.75rem; border-bottom: 2.5px solid transparent; margin-bottom: -2.5px; color: #8a857a; cursor: pointer; transition: all 0.2s ease;">Specifications</h3>
-    </div>
+  <!-- Product Details: Long Description & Specifications -->
+  <div class="product-details-sections" style="margin-top: 3.5rem; border-top: 1px solid #f0ede8; padding-top: 3rem; display: grid; grid-template-columns: 1fr; gap: 3rem;">
     
-    <!-- Tab content: Detailed Craftsmanship Description -->
-    <div class="tab-content" id="tabContentDesc" style="color:#5C5850; line-height: 1.8; font-size: 0.95rem; display: flex; flex-direction: column; gap: 1rem;">
-      {{ product.description|safe }}
+    <!-- Detailed Craftsmanship Description -->
+    <div class="detail-section">
+      <h3 style="font-family:'Playfair Display', serif; font-size:1.4rem; color: var(--dark-charcoal); margin-bottom: 1.25rem;">Detailed Craftsmanship</h3>
+      <div style="color:#5C5850; line-height: 1.8; font-size: 0.95rem; display: flex; flex-direction: column; gap: 1rem;">
+        {{ product.description|safe }}
+      </div>
     </div>
 
-    <!-- Tab content: Specifications list -->
-    <div class="tab-content" id="tabContentSpecs" style="color:#5C5850; line-height: 1.8; font-size: 0.95rem; display: none;">
-      <table class="specs-table" style="width: 100%; border-collapse: collapse; margin-top: 0.5rem;">
+    <!-- Specifications list -->
+    <div class="detail-section">
+      <h3 style="font-family:'Playfair Display', serif; font-size:1.4rem; color: var(--dark-charcoal); margin-bottom: 1.25rem;">Specifications</h3>
+      <div style="color:#5C5850; line-height: 1.8; font-size: 0.95rem;">
+        <table class="specs-table" style="width: 100%; border-collapse: collapse; margin-top: 0.5rem;">
         <tbody>
           <tr style="border-bottom: 1px solid #f0ede8;">
             <td style="padding: 0.8rem 1rem; font-weight: 700; width: 30%; color: var(--dark-charcoal);">Category</td>
@@ -220,6 +206,7 @@
           {% endfor %}
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 
@@ -351,7 +338,7 @@
             
             <!-- Image Area (Sourced directly from primary URL, no hover slideshow) -->
             <div class="shop-card-img-wrap" style="cursor: pointer; position: relative; overflow: hidden; width: 100%; display: block;" onclick="window.location.href='/product/{{ item.id }}'">
-              <img src="{{ resolve_image(item.image_url) }}" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='/static/images/placeholder.png'" style="width: 100%; height: 220px; object-fit: cover; display: block; pointer-events: none;">
+              <img src="{{ resolve_image(item.image_url) }}" alt="{{ item.name }}" loading="lazy" onerror="this.onerror=null; this.src='/static/images/placeholder.png'" style="width: 100%; height: 220px; object-fit: contain; background-color: #f8f7f5; display: block; pointer-events: none;">
               
               <!-- Slide-up Add to Bag button on hover (Overlay Myntra-style) -->
               <button class="btn add-to-cart hover-add-btn" data-name="{{ item.name }}" data-price="{{ '%.0f'|format(item.sale_price or item.price) }}" style="position: absolute; bottom: 0; left: 0; right: 0; background: #ffffff; color: var(--dark-charcoal); border-radius: 0px; font-weight: 700; border: 1.5px solid #dcd8d0; margin: 12px; padding: 0.65rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.8px; transform: translateY(120%); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 10; display: flex; align-items: center; justify-content: center; gap: 6px; white-shadow: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; pointer-events: auto;">

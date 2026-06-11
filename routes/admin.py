@@ -3,7 +3,7 @@ import io
 import uuid
 import itertools
 from functools import wraps
-from flask import render_template, request, redirect, url_for, flash, abort, session
+from flask import render_template, request, redirect, url_for, flash, abort, session, jsonify
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc, or_, and_
 
@@ -1625,20 +1625,41 @@ def register(app):
     @app.route("/admin/planner/<col_id>/edit", methods=["GET", "POST"])
     @require_admin
     def admin_planner_edit(col_id):
-        from models import PlannerCollection
+        from models import PlannerCollection, Product, PlannerCollectionProduct
         col = db_sql.session.get(PlannerCollection, col_id)
         if not col:
             flash("Collection not found.", "error")
             return redirect(url_for("admin_planner"))
+        
         if request.method == "POST":
             col.title     = request.form.get("title", col.title).strip()
             col.tip       = request.form.get("tip", col.tip).strip()
             col.image_url = request.form.get("image_url", col.image_url).strip()
             col.page_slug = request.form.get("page_slug", col.page_slug).strip()
+            
+            # Update featured products checklist
+            selected_pids = request.form.getlist("featured_products")
+            if len(selected_pids) > 3:
+                flash("You can select up to 3 featured products max.", "error")
+                return redirect(url_for("admin_planner_edit", col_id=col_id))
+            
+            # Clear existing products and re-add new ones
+            PlannerCollectionProduct.query.filter_by(collection_id=col.id).delete()
+            for idx, pid in enumerate(selected_pids):
+                cp = PlannerCollectionProduct(
+                    collection_id=col.id,
+                    product_id=pid,
+                    display_order=idx
+                )
+                db_sql.session.add(cp)
+            
             db_sql.session.commit()
-            flash("Collection updated.", "success")
+            flash("Collection and featured products updated.", "success")
             return redirect(url_for("admin_planner"))
-        return render_template("admin/planner_edit.html", col=col)
+            
+        products = Product.query.filter_by(is_active=1).order_by(Product.name).all()
+        featured_ids = [cp.product_id for cp in col.col_products.all()]
+        return render_template("admin/planner_edit.html", col=col, products=products, featured_ids=featured_ids)
 
     @app.route("/admin/planner/<col_id>/toggle", methods=["POST"])
     @require_admin

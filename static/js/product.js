@@ -132,39 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. Tab Switching Logic
-  const tabBtnDesc = document.getElementById('tabBtnDesc');
-  const tabBtnSpecs = document.getElementById('tabBtnSpecs');
-  const tabContentDesc = document.getElementById('tabContentDesc');
-  const tabContentSpecs = document.getElementById('tabContentSpecs');
-
-  if (tabBtnDesc && tabBtnSpecs && tabContentDesc && tabContentSpecs) {
-    tabBtnDesc.addEventListener('click', () => {
-      tabBtnDesc.classList.add('active');
-      tabBtnDesc.style.borderBottom = '2.5px solid var(--primary)';
-      tabBtnDesc.style.color = 'var(--dark-charcoal)';
-
-      tabBtnSpecs.classList.remove('active');
-      tabBtnSpecs.style.borderBottom = '2.5px solid transparent';
-      tabBtnSpecs.style.color = '#8a857a';
-
-      tabContentDesc.style.display = 'flex';
-      tabContentSpecs.style.display = 'none';
-    });
-
-    tabBtnSpecs.addEventListener('click', () => {
-      tabBtnSpecs.classList.add('active');
-      tabBtnSpecs.style.borderBottom = '2.5px solid var(--primary)';
-      tabBtnSpecs.style.color = 'var(--dark-charcoal)';
-
-      tabBtnDesc.classList.remove('active');
-      tabBtnDesc.style.borderBottom = '2.5px solid transparent';
-      tabBtnDesc.style.color = '#8a857a';
-
-      tabContentSpecs.style.display = 'block';
-      tabContentDesc.style.display = 'none';
-    });
-  }
+  // 3. Tab Switching Logic (Removed - Sections are now stacked vertically)
 
   // 4. Interactive Review Form Star Rating Selection
   const starsContainer = document.querySelector('.interactive-star-selector');
@@ -327,9 +295,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Price Updates
         if (detailProductPrice) {
           if (matchedVariation.sale_price && matchedVariation.sale_price < matchedVariation.price) {
+            const savings = Math.round(((matchedVariation.price - matchedVariation.sale_price) / matchedVariation.price) * 100);
             detailProductPrice.innerHTML = `
-              <span class="original-price" style="text-decoration: line-through; color: #8a857a; font-size: 1.1rem; margin-right: 10px;">₹${Math.round(matchedVariation.price)}</span>
+              <span class="original-price" style="text-decoration: line-through; color: #8a857a; font-size: 1.1rem; margin-right: 8px;">₹${Math.round(matchedVariation.price)}</span>
               <span class="current-price" style="color: var(--primary); font-weight: 800;">₹${Math.round(matchedVariation.sale_price)}</span>
+              <span class="shop-card-discount-tag" style="background-color: #D94638; color: #ffffff; padding: 2px 8px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; border-radius: 0px; margin-left: 0.5rem;">Save ${savings}%</span>
             `;
           } else {
             detailProductPrice.innerHTML = `
@@ -428,6 +398,55 @@ document.addEventListener('DOMContentLoaded', () => {
           buyNowBtn.dataset.sku = matchedVariation.sku || '';
           buyNowBtn.dataset.variationId = matchedVariation.id;
         }
+
+        // 4. Update prices on swatch buttons
+        document.querySelectorAll('.variation-group').forEach(group => {
+          const attrId = group.dataset.attrId;
+          group.querySelectorAll('.swatch-btn').forEach(btn => {
+            const valId = btn.dataset.valueId;
+            
+            // Hypothetical selection state: current state, but override this attribute with valId
+            const hypotheticalSelections = { ...selections, [attrId]: valId };
+            
+            // Find matching variation
+            let hypotheticalVariation = null;
+            for (const v of variations) {
+              let isMatch = true;
+              for (const aId in hypotheticalSelections) {
+                const vId = hypotheticalSelections[aId];
+                const hasVal = v.values.some(valObj => String(valObj.attribute_id) === String(aId) && String(valObj.value_id) === String(vId));
+                if (!hasVal) {
+                  isMatch = false;
+                  break;
+                }
+              }
+              if (isMatch) {
+                hypotheticalVariation = v;
+                break;
+              }
+            }
+            
+            // Update button text
+            let priceSpan = btn.querySelector('.swatch-price');
+            
+            if (hypotheticalVariation) {
+              const price = Math.round(hypotheticalVariation.sale_price || hypotheticalVariation.price);
+              if (!priceSpan) {
+                priceSpan = document.createElement('span');
+                priceSpan.className = 'swatch-price';
+                priceSpan.style.fontSize = '0.75rem';
+                priceSpan.style.marginLeft = '5px';
+                priceSpan.style.fontWeight = '700';
+                priceSpan.style.transition = 'color 0.25s ease';
+                btn.appendChild(priceSpan);
+              }
+              priceSpan.innerText = `- ₹${price}`;
+              priceSpan.style.color = btn.classList.contains('active') ? 'var(--primary)' : '#8C877D';
+            } else if (priceSpan) {
+              priceSpan.innerText = '';
+            }
+          });
+        });
 
       } else {
         // Unavailable State (Safety fallback)

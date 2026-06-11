@@ -83,20 +83,7 @@
       {% endfor %}
     </div>
     {% else %}
-    <p style="font-size:0.83rem; color:var(--admin-text-muted); margin-bottom:1rem;">No featured products yet — add up to 3 below.</p>
-    {% endif %}
-
-    {# ── Product Search (only if fewer than 3) ── #}
-    {% if products|length < 3 %}
-    <div class="planner-search-wrap" data-col-id="{{ col.id }}" style="position:relative; max-width:400px;">
-      <input type="text" class="admin-input planner-search-input"
-             placeholder="🔍  Search product name to add…"
-             autocomplete="off"
-             style="width:100%; box-sizing:border-box; font-size:0.875rem;">
-      <div class="planner-search-dropdown" style="display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:white; border:1px solid var(--admin-border); border-radius:0.6rem; box-shadow:0 8px 24px rgba(0,0,0,0.1); z-index:200; max-height:240px; overflow-y:auto;"></div>
-    </div>
-    {% else %}
-    <p style="font-size:0.8rem; color:#6b7280; font-style:italic;">Max 3 products reached. Remove one to add another.</p>
+    <p style="font-size:0.83rem; color:var(--admin-text-muted); margin-bottom:1rem;">No featured products yet — edit collection to select products.</p>
     {% endif %}
   </div>
 </div>
@@ -163,57 +150,6 @@ document.getElementById('addPlannerModal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('addPlannerModal')) closeAddModal();
 });
 
-// Product search + add for each collection
-document.querySelectorAll('.planner-search-wrap').forEach(wrap => {
-  const colId   = wrap.dataset.colId;
-  const input   = wrap.querySelector('.planner-search-input');
-  const dropdown = wrap.querySelector('.planner-search-dropdown');
-  let timer;
-
-  input.addEventListener('input', () => {
-    clearTimeout(timer);
-    const q = input.value.trim();
-    if (q.length < 2) { dropdown.style.display = 'none'; return; }
-    timer = setTimeout(async () => {
-      try {
-        const res  = await fetch(`/admin/planner/search_products?q=${encodeURIComponent(q)}`);
-        const data = await res.json();
-        if (!data.length) {
-          dropdown.innerHTML = '<div style="padding:0.75rem 1rem; color:#6b7280; font-size:0.85rem;">No products found.</div>';
-        } else {
-          dropdown.innerHTML = data.map(p => `
-            <div class="planner-result-row" data-id="${p.id}"
-                 style="display:flex; align-items:center; gap:0.65rem; padding:0.6rem 0.9rem; cursor:pointer; border-bottom:1px solid #f3f4f6;">
-              ${p.image ? `<img src="${p.image}" style="width:34px;height:34px;object-fit:cover;border-radius:4px;flex-shrink:0;">` : '<div style="width:34px;height:34px;background:#f3f4f6;border-radius:4px;flex-shrink:0;"></div>'}
-              <div style="flex:1; min-width:0;">
-                <div style="font-size:0.85rem; font-weight:600; color:#111827; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
-                <div style="font-size:0.76rem; color:#6b7280;">₹${p.price}</div>
-              </div>
-              <span style="font-size:0.75rem; color:#059669; font-weight:600; flex-shrink:0;">+ Add</span>
-            </div>
-          `).join('');
-        }
-        dropdown.style.display = 'block';
-        dropdown.querySelectorAll('.planner-result-row').forEach(row => {
-          row.addEventListener('mouseenter', () => row.style.background = '#f9fafb');
-          row.addEventListener('mouseleave', () => row.style.background = '');
-          row.addEventListener('click', () => {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/admin/planner/${colId}/products/add`;
-            form.innerHTML = `<input type="hidden" name="csrf_token" value="${CSRF}">
-                              <input type="hidden" name="product_id" value="${row.dataset.id}">`;
-            document.body.appendChild(form);
-            form.submit();
-          });
-        });
-      } catch(e) { console.error(e); }
-    }, 300);
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!wrap.contains(e.target)) dropdown.style.display = 'none';
-  });
-});
+// Product search script removed (selection moved to edit page)
 </script>
 {% endblock %}

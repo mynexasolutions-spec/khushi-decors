@@ -51,6 +51,34 @@
           </p>
         </div>
 
+        <div>
+          <label class="admin-label">Featured Products (Select up to 3)</label>
+          <div style="border: 1px solid var(--admin-border); border-radius: 0.5rem; background: var(--admin-bg); max-height: 280px; overflow-y: auto; padding: 0.25rem;">
+            {% for product in products %}
+            {% set pimg = product.images.filter_by(is_primary=1).first() or product.images.first() %}
+            <label style="display: flex; align-items: center; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--admin-border); cursor: pointer; user-select: none; transition: background 0.15s ease;" onmouseover="this.style.background='var(--admin-border)'" onmouseout="this.style.background=''">
+              <input type="checkbox" name="featured_products" value="{{ product.id }}" 
+                     {% if product.id in featured_ids %}checked{% endif %}
+                     style="margin-right: 0.85rem; width: 1.1rem; height: 1.1rem; accent-color: var(--admin-primary, #4f46e5); cursor: pointer;">
+              
+              {% if pimg and pimg.media %}
+                <img src="{{ pimg.media.file_url }}" alt="" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px; margin-right: 0.75rem; flex-shrink: 0; border: 1px solid var(--admin-border);">
+              {% else %}
+                <div style="width: 36px; height: 36px; background:#e5e7eb; border: 1px solid var(--admin-border); border-radius: 4px; margin-right: 0.75rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 1rem;">🖼</div>
+              {% endif %}
+              
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 0.85rem; font-weight: 600; color: var(--admin-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ product.name }}</div>
+                <div style="font-size: 0.76rem; color: var(--admin-text-muted);">₹{{ product.sale_price or product.price }}</div>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+          <div id="max-limit-warning" style="display: none; color: #ef4444; font-size: 0.78rem; margin-top: 6px; font-weight: 600;">
+            ⚠️ Maximum 3 products can be featured. Please uncheck one before selecting another.
+          </div>
+        </div>
+
         <div style="display:flex; justify-content:flex-end; gap:0.75rem; padding-top:0.5rem; border-top:1px solid var(--admin-border); margin-top:0.5rem;">
           <a href="{{ url_for('admin_planner') }}" class="admin-btn" style="text-decoration:none;">Cancel</a>
           <button type="submit" class="admin-btn admin-btn-primary">Save Changes</button>
@@ -76,6 +104,41 @@ function previewImage(url) {
 }
 document.getElementById('edit_slug').addEventListener('input', function() {
   document.getElementById('slugPreview').textContent = this.value || 'slug';
+});
+
+// Checklist constraint
+document.addEventListener("DOMContentLoaded", () => {
+  const checkboxes = document.querySelectorAll('input[name="featured_products"]');
+  const warning = document.getElementById('max-limit-warning');
+  
+  function updateLimits() {
+    const checked = document.querySelectorAll('input[name="featured_products"]:checked');
+    if (checked.length >= 3) {
+      checkboxes.forEach(cb => {
+        if (!cb.checked) {
+          cb.disabled = true;
+          cb.parentElement.style.opacity = '0.5';
+          cb.parentElement.style.cursor = 'not-allowed';
+        }
+      });
+      warning.style.display = 'block';
+    } else {
+      checkboxes.forEach(cb => {
+        cb.disabled = false;
+        cb.parentElement.style.opacity = '1';
+        cb.parentElement.style.cursor = 'pointer';
+      });
+      warning.style.display = 'none';
+    }
+  }
+  
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      updateLimits();
+    });
+  });
+  
+  updateLimits();
 });
 </script>
 {% endblock %}
