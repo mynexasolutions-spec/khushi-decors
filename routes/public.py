@@ -243,7 +243,7 @@ def product_detail(product_id):
     empty_stars = 5 - full_stars - half_star
 
     settings = get_cached_store_settings()
-    free_shipping_threshold = float(settings.get("free_shipping_threshold") or 999)
+    free_shipping_threshold = float(settings.get("free_shipping_threshold") or 599)
 
     return render_template(
         "product_detail.html",

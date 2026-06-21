@@ -239,7 +239,7 @@ def checkout():
                 cart=cart, subtotal=subtotal, shipping=shipping, total=subtotal + shipping,
                 settings=settings, cod_enabled=cod_enabled, online_enabled=online_enabled,
                 addresses=addresses,
-                free_shipping_threshold=float(settings.get("free_shipping_threshold") or 999),
+                free_shipping_threshold=float(settings.get("free_shipping_threshold") or 599),
                 free_shipping_enabled=settings.get("free_shipping_enabled", "true") == "true",
                 free_shipping_all=settings.get("free_shipping_all") == "true",
             )
@@ -383,7 +383,7 @@ def checkout():
         cart=cart, subtotal=subtotal, shipping=shipping, total=total,
         settings=settings, cod_enabled=cod_enabled, online_enabled=online_enabled,
         addresses=addresses,
-        free_shipping_threshold=float(settings.get("free_shipping_threshold") or 999),
+        free_shipping_threshold=float(settings.get("free_shipping_threshold") or 599),
         free_shipping_enabled=settings.get("free_shipping_enabled", "true") == "true",
         free_shipping_all=settings.get("free_shipping_all") == "true",
     )

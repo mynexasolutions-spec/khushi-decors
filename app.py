@@ -136,6 +136,24 @@ if _os.environ.get("WERKZEUG_RUN_MAIN") != "true":
         except Exception:
             pass
 
+        # ── Auto-seed default store settings if table is empty ──
+        try:
+            from models import StoreSetting
+            if StoreSetting.query.count() == 0:
+                defaults = [
+                    StoreSetting(key="cod_enabled", value="true"),
+                    StoreSetting(key="online_payment_enabled", value="false"),
+                    StoreSetting(key="free_shipping_enabled", value="true"),
+                    StoreSetting(key="free_shipping_all", value="false"),
+                    StoreSetting(key="shipping_fee", value="49"),
+                    StoreSetting(key="free_shipping_threshold", value="599"),
+                ]
+                for s in defaults:
+                    db_sql.session.add(s)
+                db_sql.session.commit()
+        except Exception:
+            pass
+
         # ── Auto-seed Style Planner collections if table is empty ──
         try:
             from models import PlannerCollection

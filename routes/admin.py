@@ -1278,9 +1278,9 @@ def register(app):
                 for key in numeric_keys:
                     raw = request.form.get(key, "").strip()
                     try:
-                        value = str(max(0, float(raw))) if raw else ("99" if key == "shipping_fee" else "999")
+                        value = str(max(0, float(raw))) if raw else ("49" if key == "shipping_fee" else "599")
                     except ValueError:
-                        value = "99" if key == "shipping_fee" else "999"
+                        value = "49" if key == "shipping_fee" else "599"
                     setting = db_sql.session.get(StoreSetting, key)
                     if setting:
                         setting.value = value
