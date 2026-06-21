@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from extensions import db_sql
-from helpers import refresh_cart_prices
+from helpers import refresh_cart_prices, calc_shipping
 from models import Product, ProductVariation, AttributeValue, VariationAttributeValue
 
 bp = Blueprint("cart", __name__)
@@ -11,7 +11,7 @@ def view_cart():
     cart_items = session.get("cart", {})
     cart_items, subtotal = refresh_cart_prices(cart_items)
     session["cart"] = cart_items
-    shipping = 0 if subtotal >= 999 else 99
+    shipping = calc_shipping(subtotal)
     return render_template(
         "cart.html",
         cart_items=cart_items,
@@ -153,9 +153,9 @@ def cart_ajax_update():
         cart[item_key]["qty"] = new_qty
         session["cart"] = cart
 
-        from helpers import refresh_cart_prices
+        from helpers import refresh_cart_prices, calc_shipping
         _, subtotal = refresh_cart_prices(cart)
-        shipping = 0 if subtotal >= 999 else 99
+        shipping = calc_shipping(subtotal)
         return jsonify({
             "success": True,
             "qty": new_qty,
@@ -175,9 +175,9 @@ def cart_ajax_remove():
     if item_key in cart:
         cart.pop(item_key)
         session["cart"] = cart
-        from helpers import refresh_cart_prices
+        from helpers import refresh_cart_prices, calc_shipping
         _, subtotal = refresh_cart_prices(cart)
-        shipping = 0 if subtotal >= 999 else 99
+        shipping = calc_shipping(subtotal)
         return jsonify({
             "success": True,
             "subtotal": subtotal,

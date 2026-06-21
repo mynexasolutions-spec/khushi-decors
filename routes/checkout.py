@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify, abort
 from extensions import db_sql, csrf
 from sqlalchemy import and_, func
-from helpers import get_cached_store_settings, refresh_cart_prices
+from helpers import get_cached_store_settings, refresh_cart_prices, calc_shipping
 from models import (
     Coupon, CouponUsage, UserAddress, Order, OrderItem,
     Product, ProductReview, ProductImage, Media
@@ -14,18 +14,6 @@ from models import (
 bp = Blueprint("checkout", __name__)
 
 ALLOWED_PAYMENT_METHODS = {"cod", "razorpay"}
-
-
-def _calc_shipping(subtotal, settings=None):
-    if settings is None:
-        settings = get_cached_store_settings()
-    if settings.get("free_shipping_all") == "true":
-        return 0.0
-    fee       = float(settings.get("shipping_fee") or 99)
-    threshold = float(settings.get("free_shipping_threshold") or 999)
-    if settings.get("free_shipping_enabled", "true") == "true" and subtotal >= threshold:
-        return 0.0
-    return fee
 
 
 # ── Coupon validation ──────────────────────────────────────────────────────────
@@ -99,7 +87,7 @@ def apply_coupon():
     if error:
         return jsonify({"valid": False, "error": error})
 
-    shipping  = _calc_shipping(subtotal)
+    shipping  = calc_shipping(subtotal)
     new_total = round(max(0.0, subtotal + shipping - discount), 2)
 
     return jsonify({
@@ -143,7 +131,7 @@ def rzp_create_order():
             uid = session["user"]["id"]
             _, discount, _ = _validate_coupon(coupon_code, uid, subtotal)
 
-        shipping     = _calc_shipping(subtotal, settings)
+        shipping     = calc_shipping(subtotal, settings)
         amount_total = max(0.0, subtotal + shipping - discount)
         amount_paisa = int(round(amount_total * 100))
 
@@ -177,7 +165,7 @@ def checkout():
     session["cart"] = cart
 
     settings       = get_cached_store_settings()
-    shipping       = _calc_shipping(subtotal, settings)
+    shipping       = calc_shipping(subtotal, settings)
     cod_enabled    = settings.get("cod_enabled", "true") == "true"
     online_enabled = settings.get("online_payment_enabled", "false") == "true"
 
