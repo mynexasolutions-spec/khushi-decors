@@ -44,17 +44,24 @@
 
   <!-- Main Header Layout -->
   <header class="main-header">
-    <div class="menu-icon" id="menuToggle"><i class="fas fa-bars"></i></div>
-    <a class="logo" href="/">
-      <span class="logo-symbol">Khushi</span>
-      <span class="logo-accent">Decors</span>
-    </a>
-    <nav class="desktop-nav">
-      <a class="desktop-nav-link" href="/">Home</a>
-      <a class="desktop-nav-link" href="/shop">Shop</a>
-      <a class="desktop-nav-link" href="/about">About</a>
-      <a class="desktop-nav-link" href="/contact">Contact</a>
-    </nav>
+  <div class="menu-icon" id="menuToggle"><i class="fas fa-bars"></i></div>
+  
+  <!-- Left Side: Logo -->
+  <a class="logo" href="/">
+    <span class="logo-symbol">Khushi</span>
+    <span class="logo-accent">Decors</span>
+  </a>
+
+  <!-- Center Side: Navigation -->
+  <nav class="desktop-nav">
+    <a class="desktop-nav-link" href="/">Home</a>
+    <a class="desktop-nav-link" href="/shop">Shop</a>
+    <a class="desktop-nav-link" href="/about">About</a>
+    <a class="desktop-nav-link" href="/contact">Contact</a>
+  </nav>
+
+  <!-- Right Side: Search and Actions Combined -->
+  <div class="header-actions">
     <!-- Header Search Input -->
     <div class="search-container">
       <form action="/shop" method="GET" class="search-wrapper">
@@ -63,16 +70,14 @@
       </form>
     </div>
 
-    <!-- User profile & shopping bag controls -->
-    <div class="header-actions">
-      <a href="/account" title="Account"><i class="fas fa-user-circle" id="loginIcon"></i></a>
-      <div class="cart-icon" id="cartIcon" onclick="window.location.href='/cart'" style="cursor: pointer;">
-        <i class="fas fa-bag-shopping"></i>
-        <span class="cart-count" id="cartCount">0</span>
-      </div>
+    <!-- User Profile & Shopping Bag Controls -->
+    <a href="/account" title="Account"><i class="fas fa-user-circle" id="loginIcon"></i></a>
+    <div class="cart-icon" id="cartIcon" onclick="window.location.href='/cart'" style="cursor: pointer;">
+      <i class="fas fa-bag-shopping"></i>
+      <span class="cart-count" id="cartCount">0</span>
     </div>
-  </header>
-
+  </div>
+</header>
   <!-- Page Content Block -->
   {% block content %}{% endblock %}
 

@@ -226,9 +226,21 @@ def product_detail(product_id):
         abort(404)
     
     # Resolve images list into simple URLs for storefront gallery
-    gallery_images = [resolve_image(img["image_url"]) for img in images]
-    if not gallery_images:
-        gallery_images = ["/static/images/placeholder.png"]
+    # gallery_images = [resolve_image(img["image_url"]) for img in images]
+    # if not gallery_images:
+    #     gallery_images = ["/static/images/placeholder.png"]
+    gallery_media = []
+    for img in images:
+        url = resolve_image(img["image_url"])
+        # Check if the file extension points to a video format
+        is_video = any(url.lower().endswith(ext) for ext in ['.mp4', '.webm', '.ogg', '.mov'])
+        gallery_media.append({
+            "url": url,
+            "is_video": is_video
+        })
+
+    if not gallery_media:
+        gallery_media = [{"url": "/static/images/placeholder.png", "is_video": False}]
         
     try:
         related = get_related_products(product.get("category_slug", ""), product_id)
@@ -247,7 +259,7 @@ def product_detail(product_id):
 
     return render_template(
         "product_detail.html",
-        product=product, images=images, gallery_images=gallery_images, variations=variations,
+        product=product, images=images, gallery_media=gallery_media, variations=variations,
         reviews=reviews, attributes=attributes, related=related, related_products=related,
         variation_json=variation_json, vars_json=vars_json,
         avg_rating=avg_rating, num_reviews=num_reviews,

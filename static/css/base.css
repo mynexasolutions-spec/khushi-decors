@@ -57,6 +57,7 @@ h1, h2, h3 {
   gap: 4px;
   text-decoration: none;
   cursor: pointer;
+  flex: 1;
 }
 
 .logo-symbol {
@@ -183,6 +184,8 @@ h1, h2, h3 {
 .desktop-nav {
   display: flex;
   gap: 1.5rem;
+  justify-content: flex-start;
+  flex: 1;
 }
 
 .desktop-nav-link {
@@ -234,6 +237,11 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.header-actions a, 
+.header-actions .cart-icon {
+  display: flex;
+  align-items: center;
 }
 
 /* Sidebar */
@@ -604,45 +612,60 @@ footer {
 }
 
 @media (max-width: 768px) {
+  /* Converts the header into a slim, single horizontal row */
   .main-header {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    row-gap: 0.8rem;
-    column-gap: 1rem;
-    padding: 0.8rem 1.2rem;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    padding: 0.6rem 1rem; /* Reduced vertical padding for a thinner look */
+    height: 60px; /* Forces a fixed, clean professional height */
+    box-sizing: border-box;
   }
+
+  /* Hamburger menu stays comfortably on the left */
   .menu-icon {
     display: block;
-    grid-column: 1;
-    grid-row: 1;
-    justify-self: start;
+    font-size: 1.3rem;
     z-index: 2;
+    cursor: pointer;
+    flex: 1; /* Helps balance and center the middle logo */
+    text-align: left;
   }
+
+  /* Keeps the logo dead-center on the screen */
   .logo {
-    grid-column: 1 / span 3;
-    grid-row: 1;
-    justify-self: center;
-    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 0;
+    z-index: 1;
+    flex: 2; /* Allocates center space */
+    text-align: center;
   }
+
   .desktop-nav {
     display: none;
   }
+
+  /* Safely keeps the search bar removed from layout calculations */
   .search-container {
-    grid-column: 1 / span 2;
-    grid-row: 2;
-    margin: 0;
-    max-width: 100%;
-    width: 100%;
+    display: none !important;
   }
+
+  /* Aligns profile and bag icons perfectly on the right row axis */
   .header-actions {
-    grid-column: 3;
-    grid-row: 2;
-    justify-self: end;
     display: flex;
     align-items: center;
-    gap: 1.2rem;
+    justify-content: flex-end;
+    gap: 1rem; /* Clean spacing between profile and bag */
+    flex: 1; /* Matches the left hamburger width to ensure absolute centering */
+  }
+
+  /* Standardizes icon font sizing inside the action cluster */
+  .header-actions i {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
   }
 }
 

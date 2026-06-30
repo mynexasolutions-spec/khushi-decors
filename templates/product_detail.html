@@ -24,20 +24,39 @@
     <!-- Left Column: Thumbnail Switcher Gallery -->
     <div class="product-gallery-container">
       <div class="product-gallery-thumbs" id="productGalleryThumbs">
-        {% for url in gallery_images %}
-          <img src="{{ url }}" alt="Thumbnail {{ loop.index }}" class="gallery-thumb-item {% if loop.first %}active{% endif %}" data-idx="{{ loop.index0 }}">
+        {% for media in gallery_media %}
+          <div class="gallery-thumb-item {% if loop.first %}active{% endif %}" data-idx="{{ loop.index0 }}" style="position: relative; cursor: pointer;">
+            {% if media.is_video %}
+              <!-- Video Preview Thumbnail Frame -->
+              <video src="{{ media.url }}" preload="metadata" muted style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>
+              <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.25);">
+                <i class="fas fa-play" style="color: white; font-size: 0.75rem;"></i>
+              </div>
+            {% else %}
+              <!-- Standard Image Thumbnail -->
+              <img src="{{ media.url }}" alt="Thumbnail {{ loop.index }}">
+            {% endif %}
+          </div>
         {% endfor %}
       </div>
-      <div class="product-gallery-main" style="position: relative;">
+      
+      <div class="product-gallery-main" style="position: relative; width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #faf9f6;">
         <!-- Left Arrow Button -->
-        <button id="galleryPrevBtn" class="gallery-nav-btn" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--dark-charcoal); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all 0.25s ease; outline: none; border-style: solid;" aria-label="Previous image">
+        <button id="galleryPrevBtn" class="gallery-nav-btn" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--dark-charcoal); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all 0.25s ease; outline: none;" aria-label="Previous image">
           <i class="fas fa-chevron-left" style="font-size: 0.95rem;"></i>
         </button>
 
-        <img src="{{ gallery_images[0] }}" alt="{{ product.name }}" id="mainProductImg">
+        <!-- Dynamic Container for Media Display -->
+        <div id="mainMediaContainer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+          {% if gallery_media[0].is_video %}
+            <video src="{{ gallery_media[0].url }}" id="mainProductVideo" controls autoplay muted playsinline style="width: 100%; max-height: 550px; object-fit: contain;"></video>
+          {% else %}
+            <img src="{{ gallery_media[0].url }}" alt="{{ product.name }}" id="mainProductImg" style="width: 100%; max-height: 550px; object-fit: contain;">
+          {% endif %}
+        </div>
 
         <!-- Right Arrow Button -->
-        <button id="galleryNextBtn" class="gallery-nav-btn" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--dark-charcoal); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all 0.25s ease; outline: none; border-style: solid;" aria-label="Next image">
+        <button id="galleryNextBtn" class="gallery-nav-btn" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--dark-charcoal); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all 0.25s ease; outline: none;" aria-label="Next image">
           <i class="fas fa-chevron-right" style="font-size: 0.95rem;"></i>
         </button>
       </div>

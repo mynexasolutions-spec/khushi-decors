@@ -511,6 +511,7 @@
   object-fit: cover;
   display: block;
   transition: opacity 0.25s ease;
+  cursor: zoom-in;
 }
 
 /* Hover Add to Bag Slide up action */
@@ -799,6 +800,7 @@
   height: 220px;
   object-fit: cover;
   pointer-events: none;
+  cursor:zoom-in;
 }
 
 /* Card index indicator dots hover displays */

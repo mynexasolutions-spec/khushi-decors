@@ -46,11 +46,10 @@
   width: 78px;
   height: 78px;
   border-radius: 0;
-  object-fit: cover;
-  cursor: pointer;
-  border: 2px solid transparent;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-  transition: var(--transition);
+  overflow:hidden;
+
+  position:relative;
+  flex-shrink:0;
 }
 
 .gallery-thumb-item:hover {
@@ -61,6 +60,14 @@
 .gallery-thumb-item.active {
   border-color: var(--primary);
   box-shadow: 0 4px 12px rgba(193,122,90,0.22);
+}
+.gallery-thumb-item img,
+.gallery-thumb-item video{
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+    display:block;
 }
 
 .product-gallery-main {

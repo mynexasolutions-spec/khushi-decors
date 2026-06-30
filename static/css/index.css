@@ -1,25 +1,25 @@
 /* Hero Slider */
 .hero-slider {
   position: relative;
-  height: 75vh;
-  min-height: 500px;
+  height: 100vh;
   overflow: hidden;
-  border-radius: 0px;
-  margin-bottom: 3rem;
+  background-color: #000;
+  padding:0;
 }
 .slide {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   background-size: cover;
-  background-position: center 30%;
-  transition: opacity 1s ease;
+  background-position: center;
   opacity: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: opacity 1.5s ease-in-out; /* Smooth fade-in fade-out transition */
+  z-index: 1;
 }
-.slide.active-slide { opacity: 1; }
+.slide.active-slide { opacity: 1; 
+z-index: 2;}
 .scroll-btn {
   background: var(--primary);
   color: white;
@@ -42,27 +42,32 @@
 }
 
 .hero-content-fixed {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  text-align: center;
-  color: white;
-  width: 90%;
-  max-width: 800px;
+   position: absolute;
+  z-index: 3;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 50%; /* Covers the left half of the banner */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
+  padding-left: 8%;
+  box-sizing: border-box;
+  
+  /* Creates a smooth black block that fades out to the right */
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.85) 60%, rgba(0, 0, 0, 0) 100%);
 }
 .hero-content-fixed .hero-pretitle {
-  font-size: 0.85rem;
-  letter-spacing: 3px;
-  font-weight: 700;
+  display: block;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #d4af37; /* Premium Gold Accent color */
+  margin-bottom: 20px;
+  font-weight: 600;
   text-transform: uppercase;
-  color: var(--primary-light);
-  margin-bottom: 0.25rem;
+}
+.hero-content-fixed h1 span {
+  color: #d4af37; /* Highlights 'with Premium LED Mirrors' in gold */
 }
 .hero-content-fixed h1 {
   font-family: 'Playfair Display', serif;
@@ -75,24 +80,32 @@
   text-shadow: 0 4px 15px rgba(0,0,0,0.35);
 }
 .hero-content-fixed p {
-  font-size: 1.2rem;
-  font-weight: 400;
-  opacity: 0.95;
-  max-width: 600px;
-  margin: 0.5rem 0 1.5rem 0;
+font-family: 'Poppins', sans-serif;
+  font-size: 18px;
   line-height: 1.6;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  color: #cccccc;
+  margin-bottom: 40px
 }
 .hero-actions-row {
   display: flex;
   gap: 1.25rem;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
+  width:100%;
 }
 .hero-primary-btn {
-  background: var(--primary);
-  color: white;
-  margin: 0 !important;
+  background: transparent;
+  color: #d4af37;
+  border: 1.5px solid #d4af37;
+  padding: 12px 30px;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.hero-primary-btn:hover {
+  background: #d4af37;
+  color: #000000;
 }
 .hero-secondary-btn {
   background: transparent;
@@ -106,37 +119,79 @@
   border-color: white;
 }
 
+/* --- Mobile Optimization (Smartphones and Tablets) --- */
 @media (max-width: 768px) {
   .hero-slider {
-    height: 65vh;
-    min-height: 420px;
+    height: 70vh; /* Slightly taller to prevent text text overflows */
+    min-height: 480px;
   }
+
+  .hero-content-fixed {
+    width: 100%; /* Spans full screen width instead of 50% */
+    padding: 0 24px; /* Centers text safely away from glass screen edges */
+    align-items: center; /* Aligns pretitle, text, and buttons to the middle */
+    text-align: center; /* Centers all typographic content */
+    
+    /* Changes side-gradient to a dark bottom shadow for ideal background image contrast */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 60%, rgba(0, 0, 0, 0.3) 100%);
+  }
+
+  .hero-content-fixed .hero-pretitle {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+
   .hero-content-fixed h1 {
-    font-size: 2.4rem;
+    font-size: 2.1rem; /* Compact, readable title size for mobile viewport width */
+    line-height: 1.3;
+    margin-bottom: 12px;
   }
+
+  /* Removes hardcoded <br> breaks on mobile to let text flow naturally */
+  .hero-content-fixed h1 br, 
+  .hero-content-fixed p br {
+    display: none;
+  }
+
   .hero-content-fixed p {
-    font-size: 1rem;
+    font-size: 14px;
     line-height: 1.5;
+    margin-bottom: 28px;
+    color: #e0e0e0;
+    max-width: 90%; /* Stops text from hugging screen edges */
   }
+
   .hero-actions-row {
-    gap: 0.75rem;
+    width: 100%;
+    justify-content: center;
   }
-  .scroll-btn {
-    padding: 0.75rem 1.8rem;
-    font-size: 0.88rem;
+
+  /* Creates a large, easily clickable touch target for thumbs */
+  .hero-primary-btn {
+    width: 100%;
+    max-width: 280px; /* Limits size on small tablets */
+    padding: 14px 20px; /* Thicker top/bottom padding for easier tapping */
+    font-size: 13px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
   }
 }
 
+
 /* Category Catalog */
 .catalog-section {
-  padding: 1rem 2rem 3rem;
+  padding: 5rem 2rem;
 }
 .section-title {
   text-align: center;
+  font: 'Playfair Display', serif;
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2rem;
   letter-spacing: -0.02em;
+
 }
 .catalog-grid {
   display: grid;
@@ -202,10 +257,10 @@
 /* Quality section */
 .quality-section {
   background: linear-gradient(120deg, #F4EFE6 0%, #FDFBF7 100%);
-  padding: 3rem 2rem;
+  padding: 5rem 2rem;
   text-align: center;
   border-radius: 0px;
-  margin-top: 1.5rem;
+  margin-top: 0 ;
 }
 .badge-container {
   display: flex;
@@ -242,6 +297,7 @@
 }
 
 /* Trust Bar */
+/* Trust Bar */
 .trust-bar {
   display: flex;
   flex-direction: column;
@@ -251,6 +307,7 @@
   background: #FAF9F5;
   border-bottom: 1px solid #EAE6DF;
 }
+
 .trust-label {
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -258,15 +315,33 @@
   font-weight: 700;
   color: #8C877D;
 }
-.trust-logos {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 3rem;
-  flex-wrap: wrap;
+
+/* 1. Wrapper to hide overflowing logos */
+.trust-slider {
+  overflow: hidden;
+  width: 100%;
   max-width: 1200px;
+  position: relative;
+  /* Visual fade effect on sides */
+  mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
 }
-.trust-logos span {
+
+/* 2. Moving container holding both logo sets */
+.trust-track {
+  display: flex;
+  align-items: center;
+  gap: 4rem; /* Adjusted gap for spacing */
+  width: max-content;
+  animation: scrollLogos 25s linear infinite;
+}
+
+/* Pause animation on hover for user control */
+.trust-track:hover {
+  animation-play-state: paused;
+}
+
+.trust-track span {
   font-family: 'Playfair Display', serif;
   font-size: 1.1rem;
   font-weight: 600;
@@ -276,21 +351,35 @@
   gap: 8px;
   opacity: 0.75;
   transition: all 0.3s ease;
+  white-space: nowrap; /* Prevents text wrapping */
 }
-.trust-logos span i {
+
+.trust-track span i {
   font-size: 1rem;
   color: var(--primary);
   opacity: 0.65;
 }
-.trust-logos span:hover {
+
+.trust-track span:hover {
   opacity: 1;
   color: var(--dark-charcoal);
   transform: translateY(-1px);
 }
 
+/* 3. Infinite loop logic (moves exactly half the track width) */
+@keyframes scrollLogos {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+
 /* Curated Bestsellers */
 .featured-section {
-  padding: 4rem 2.5rem;
+  padding: 5rem 2.5rem;
   background: #FDFBF7;
   max-width: 1320px;
   margin: 0 auto;
@@ -409,11 +498,13 @@
 
 /* Brand Philosophy */
 .brand-story-section {
-  padding: 5rem 2.5rem;
+  padding: 3rem 2.5rem;
   background: #FAF7F2;
   border-radius: 0px;
-  margin: 2rem auto;
+  margin-left: auto;
+  margin-right: auto;
   max-width: 1280px;
+
 }
 .story-container {
   display: grid;
@@ -748,7 +839,7 @@
   padding: 5rem 2.5rem;
   background: #FAF7F2;
   border-radius: 0px;
-  margin-top: 3rem;
+ /* margin-top: 3rem;*/
 }
 .testimonials-slider-container {
   position: relative;
@@ -871,7 +962,7 @@
 /* Free Styling Consultation Banner */
 .consultation-banner-section {
   background: linear-gradient(135deg, #4A6552 0%, #1D2B20 100%);
-  padding: 6rem 2.5rem;
+  padding: 5rem 2.5rem;
   position: relative;
   overflow: hidden;
   color: white;
@@ -1046,4 +1137,18 @@
   .featured-card img {
     height: 150px !important;
   }
+}
+
+:root{
+    --section-spacing: 5rem;
+}
+.catalog-section,
+.brand-story-section,
+.featured-section,
+.style-planner-section,
+.testimonials-section,
+.consultation-banner-section,
+.quality-section{
+    padding:5rem 2.5rem;
+    
 }

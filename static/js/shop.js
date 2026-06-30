@@ -489,78 +489,91 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------- MODERN PRODUCT CARD HOVER IMAGES SLIDESHOW ----------
-  function initCardSlideshows() {
-    const cards = document.querySelectorAll('.shop-product-card');
-    cards.forEach(card => {
-      const imgWrap = card.querySelector('.shop-card-img-wrap');
-      if (!imgWrap) return;
+  // ---------- MODERN PRODUCT CARD HOVER IMAGES SLIDESHOW + CENTER ZOOM ----------
+function initCardSlideshows() {
+  const cards = document.querySelectorAll('.shop-product-card');
+  cards.forEach(card => {
+    const imgWrap = card.querySelector('.shop-card-img-wrap');
+    if (!imgWrap) return;
 
-      const track = imgWrap.querySelector('.card-images-slider-track');
-      const dotsContainer = card.querySelector('.card-slideshow-dots');
-      if (!track) return;
+    const track = imgWrap.querySelector('.card-images-slider-track');
+    const dotsContainer = card.querySelector('.card-slideshow-dots');
+    if (!track) return;
 
-      let images = [];
-      try {
-        images = JSON.parse(imgWrap.dataset.images || '[]');
-      } catch (e) {
-        images = [];
+    // Grab all active sliding product images within the card container
+    const slideImages = track.querySelectorAll('.card-slider-img');
+
+    let images = [];
+    try {
+      images = JSON.parse(imgWrap.dataset.images || '[]');
+    } catch (e) {
+      images = [];
+    }
+
+    let intervalId = null;
+    let hoverTimeout = null;
+    let currentIndex = 0;
+
+    // --- SLIDESHOW SLIDER TRACK LOGIC ---
+    function updateSliderPosition() {
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+      if (dotsContainer) {
+        const dots = dotsContainer.querySelectorAll('.slideshow-dot');
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('active', idx === currentIndex);
+        });
       }
+    }
+
+    card.addEventListener('mouseenter', () => {
+      if (dotsContainer) dotsContainer.style.opacity = '1';
+
+      if (intervalId) clearInterval(intervalId);
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+
+      // Trigger uniform inner zoom animation smoothly from the absolute center
+      slideImages.forEach(img => {
+        img.style.transform = 'scale(1.12)'; // Scales up uniformly from center (1.12 = 12% zoom)
+      });
 
       if (images.length <= 1) return;
 
-      let intervalId = null;
-      let hoverTimeout = null;
-      let currentIndex = 0;
+      // Initialize the multi-image loop interval timer rules
+      hoverTimeout = setTimeout(() => {
+        currentIndex = (currentIndex + 1) % images.length;
+        updateSliderPosition();
 
-      function updateSliderPosition() {
-        track.style.transform = `translateX(-${currentIndex * 100}%)`;
-
-        if (dotsContainer) {
-          const dots = dotsContainer.querySelectorAll('.slideshow-dot');
-          dots.forEach((dot, idx) => {
-            dot.classList.toggle('active', idx === currentIndex);
-          });
-        }
-      }
-
-      card.addEventListener('mouseenter', () => {
-        if (dotsContainer) dotsContainer.style.opacity = '1';
-
-        // Clear any old interval/timeout just in case
-        if (intervalId) clearInterval(intervalId);
-        if (hoverTimeout) clearTimeout(hoverTimeout);
-
-        // Start cycling images after a short initial delay of 400ms
-        hoverTimeout = setTimeout(() => {
-          // Slide to the next image immediately
+        intervalId = setInterval(() => {
           currentIndex = (currentIndex + 1) % images.length;
           updateSliderPosition();
+        }, 1500);
+      }, 400);
+    });
 
-          // Then keep sliding every 1500ms
-          intervalId = setInterval(() => {
-            currentIndex = (currentIndex + 1) % images.length;
-            updateSliderPosition();
-          }, 1500);
-        }, 400);
-      });
+    card.addEventListener('mouseleave', () => {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+      }
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
 
-      card.addEventListener('mouseleave', () => {
-        if (hoverTimeout) {
-          clearTimeout(hoverTimeout);
-          hoverTimeout = null;
-        }
-        if (intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
-        }
+      if (dotsContainer) dotsContainer.style.opacity = '0';
 
-        if (dotsContainer) dotsContainer.style.opacity = '0';
+      currentIndex = 0;
+      updateSliderPosition();
 
-        currentIndex = 0;
-        updateSliderPosition();
+      // Reset image scaling properties back to default bounds
+      slideImages.forEach(img => {
+        img.style.transform = 'scale(1)';
       });
     });
-  }
+  });
+}
+
 
   // Initialize and run on initial page load
   attachCategoryClickListeners();

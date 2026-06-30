@@ -10,26 +10,37 @@
 <div id="mainPage" class="page active-page">
   <!-- Hero Banner Slider -->
   <div class="hero-slider" id="heroSlider">
-    <div class="slide active-slide" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.45)), url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1932&auto=format');"></div>
-    <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.45)), url('https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=1858&auto=format');"></div>
-    <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.45)), url('/static/images/hero-banner.webp');"></div>
+    <!-- Leave your three background images here. They will fade behind the fixed text content -->
+    <div class="slide active-slide" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.5)), url('/static/images/Banner 1.png');"></div>
+    <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.5)), url('/static/images/Banner 2.png');"></div>
+    <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.5)), url('/static/images/Banner 3.png');"></div>
     
-    <!-- Fixed Hero Content Overlay -->
+    <!-- Fixed Hero Content Overlay matching Khushi Decor Banner -->
     <div class="hero-content-fixed">
-      <span class="hero-pretitle">Premium Home Decor</span>
-      <h1>Elevate Everyday Living</h1>
-      <p>Discover handpicked Indian artisan crafts and premium backlit LED mirrors tailored to style your sanctuary.</p>
+      <span class="hero-pretitle">PREMIUM LED WALL & BATHROOM MIRRORS</span>
+      <h1>Transform Your Space <br><span>with Premium LED Mirrors</span></h1>
+      <p>Luxury LED Wall Mirrors & Bathroom Mirrors <br>Crafted for Modern Homes</p>
       <div class="hero-actions-row">
-        <button class="scroll-btn hero-primary-btn" id="scrollToCatalog">Shop Bestsellers</button>
-        <button class="scroll-btn hero-secondary-btn" onclick="document.getElementById('consultationForm').scrollIntoView({ behavior: 'smooth' })">Book Consultation</button>
+        <button class="scroll-btn hero-primary-btn" id="scrollToCatalog">
+          EXPLORE COLLECTION <span class="arrow">→</span>
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Trust Bar -->
-  <div class="trust-bar">
-    <div class="trust-label">As featured in</div>
-    <div class="trust-logos">
+<div class="trust-bar">
+  <div class="trust-label">As featured in</div>
+  <div class="trust-slider">
+    <div class="trust-track">
+      <!-- Original Set -->
+      <span><i class="fa-solid fa-hotel"></i> Architectural Digest</span>
+      <span><i class="fa-solid fa-couch"></i> ELLE DECOR</span>
+      <span><i class="fa-solid fa-house-chimney-window"></i> Livingetc</span>
+      <span><i class="fa-solid fa-compass-drafting"></i> Vogue India</span>
+      <span><i class="fa-solid fa-cubes"></i> GoodHomes</span>
+      
+      <!-- Duplicate Set for Seamless Loop -->
       <span><i class="fa-solid fa-hotel"></i> Architectural Digest</span>
       <span><i class="fa-solid fa-couch"></i> ELLE DECOR</span>
       <span><i class="fa-solid fa-house-chimney-window"></i> Livingetc</span>
@@ -37,6 +48,7 @@
       <span><i class="fa-solid fa-cubes"></i> GoodHomes</span>
     </div>
   </div>
+</div>
 
   <!-- Shop by Category Catalog -->
   <div class="catalog-section" id="catalogSection">
@@ -52,7 +64,43 @@
     </div>
   </div>
 
-  <!-- Featured Bestsellers Section -->
+  
+
+  <!-- Brand Philosophy -->
+  <div class="brand-story-section">
+    <div class="story-container">
+      <div class="story-image">
+        <img src="/static/images/artisan-craft.webp" alt="Artisan Crafting Interior">
+        <div class="story-floating-badge">
+          <span class="badge-number">100%</span>
+          <span class="badge-label">Handcrafted in India</span>
+        </div>
+      </div>
+      <div class="story-content">
+        <span class="story-pretitle">OUR PHILOSOPHY</span>
+        <h2>Timeless Design Meets Conscious Craftsmanship</h2>
+        <p class="story-lead">At Khushi Decors, we believe that your home should be an authentic reflection of your journey. Each piece in our collection is thoughtfully designed and artisan-crafted to bring warmth, character, and soul to your everyday spaces.</p>
+        <p>We source natural materials like organic cotton jute, sustainably harvested wood, and natural clay to create decor that is not only beautiful but also kind to our planet. By partnering with local Indian master craftspeople, we preserve traditional techniques while introducing modern interior aesthetics.</p>
+        <div class="story-features">
+          <div class="story-feature-item">
+            <i class="fas fa-hand-holding-heart"></i>
+            <div>
+              <h5>Artisanal Spirit</h5>
+              <p>Every single product carries the distinct touch and soul of the maker.</p>
+            </div>
+          </div>
+          <div class="story-feature-item">
+            <i class="fas fa-seedling"></i>
+            <div>
+              <h5>Sustainable Luxury</h5>
+              <p>Ethically sourced biodegradable materials crafted for generations to enjoy.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Featured Bestsellers Section -->
   <div class="featured-section" id="featuredSection">
     <h2 class="section-title">Curated Bestsellers</h2>
     <p class="section-subtitle">Handpicked masterworks loved by interior designers</p>
@@ -108,42 +156,6 @@
       {% endfor %}
     </div>
   </div>
-
-  <!-- Brand Philosophy -->
-  <div class="brand-story-section">
-    <div class="story-container">
-      <div class="story-image">
-        <img src="/static/images/artisan-craft.webp" alt="Artisan Crafting Interior">
-        <div class="story-floating-badge">
-          <span class="badge-number">100%</span>
-          <span class="badge-label">Handcrafted in India</span>
-        </div>
-      </div>
-      <div class="story-content">
-        <span class="story-pretitle">OUR PHILOSOPHY</span>
-        <h2>Timeless Design Meets Conscious Craftsmanship</h2>
-        <p class="story-lead">At Khushi Decors, we believe that your home should be an authentic reflection of your journey. Each piece in our collection is thoughtfully designed and artisan-crafted to bring warmth, character, and soul to your everyday spaces.</p>
-        <p>We source natural materials like organic cotton jute, sustainably harvested wood, and natural clay to create decor that is not only beautiful but also kind to our planet. By partnering with local Indian master craftspeople, we preserve traditional techniques while introducing modern interior aesthetics.</p>
-        <div class="story-features">
-          <div class="story-feature-item">
-            <i class="fas fa-hand-holding-heart"></i>
-            <div>
-              <h5>Artisanal Spirit</h5>
-              <p>Every single product carries the distinct touch and soul of the maker.</p>
-            </div>
-          </div>
-          <div class="story-feature-item">
-            <i class="fas fa-seedling"></i>
-            <div>
-              <h5>Sustainable Luxury</h5>
-              <p>Ethically sourced biodegradable materials crafted for generations to enjoy.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Room Style Planner Visualizer -->
   <div class="style-planner-section">
     <h2 class="section-title">Curated Style Collections</h2>
