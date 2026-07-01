@@ -25,7 +25,7 @@
     <div class="product-gallery-container">
       <div class="product-gallery-thumbs" id="productGalleryThumbs">
         {% for media in gallery_media %}
-          <div class="gallery-thumb-item {% if loop.first %}active{% endif %}" data-idx="{{ loop.index0 }}" style="position: relative; cursor: pointer;">
+          <div class="gallery-thumb-item {% if loop.first %}active{% endif %}" data-idx="{{ loop.index0 }}" style="position: relative; cursor: pointer;" >
             {% if media.is_video %}
               <!-- Video Preview Thumbnail Frame -->
               <video src="{{ media.url }}" preload="metadata" muted style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>

@@ -37,14 +37,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Animate source update on main image
     if (mainProductImg && thumbs[activeImageIndex]) {
-      const src = thumbs[activeImageIndex].src;
-      mainProductImg.style.opacity = '0.3';
-      setTimeout(() => {
-        mainProductImg.src = src;
-        mainProductImg.style.opacity = '1';
-      }, 120);
+      const thumb = thumbs[activeImageIndex];
+      // edited 
+      const img = thumb.querySelector('img');
+      const video = thumb.querySelector('video');
+      const container =
+        document.getElementById('mainMediaContainer');
+
+    if (img) {
+
+        container.innerHTML = `
+            <img
+                id="mainProductImg"
+                src="${img.src}"
+                style="
+                    width:100%;
+                    max-height:550px;
+                    object-fit:contain;
+                "
+            >
+        `;
+
+    }
+
+    else if (video) {
+
+        container.innerHTML = `
+            <video
+                id="mainProductVideo"
+                controls
+                autoplay
+                muted
+                playsinline
+                style="
+                    width:100%;
+                    max-height:550px;
+                    object-fit:contain;
+                "
+            >
+                <source
+                    src="${video.src}"
+                    type="video/mp4">
+            </video>
+        `;
+
     }
   }
+}
+  //     const src = img
+  //       ? img.src
+  //       : video
+  //         ? video.src
+  //         : null;
+  //     mainProductImg.style.opacity = '0.3';
+  //     setTimeout(() => {
+  //       mainProductImg.src = src;
+  //       mainProductImg.style.opacity = '1';
+  //     }, 120);
+  //   }
+  // }
 
   // 1. Thumbnail Image Swapping helper
   function setupThumbnailListeners() {
